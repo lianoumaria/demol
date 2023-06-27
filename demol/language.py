@@ -7,11 +7,11 @@ from .utils import (
 
 
 
-@language('devices', '*.hwd')
+@language('demol-devices', '*.hwd')
 def devices_language():
     return get_device_metamodel()
 
 
-@language('device-synthesis', '*.synth')
+@language('demol-synthesis', '*.synth')
 def device_synthesis_language():
     return get_synthesis_metamodel()
