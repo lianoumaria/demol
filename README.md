@@ -36,21 +36,20 @@ end
 
 ```
 Board ESP32Wroom32
-	riot_name: "esp32-wroom-32"
     vcc: 3.3
     operating_voltage: 3.3
     memory:
-		flash: 4 mb
+    flash: 4 mb
     cpu:
-		cpu_family: ESP32
-		max_freq: 240 mhz
-		fpu: false
+        cpu_family: ESP32
+        max_freq: 240 mhz
+        fpu: false
     network:
-		- wifi:
-			name: wifi_1
-			freq: 2.5 ghz
+	- wifi:
+		name: wifi_1
+		freq: 2.5 ghz
 	bluetooth:
-		version: 4.2
+        version: 4.2
     pins:
     - power:
         name: power_3v3
@@ -131,8 +130,8 @@ Connection Bme680Esp32
     board: ESP32Wroom32
     peripheral: BME680
     powerConnections:
-		- ESP32Wroom32.gnd_1 -- BME680.gnd
-		- ESP32Wroom32.power_5v -- BME680.vcc
+	- ESP32Wroom32.gnd_1 -- BME680.gnd
+	- ESP32Wroom32.power_5v -- BME680.vcc
     ioConnections:
     - i2c:
         sda: ESP32Wroom32.p_21 -- BME680.sda
