@@ -1,0 +1,189 @@
+//Device
+DeviceDefinition:
+    device=Device
+;
+
+Device:
+    Board | Peripheral
+;
+
+// Board meta-model
+Board:
+    'Board' name=ID
+	(
+      (memory=MEMORY)
+	  (cpu=CPU)
+	  ("riot_name" ":" riot_name=STRING)
+	  ("vcc" ":" vcc=FLOAT)
+	  ("operating_voltage" ":" op_volt=FLOAT)
+	  ("pins" ":" "-" pins*=Pin["-"])
+	  (network=NETWORK)?
+	  (bluetooth=BLUETOOTH)?
+     )#
+    'end'
+;
+
+Peripheral:
+    'Peripheral' name=ID
+	(
+      ("type" ":" type=PeripheralType)
+	  ("riot_name" ":" riot_name=STRING)
+	  ("pins" ":" "-" pins*=Pin["-"])
+	  ("vcc" ":" vcc=FLOAT)
+	  ("operating_voltage" ":" op_volt=FLOAT)
+    )#
+    'end'
+;
+
+PeripheralType:
+	"Sensor" | "Actuator" | "Other"
+;
+
+Pin:
+	PowerPin | IOPin
+;
+
+PowerPin:
+	"power:"
+	(
+        ("name:" name=ID)
+	    ("number:" number=INT)
+	    ("type:" type=PowerType)
+    )#
+;
+
+PowerType:
+	("gnd" | "5v" | "3v3")
+;
+
+IOPin:
+	"io_pin:"
+	(
+        ("functions:" funcs*=PinFunction[","])
+        ("name:" name=ID)
+	    ("number:" number=INT)
+	    ("vmax:" vmax=NUMBER)?
+    )#
+;
+
+PinFunction:
+	GPIO | I2C | SPI | UART | PWM | ADC | DAC
+;
+
+GPIO:
+	type="gpio"
+;
+
+I2C:
+	type=I2C_TYPE "-" bus=INT
+;
+
+I2C_TYPE:
+	"sda" | "scl"
+;
+
+SPI:
+	type=SPI_TYPE "-" bus=INT
+;
+
+SPI_TYPE:
+	"mosi" | "miso" | "sck" | "cs"
+;
+
+UART:
+	type=UART_TYPE "-" bus=INT
+;
+
+UART_TYPE:
+	"tx" | "rx"
+;
+
+PWM:
+	type="pwm-" interface=INT
+;
+
+ADC:
+	type="adc"
+;
+
+DAC:
+	type="dac"
+;
+
+
+CPU:
+	"cpu" ":"
+	(
+        ("cpu_family:" cpu_family=CPU_FAMILY)
+	    ("max_freq:" max_freq=NUMBER unit=FREQ_UNIT)
+	    ("fpu:" fpu=BOOL)
+    )#
+;
+
+
+CPU_FAMILY:
+	( "ESP32" | "ESP8266")
+;
+
+MEMORY:
+    "memory:"
+	(
+    (("ram:" ram=NUMBER UNITS?)
+    ("rom:" rom=NUMBER UNITS?)?
+    ("flash:" flash=NUMBER UNITS?)?)# |
+    (("ram:" ram=NUMBER UNITS?)?
+    ("rom:" rom=NUMBER UNITS?)?
+    ("flash:" flash=NUMBER UNITS?))# |
+    (("ram:" ram=NUMBER UNITS?)?
+    ("rom:" rom=NUMBER UNITS?)
+    ("flash:" flash=NUMBER UNITS?)?)#
+    )
+;
+
+UNITS:
+    ("kb" | "mb" | "gb" | "b")
+;
+
+NETWORK:
+    "network" ":"
+    (WIFI|ETHERNET)
+;
+
+WIFI:
+	"- wifi:"
+	(("name:" name=ID)
+	 ("freq:" freq=NUMBER FREQ_UNIT)?)#
+;
+
+FREQ_UNIT:
+	"ghz" | "mhz" | "hz"
+;
+
+ETHERNET:
+	"- ethernet:"
+	"name:" name=ID
+;
+
+BLUETOOTH:
+	"bluetooth" ":"
+	"version:" version=NUMBER
+;
+
+NID:
+	/(.*?)\n/
+;
+
+FQN: ID+['.'];
+FQNI: ID+['.']('.*')?;
+Import: 'import' importURI=FQNI ('as' name=ID)?;
+
+Description: /\#(.*?)$/;
+
+// Special rule for comments. Comments start with //
+
+// Comments
+Comment: CommentLine | CommentBlock ;
+
+CommentLine: /\/\/.*?$/;
+
+CommentBlock: /\/\*(.|\n)*?\*\//;

@@ -1,0 +1,25 @@
+// RIOT Configuration for SRF04 (HC-SR04) ultra sonic range finder
+
+Peripheral SonarSRF04
+    type: Sensor
+    riot_name: "srf04"
+    operating_voltage: 5
+    vcc: 5
+    pins:
+    - power:
+        name: vcc
+        number: 1
+        type: 5v
+    - power:
+        name: gnd
+        number: 4
+        type: gnd
+    - io_pin:
+        functions: gpio
+        name: trigger
+        number: 2
+    - io_pin:
+        functions: gpio
+        name: echo
+        number: 3
+end
