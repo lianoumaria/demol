@@ -45,9 +45,9 @@ Board ESP32Wroom32
         max_freq: 240 mhz
         fpu: false
     network:
-	- wifi:
-		name: wifi_1
-		freq: 2.5 ghz
+    - wifi:
+	name: wifi_1
+	freq: 2.5 ghz
 	bluetooth:
         version: 4.2
     pins:
@@ -121,25 +121,25 @@ Connection SonarESP32
     - gpio: ESP32Wroom32.p_13 -- SonarSRF04.trigger
     - gpio: ESP32Wroom32.p_14 -- SonarSRF04.echo
     endpoint:
-		topic: "my_esp.sensors.srf04"
-		msg: Distance
-		frequency: 5 hz
+	topic: "my_esp.sensors.srf04"
+	msg: Distance
+	frequency: 5 hz
 end
 
 Connection Bme680Esp32
     board: ESP32Wroom32
     peripheral: BME680
     powerConnections:
-	- ESP32Wroom32.gnd_1 -- BME680.gnd
-	- ESP32Wroom32.power_5v -- BME680.vcc
+    - ESP32Wroom32.gnd_1 -- BME680.gnd
+    - ESP32Wroom32.power_5v -- BME680.vcc
     ioConnections:
     - i2c:
         sda: ESP32Wroom32.p_21 -- BME680.sda
         scl: ESP32Wroom32.p_22 -- BME680.scl
         slave_address: 0x76
     endpoint:
-		topic: "my_esp.sensors.bme680"
-		msg: Env
-		frequency: 2 hz
+	topic: "my_esp.sensors.bme680"
+	msg: Env
+	frequency: 2 hz
 end
 ```
