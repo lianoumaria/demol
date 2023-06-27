@@ -105,14 +105,20 @@ CommunicationTransport:
     AMQPTransport | MQTTTransport | RedisTransport
 ;
 
+BrokerAuth: BrokerAuthPlain;
+
+BrokerAuthPlain:
+    'username' ':' username=STRING
+    'password' ':' password=STRING
+;
+
 AMQPTransport:
     'Communication<AMQP>'
     (
         ('host:' host=STRING)
         ('port:' port=INT)
         ('vhost:' vhost=STRING)
-        ('username:' username=STRING)?
-        ('password:' password=STRING)?
+        ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
 ;
@@ -122,8 +128,7 @@ MQTTTransport:
     (
         ('host:' host=STRING)
         ('port:' port=INT)
-        ('username:' username=STRING)?
-        ('password:' password=STRING)?
+        ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
 ;
@@ -134,8 +139,7 @@ RedisTransport:
         ('host:' host=STRING)
         ('port:' port=INT)
         ('db:' db=INT)?
-        ('username:' username=STRING)?
-        ('password:' password=STRING)?
+        ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
 ;
