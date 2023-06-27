@@ -77,7 +77,7 @@ UARTConnection:
 Endpoint:
 	(
         ("topic:" topic=STRING)
-	    ("msg:" msg=MSG_ENTRIES)
+	    ("msg:" msg=MessageType)
         ("frequency:" freq=FREQUENCY)?
     )#
 ;
@@ -148,20 +148,28 @@ ADDRESS_ID:
 	/([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/
 ;
 
-MSG_ENTRIES:
-	msg_entries*=MSG_TYPES[","]
+MessageType:
+	SensorMsgType | ActuatorMsgType | CustomMsgType
 ;
 
-MSG_TYPES:
-	SENSOR | ACTUATOR
+CustomMsgType: 'Custom';
+
+SensorMsgType:
+	"Distance"      |
+    "Temperature"   |
+    "Humidity"      |
+    "Gas"           |
+    "Pressure"      |
+    "Env"           |
+    "Acceleration"  |
+    "Custom"
 ;
 
-SENSOR:
-	"Distance" | "Temperature" | "Humidity" | "Gas" | "Pressure" | "Env" | "Acceleration"
-;
-
-ACTUATOR:
-	"MotorController" | "LedController" | "ServoController"
+ActuatorMsgType:
+	"MotorController"   |
+    "LedController"     |
+    "ServoController"   |
+    "Custom"
 ;
 
 // FQN: ID+['.'];
