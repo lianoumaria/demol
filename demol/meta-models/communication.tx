@@ -1,4 +1,4 @@
-CommunicationTransport:
+CommunicationMiddleware:
     AMQPBroker | MQTTBroker | RedisBroker
 ;
 
