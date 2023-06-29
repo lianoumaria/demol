@@ -2,18 +2,16 @@
 
 Peripheral BME680
     type: Sensor
-	riot_name: "bme680"
-    operating_voltage: 3.3
-    vcc: 3.3
+    vcc: 5
     pins:
 		- power:
 			name: vcc
 			number: 1
-			type: 5v
+			type: 5V
 		- power:
 			name: gnd
 			number: 4
-			type: gnd
+			type: GND
 		- io_pin:
             functions: sda-0
 			name: sda

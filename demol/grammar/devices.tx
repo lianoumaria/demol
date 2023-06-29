@@ -11,14 +11,13 @@ Device:
 Board:
     'Board' name=ID
 	(
-      (memory=MEMORY)
-	  (cpu=CPU)
-	  ("riot_name" ":" riot_name=STRING)
-	  ("vcc" ":" vcc=FLOAT)
-	  ("operating_voltage" ":" op_volt=FLOAT)
-	  ("pins" ":" "-" pins*=Pin["-"])
-	  (network=NETWORK)?
-	  (bluetooth=BLUETOOTH)?
+	    ("cpu" ":" cpu=CPU)
+        ("memory" ":" memory=Memory)
+	    ("vcc" ":" vcc=FLOAT)
+	    ("pins" ":" "-" pins*=Pin["-"])
+	    ("ioVcc" ":" vcc=FLOAT)?
+	    ('networking' ':' '-' networking*=NetworkInterface['-'])?
+	    ('bluetooth' ':' bluetooth=Bluetooth)?
      )#
     'end'
 ;
@@ -27,10 +26,8 @@ Peripheral:
     'Peripheral' name=ID
 	(
       ("type" ":" type=PeripheralType)
-	  ("riot_name" ":" riot_name=STRING)
 	  ("pins" ":" "-" pins*=Pin["-"])
 	  ("vcc" ":" vcc=FLOAT)
-	  ("operating_voltage" ":" op_volt=FLOAT)
     )#
     'end'
 ;
@@ -53,7 +50,10 @@ PowerPin:
 ;
 
 PowerType:
-	("gnd" | "5v" | "3v3")
+	"GND"   |
+    "5V"    |
+    "3V3"   |
+    "12V"
 ;
 
 IOPin:
@@ -83,18 +83,18 @@ I2C_TYPE:
 ;
 
 SPI:
-	type=SPI_TYPE "-" bus=INT
+	type=SPIPinType "-" bus=INT
 ;
 
-SPI_TYPE:
+SPIPinType:
 	"mosi" | "miso" | "sck" | "cs"
 ;
 
 UART:
-	type=UART_TYPE "-" bus=INT
+	type=UARTPinType "-" bus=INT
 ;
 
-UART_TYPE:
+UARTPinType:
 	"tx" | "rx"
 ;
 
@@ -112,31 +112,29 @@ DAC:
 
 
 CPU:
-	"cpu" ":"
 	(
-        ("cpu_family:" cpu_family=CPU_FAMILY)
-	    ("max_freq:" max_freq=NUMBER unit=FREQ_UNIT)
+        ("cpu_family:" cpu_family=CPUFamilyType)
+	    ("max_freq:" max_freq=NUMBER unit=FrequencyUnit)
 	    ("fpu:" fpu=BOOL)
     )#
 ;
 
 
-CPU_FAMILY:
-	( "ESP32" | "ESP8266")
+CPUFamilyType:
+	( "ESP32" | "ESP8266" | "PiArmCortex")
 ;
 
-MEMORY:
-    "memory:"
+Memory:
 	(
-    (("ram:" ram=NUMBER UNITS?)
-    ("rom:" rom=NUMBER UNITS?)?
-    ("flash:" flash=NUMBER UNITS?)?)# |
-    (("ram:" ram=NUMBER UNITS?)?
-    ("rom:" rom=NUMBER UNITS?)?
-    ("flash:" flash=NUMBER UNITS?))# |
-    (("ram:" ram=NUMBER UNITS?)?
-    ("rom:" rom=NUMBER UNITS?)
-    ("flash:" flash=NUMBER UNITS?)?)#
+        (("ram:" ram=NUMBER UNITS?)
+        ("rom:" rom=NUMBER UNITS?)?
+        ("flash:" flash=NUMBER UNITS?)?)# |
+        (("ram:" ram=NUMBER UNITS?)?
+        ("rom:" rom=NUMBER UNITS?)?
+        ("flash:" flash=NUMBER UNITS?))# |
+        (("ram:" ram=NUMBER UNITS?)?
+        ("rom:" rom=NUMBER UNITS?)
+        ("flash:" flash=NUMBER UNITS?)?)#
     )
 ;
 
@@ -144,29 +142,33 @@ UNITS:
     ("kb" | "mb" | "gb" | "b")
 ;
 
-NETWORK:
-    "network" ":"
-    (WIFI|ETHERNET)
+NetworkInterface:
+    WifiInterface   |
+    EthernetInterface
 ;
 
-WIFI:
-	"- wifi:"
-	(("name:" name=ID)
-	 ("freq:" freq=NUMBER FREQ_UNIT)?)#
+WifiInterface:
+	"wifi:"
+	(
+        ("name:" name=ID)
+	    ("freq:" freq=NUMBER unit=FrequencyUnit)?
+    )#
 ;
 
-FREQ_UNIT:
+FrequencyUnit:
 	"ghz" | "mhz" | "hz"
 ;
 
-ETHERNET:
-	"- ethernet:"
-	"name:" name=ID
+EthernetInterface:
+	"ethernet:"
+        "name:" name=ID
 ;
 
-BLUETOOTH:
-	"bluetooth" ":"
-	"version:" version=NUMBER
+Bluetooth:
+    'NA' |
+    'BT3' |
+    'BT4' |
+    'BT5'
 ;
 
 NID:

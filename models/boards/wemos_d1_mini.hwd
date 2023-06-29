@@ -1,16 +1,14 @@
 // RIOT Configuration for all WEMOS LOLIN D1 mini boards (V2 / V3 / Lite / Pro)
 
 Board WemosD1Mini
-	riot_name: "esp8266-esp-12x"
     vcc: 3.3
-    operating_voltage: 3.3
     memory:
 		flash: 16 mb
     cpu:
 		cpu_family: ESP8266
 		max_freq: 160 mhz
 		fpu: false
-    network:
+    networking:
 		- wifi:
 			name: wifi_1
 			freq: 2.5 ghz
@@ -47,7 +45,7 @@ Board WemosD1Mini
     - power:
         name: power_3v3
         number: 8
-        type: 3v3
+        type: 3V3
     - io_pin:
         functions: tx-0
         name: tx
@@ -75,9 +73,9 @@ Board WemosD1Mini
     - power:
         name: gnd
         number: 15
-        type: gnd
+        type: GND
     - power:
         name: power_5v
         number: 16
-        type: 5v
+        type: 5V
 end

@@ -1,26 +1,23 @@
 // RIOT Configuration for ESP32-WROOM-32 boards
 
 Board ESP32Wroom32
-	riot_name: "esp32-wroom-32"
     vcc: 3.3
-    operating_voltage: 3.3
     memory:
 		flash: 4 mb
     cpu:
 		cpu_family: ESP32
 		max_freq: 240 mhz
 		fpu: false
-    network:
+    networking:
 		- wifi:
 			name: wifi_1
 			freq: 2.5 ghz
-	bluetooth:
-		version: 4.2
+	bluetooth: BT4
     pins:
     - power:
         name: power_3v3
         number: 1
-        type: 3v3
+        type: 3V3
     - io_pin:
         functions:
         name: en_rst
@@ -72,7 +69,7 @@ Board ESP32Wroom32
     - power:
         name: gnd_1
         number: 14
-        type: gnd
+        type: GND
     - io_pin:
         functions: gpio, mosi-1, adc
         name: p_13
@@ -92,11 +89,11 @@ Board ESP32Wroom32
     - power:
         name: power_5v
         number: 19
-        type: 5v
+        type: 5V
     - power:
         name: gnd_2
         number: 20
-        type: gnd
+        type: GND
     - io_pin:
         functions: gpio, mosi-0
         name: p_23
@@ -120,7 +117,7 @@ Board ESP32Wroom32
     - power:
         name: gnd_3
         number: 26
-        type: gnd
+        type: GND
     - io_pin:
         functions: gpio, miso-0
         name: p_19

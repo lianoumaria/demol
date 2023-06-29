@@ -2,18 +2,16 @@
 
 Peripheral WS281X
     type: Actuator
-	riot_name: "ws281x"
-    operating_voltage: 5
     vcc: 5
     pins:
 		- power:
 			name: vcc
 			number: 1
-			type: 5v
+			type: 5V
 		- power:
 			name: gnd
 			number: 2
-			type: gnd
+			type: GND
 		- io_pin:
             functions: gpio
 			name: data_in
