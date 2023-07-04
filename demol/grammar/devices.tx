@@ -7,6 +7,7 @@ Device:
     Board | Peripheral
 ;
 
+
 // Board meta-model
 Board:
     'Board' name=ID

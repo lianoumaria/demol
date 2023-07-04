@@ -4,23 +4,31 @@
 import devices
 import communication
 
-SYNTHESIS:
+Synthesis:
     imports*=Import
-    network=Network
-    communication=CommunicationMiddleware
-	connections*=Connection
+    devices=DevicesBag
+    (
+        network=Network
+        communication=CommunicationMiddleware
+        connections+=Connection
+    )#
+;
+
+DevicesBag:
+    'Devices'
+	    ("board:" board=[devices.Board:FQN|+m:device])  // RREL
+	    ("peripherals:" '-' peripherals*=[Peripheral:FQN|+m:device]['-'])? // RREL
+    'end'
 ;
 
 Connection:
-	"Connection" name=ID
+	"Connection"
 	(
-	    // ("board:" board=[Board|FQN])
-	    ("board:" board=[devices.Board:ID|+m:device])  // RREL Usage
-	    // ("peripheral:" peripheral=[Peripheral|FQN])
-	    ("peripheral:" peripheral=[Peripheral:ID|+m:device]) // RREL
-        // ("peripheral:" peripheral=[FQN])
-	    ("powerConnections:" '-' power_conns*=PowerConnection['-'])?
+	    ("board:" board=[devices.Board:ID])  // Hanled by Model Processor
+	    ("peripheral:" peripheral=[Peripheral:ID]) // Handled by Model processor
+	    ("powerConnections:" '-' power_conns*=PowerConnection['-'])
 	    ("ioConnections:" '-' io_conns+=IOConnection['-'])
+	    ("driverTpl:" driverTpl=STRING)?
 	    ("endpoint:" endpoint=Endpoint)?
     )#
     'end'
@@ -60,19 +68,21 @@ SPIConnection:
 ;
 
 I2CConnection:
-	type="i2c" ":"
-	"sda" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
-		peripheralPin0=[IOPin:FQN|+m:device.pins]
-	"scl" ":" boardPin1=[IOPin:FQN|+m:device.pins] "--"
-		peripheralPin1=[IOPin:FQN|+m:device.pins]
-	"slave_address:" "0x" slave_addr=INT
+	"i2c" ":"
+        "sda" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
+            peripheralPin0=[IOPin:FQN|+m:device.pins]
+        "scl" ":" boardPin1=[IOPin:FQN|+m:device.pins] "--"
+            peripheralPin1=[IOPin:FQN|+m:device.pins]
+        "slave_address:" "0x" slave_addr=INT
 ;
 
 UARTConnection:
-	"-" type="uart" ":"
-	"tx:" board_int=ID "--" peripheral_int=ID
-	"rx:" board_int=ID "--" peripheral_int=ID
-	"baudrate:" baudrate=INT
+	"uart" ":"
+        "tx" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
+            peripheralPin0=[IOPin:FQN|+m:device.pins]
+        "rx" ":" boardPin1=[IOPin:FQN|+m:device.pins] "--"
+            peripheralPin1=[IOPin:FQN|+m:device.pins]
+        "baudrate:" baudrate=INT
 ;
 
 Endpoint:
