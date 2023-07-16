@@ -25,15 +25,16 @@ Connection
     board: ESP32Wroom32
     peripheral: SonarSRF04
     powerConnections:
-    - ESP32Wroom32.gnd_1 -- SonarSRF04.gnd
-    - ESP32Wroom32.power_5v -- SonarSRF04.vcc
+        - gnd_1 -- gnd
+        - power_5v -- vcc
     ioConnections:
-    - gpio: ESP32Wroom32.p_13 -- SonarSRF04.trigger
-    - gpio: ESP32Wroom32.p_14 -- SonarSRF04.echo
+        - type: gpio
+          conn: p_13 -- trigger
+        - type: gpio
+          conn: p_14 -- echo
     endpoint:
 	topic: "my_esp.sensors.srf04"
 	msg: Distance
-	frequency: 5 hz
 end
 
 
@@ -41,15 +42,14 @@ Connection
     board: ESP32Wroom32
     peripheral: BME680
     powerConnections:
-    - ESP32Wroom32.gnd_1 -- BME680.gnd
-    - ESP32Wroom32.power_5v -- BME680.vcc
+        - gnd_1 -- gnd
+        - power_5v -- vcc
     ioConnections:
-    - i2c:
-        sda: ESP32Wroom32.p_21 -- BME680.sda
-        scl: ESP32Wroom32.p_22 -- BME680.scl
-        slave_address: 0x76
+        - type: i2c
+          sda: p_21 -- sda
+          scl: p_22 -- scl
+          slave_address: 0x76
     endpoint:
         topic: "my_esp.sensors.bme680"
         msg: Env
-        frequency: 2 hz
 end

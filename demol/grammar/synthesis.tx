@@ -6,7 +6,7 @@ import communication
 
 Synthesis:
     imports*=Import
-    devices=DevicesBag
+    deviceBag=DevicesBag
     (
         network=Network
         communication=CommunicationMiddleware
@@ -24,37 +24,55 @@ DevicesBag:
 Connection:
 	"Connection"
 	(
-	    ("board:" board=[devices.Board:ID])  // Hanled by Model Processor
-	    ("peripheral:" peripheral=[Peripheral:ID]) // Handled by Model processor
-	    ("powerConnections:" '-' power_conns*=PowerConnection['-'])
-	    ("ioConnections:" '-' io_conns+=IOConnection['-'])
+	    ("board:" board=[Board:FQN|+m:device])  // Hanled by Model Processor
+	    ("peripheral:" peripheral=[Peripheral:FQN|+m:device]) // Handled by Model processor
+	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
+	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
+        /*
+	    ("powerConnections"
+            powerConns*=PowerConnection
+         "end"
+        )
+	    ("ioConnections"
+            ioConns+=IOConnection
+         "end"
+        )
+        */
 	    ("driverTpl:" driverTpl=STRING)?
 	    ("endpoint:" endpoint=Endpoint)?
     )#
     'end'
 ;
-
+/*
 PowerConnection:
 	boardPin=[PowerPin:FQN|+m:device.pins] "--" peripheralPin=[PowerPin:FQN|+m:device.pins]
 ;
+*/
+
+PinConnection:
+    boardPin=ID "--" peripheralPin=ID
+;
+
+PowerConnection: PinConnection;
 
 IOConnection:
 	GPIOConnection | I2CConnection | SPIConnection | UARTConnection
 ;
 
+/*
 GPIOConnection:
 	"gpio" ":" boardPin=[IOPin:FQN|+m:device.pins] "--"
 		peripheralPin=[IOPin:FQN|+m:device.pins]
 ;
+*/
 
-FREQUENCY:
-	val=INT unit=FREQ_UNIT
+GPIOConnection:
+	"type" ":"  type="gpio"
+    ('name:' name=NID)?
+    ('conn:' pinConn=PinConnection)
 ;
 
-FREQ_UNIT:
-	"hz" | "khz" | "mhz" | "ghz"
-;
-
+/*
 SPIConnection:
 	"spi" ":"
 	"mosi" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
@@ -66,7 +84,18 @@ SPIConnection:
 	"cs" ":" boardPin3=[IOPin:FQN|+m:device.pins] "--"
 		peripheralPin3=[IOPin:FQN|+m:device.pins]
 ;
+*/
 
+SPIConnection:
+	"type" ":" type="spi"
+    ('name:' name=NID)?
+    "mosi" ":" mosi=PinConnection
+    "miso" ":" miso=PinConnection
+    "sck" ":" sck=PinConnection
+    "cs" ":" cs=PinConnection
+;
+
+/*
 I2CConnection:
 	"i2c" ":"
         "sda" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
@@ -75,7 +104,17 @@ I2CConnection:
             peripheralPin1=[IOPin:FQN|+m:device.pins]
         "slave_address:" "0x" slave_addr=INT
 ;
+*/
 
+I2CConnection:
+	"type" ":" type="i2c"
+    ('name:' name=NID)?
+    "sda" ":" sda=PinConnection
+    "scl" ":" scl=PinConnection
+    "slave_address:" "0x" slave_addr=INT
+;
+
+/*
 UARTConnection:
 	"uart" ":"
         "tx" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
@@ -84,12 +123,20 @@ UARTConnection:
             peripheralPin1=[IOPin:FQN|+m:device.pins]
         "baudrate:" baudrate=INT
 ;
+*/
+
+UARTConnection:
+	"type" ":" type="uart"
+    ('name:' name=NID)?
+    "tx" ":" boardPin0=ID "--" peripheralPin0=ID
+    "rx" ":" boardPin1=ID "--" peripheralPin1=ID
+    "baudrate:" baudrate=INT
+;
 
 Endpoint:
 	(
         ("topic:" topic=STRING)
 	    ("msg:" msg=MessageType)
-        ("frequency:" freq=FREQUENCY)?
     )#
 ;
 
@@ -141,6 +188,7 @@ ActuatorMsgType:
     "Custom"
 ;
 
+NID: /(.*?)\n/;
 // FQN: ID+['.'];
 FQN: ID('.'ID)*;
 FQNI: ID+['.']('.*')?;

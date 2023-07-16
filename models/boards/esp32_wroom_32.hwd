@@ -3,16 +3,16 @@
 Board ESP32Wroom32
     vcc: 3.3
     memory:
-		flash: 4 mb
+        flash: 4 mb
     cpu:
-		cpu_family: ESP32
-		max_freq: 240 mhz
-		fpu: false
+        cpu_family: ESP32
+        max_freq: 240 mhz
+        fpu: false
     networking:
-		- wifi:
-			name: wifi_1
-			freq: 2.5 ghz
-	bluetooth: BT4
+    - wifi:
+        name: wifi_1
+        freq: 2.5 ghz
+    bluetooth: BT4
     pins:
     - power:
         name: power_3v3
