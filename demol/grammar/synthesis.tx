@@ -128,8 +128,8 @@ UARTConnection:
 UARTConnection:
 	"type" ":" type="uart"
     ('name:' name=NID)?
-    "tx" ":" boardPin0=ID "--" peripheralPin0=ID
-    "rx" ":" boardPin1=ID "--" peripheralPin1=ID
+    "tx" ":" tx=PinConnection
+    "rx" ":" rx=PinConnection
     "baudrate:" baudrate=INT
 ;
 

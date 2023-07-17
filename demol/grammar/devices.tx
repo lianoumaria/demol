@@ -62,7 +62,7 @@ IOPin:
 	(
         ("functions:" funcs*=PinFunction[","])
         ("name:" name=ID)
-	    ("number:" number=INT)
+	    ("number:" number=INT)?
 	    ("vmax:" vmax=NUMBER)?
     )#
 ;
