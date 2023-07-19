@@ -19,7 +19,7 @@ def create_output_dirs(out_dir: str):
 def get_device_metamodel():
     # Get meta-model from language description
     mm= metamodel_from_file(
-        os.path.join(METAMODEL_REPO_PATH, 'devices.tx'),
+        os.path.join(METAMODEL_REPO_PATH, 'component.tx'),
         global_repository=True,
         debug=False
     )
@@ -40,7 +40,7 @@ def get_device_metamodel():
 
 def get_synthesis_metamodel():
     mm= metamodel_from_file(
-        os.path.join(METAMODEL_REPO_PATH, 'synthesis.tx'),
+        os.path.join(METAMODEL_REPO_PATH, 'device.tx'),
         global_repository=True,
         debug=False
     )
@@ -51,10 +51,10 @@ def get_synthesis_metamodel():
             #     importAs=True,
             # ),
             "*.*": scoping_providers.FQN(),
-            "DevicesBag.board": scoping_providers.FQNGlobalRepo(
+            "ComponentBag.board": scoping_providers.FQNGlobalRepo(
                 os.path.join(BOARD_MODEL_REPO_PATH, '*.hwd')
             ),
-            "DevicesBag.peripherals": scoping_providers.FQNGlobalRepo(
+            "ComponentBag.peripherals": scoping_providers.FQNGlobalRepo(
                 os.path.join(PERIPHERAL_MODEL_REPO_PATH, '*.hwd')
             ),
             # 'Connection.board': 'devices.board'
@@ -68,13 +68,13 @@ def get_synthesis_metamodel():
         for c in model.connections:
             board_pins = [p.name for p in c.board.pins]
             per_pins = [p.name for p in c.peripheral.pins]
-            if c.peripheral not in model.deviceBag.peripherals:
+            if c.peripheral not in model.components.peripherals:
                 raise TextXSemanticError(
-                    f'Peripheral {c.peripheral.name} not defined in Bag of devices!'
+                    f'Peripheral {c.peripheral.name} not defined in Bag of components!'
                 )
-            if c.board != model.deviceBag.board:
+            if c.board != model.components.board:
                 raise TextXSemanticError(
-                    f'Board {c.board.name} not defined in Bag of devices!'
+                    f'Board {c.board.name} not defined in Bag of components!'
                 )
             for pconn in c.powerConns:
                 print(

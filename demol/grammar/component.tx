@@ -1,9 +1,9 @@
 //Device
-DeviceDefinition:
-    device=Device
+ComponentModel:
+    component=Component
 ;
 
-Device:
+Component:
     Board | Peripheral
 ;
 

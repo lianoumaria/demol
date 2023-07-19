@@ -1,12 +1,12 @@
 // Grammar for a system. A system consists a board (ESP32/ESP8266)
 // and one or more peripherals (sensors/actuators).
 
-import devices
+import component
 import communication
 
 Synthesis:
     imports*=Import
-    deviceBag=DevicesBag
+    components=ComponentBag
     (
         network=Network
         communication=CommunicationMiddleware
@@ -14,30 +14,20 @@ Synthesis:
     )#
 ;
 
-DevicesBag:
-    'Devices'
-	    ("board:" board=[devices.Board:FQN|+m:device])  // RREL
-	    ("peripherals:" '-' peripherals*=[Peripheral:FQN|+m:device]['-'])? // RREL
+ComponentBag:
+    'Components'
+	    ("board:" board=[Board:FQN|+m:component])  // RREL
+	    ("peripherals:" '-' peripherals*=[Peripheral:FQN|+m:component]['-'])? // RREL
     'end'
 ;
 
 Connection:
 	"Connection"
 	(
-	    ("board:" board=[Board:FQN|+m:device])  // Hanled by Model Processor
-	    ("peripheral:" peripheral=[Peripheral:FQN|+m:device]) // Handled by Model processor
+	    ("board:" board=[Board:FQN|+m:component])  // Hanled by Model Processor
+	    ("peripheral:" peripheral=[Peripheral:FQN|+m:component]) // Handled by Model processor
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
-        /*
-	    ("powerConnections"
-            powerConns*=PowerConnection
-         "end"
-        )
-	    ("ioConnections"
-            ioConns+=IOConnection
-         "end"
-        )
-        */
 	    ("driverTpl:" driverTpl=STRING)?
 	    ("endpoint:" endpoint=Endpoint)?
     )#
@@ -59,71 +49,49 @@ IOConnection:
 	GPIOConnection | I2CConnection | SPIConnection | UARTConnection
 ;
 
-/*
-GPIOConnection:
-	"gpio" ":" boardPin=[IOPin:FQN|+m:device.pins] "--"
-		peripheralPin=[IOPin:FQN|+m:device.pins]
-;
-*/
-
 GPIOConnection:
 	"type" ":"  type="gpio"
     ('name:' name=NID)?
-    ('conn:' pinConn=PinConnection)
+    ('pins:' pinConn=PinConnection)
+;
+
+GPIOMode:
+    ('input' ':' input=BOOL)?
+    ('output' ':' output=BOOL)?
+    ('pullup' ':' pullup=BOOL)?
+    ('pulldown' ':' pulldown=BOOL)?
+    ('open_drain' ':' openDrain=BOOL)?
 ;
 
 /*
-SPIConnection:
-	"spi" ":"
-	"mosi" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
-		peripheralPin0=[IOPin:FQN|+m:device.pins]
-	"miso" ":" boardPin1=[IOPin:FQN|+m:device.pins] "--"
-		peripheralPin1=[IOPin:FQN|+m:device.pins]
-	"sck" ":" boardPin2=[IOPin:FQN|+m:device.pins] "--"
-		peripheralPin2=[IOPin:FQN|+m:device.pins]
-	"cs" ":" boardPin3=[IOPin:FQN|+m:device.pins] "--"
-		peripheralPin3=[IOPin:FQN|+m:device.pins]
+GPIOMode:
+    'INPUT'                 |
+    'OUTPUT'                |
+    'OUTPUT_OPEN_DRAIN'     |
+    'INPUT_PULLUP'
 ;
 */
 
 SPIConnection:
 	"type" ":" type="spi"
     ('name:' name=NID)?
-    "mosi" ":" mosi=PinConnection
-    "miso" ":" miso=PinConnection
-    "sck" ":" sck=PinConnection
-    "cs" ":" cs=PinConnection
+    ('pins:')
+        "mosi" ":" mosi=PinConnection
+        "miso" ":" miso=PinConnection
+        "sck" ":" sck=PinConnection
+        "cs" ":" cs=PinConnection
 ;
 
-/*
 I2CConnection:
-	"i2c" ":"
-        "sda" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
-            peripheralPin0=[IOPin:FQN|+m:device.pins]
-        "scl" ":" boardPin1=[IOPin:FQN|+m:device.pins] "--"
-            peripheralPin1=[IOPin:FQN|+m:device.pins]
-        "slave_address:" "0x" slave_addr=INT
-;
-*/
-
-I2CConnection:
+    (
 	"type" ":" type="i2c"
     ('name:' name=NID)?
-    "sda" ":" sda=PinConnection
-    "scl" ":" scl=PinConnection
-    "slave_address:" "0x" slave_addr=INT
+    ("slave_address:" "0x" slave_addr=INT)
+    ('pins:')
+        "sda" ":" sda=PinConnection
+        "scl" ":" scl=PinConnection
+    )#
 ;
-
-/*
-UARTConnection:
-	"uart" ":"
-        "tx" ":" boardPin0=[IOPin:FQN|+m:device.pins] "--"
-            peripheralPin0=[IOPin:FQN|+m:device.pins]
-        "rx" ":" boardPin1=[IOPin:FQN|+m:device.pins] "--"
-            peripheralPin1=[IOPin:FQN|+m:device.pins]
-        "baudrate:" baudrate=INT
-;
-*/
 
 UARTConnection:
 	"type" ":" type="uart"

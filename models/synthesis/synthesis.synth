@@ -29,9 +29,9 @@ Connection
         - power_5v -- vcc
     ioConnections:
         - type: gpio
-          conn: p_13 -- trigger
+          pins: p_13 -- trigger
         - type: gpio
-          conn: p_14 -- echo
+          pins: p_14 -- echo
     endpoint:
 	topic: "my_esp.sensors.srf04"
 	msg: Distance
@@ -46,9 +46,10 @@ Connection
         - power_5v -- vcc
     ioConnections:
         - type: i2c
-          sda: p_21 -- sda
-          scl: p_22 -- scl
           slave_address: 0x76
+          pins:
+              sda: p_21 -- sda
+              scl: p_22 -- scl
     endpoint:
         topic: "my_esp.sensors.bme680"
         msg: Env

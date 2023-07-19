@@ -4,20 +4,20 @@ Peripheral BME680
     type: Sensor
     vcc: 5
     pins:
-		- power:
-			name: vcc
-			number: 1
-			type: 5V
-		- power:
-			name: gnd
-			number: 4
-			type: GND
-		- io_pin:
+        - power:
+            name: vcc
+            number: 1
+            type: 5V
+        - power:
+            name: gnd
+            number: 4
+            type: GND
+        - io_pin:
             functions: sda-0
-			name: sda
-			number: 2
-		- io_pin:
+            name: sda
+            number: 2
+        - io_pin:
             functions: scl-0
-			name: scl
-			number: 3
+            name: scl
+            number: 3
 end
