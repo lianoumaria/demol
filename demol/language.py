@@ -1,17 +1,17 @@
 from textx import language
 
-from .utils import (
-    get_device_metamodel,
-    get_synthesis_metamodel
+from demol.lang import (
+    get_component_mm,
+    get_device_mm,
 )
 
 
 
 @language('demol-component', '*.hwd')
-def devices_language():
-    return get_device_metamodel()
+def component_language():
+    return get_component_mm()
 
 
 @language('demol-device', '*.dev')
-def device_synthesis_language():
-    return get_synthesis_metamodel()
+def device_language():
+    return get_device_mm()

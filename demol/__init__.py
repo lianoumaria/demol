@@ -1,1 +1,1 @@
-from demol.language import devices_language, device_synthesis_language
+from demol.language import component_language, device_language
