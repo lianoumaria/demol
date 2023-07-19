@@ -4,6 +4,7 @@ import textx.scoping.providers as scoping_providers
 from textx import get_location, TextXSemanticError
 from demol.definitions import *
 
+
 def raise_validation_error(obj, msg):
     raise TextXSemanticError(
         f'[Validation Error]: {msg}',
