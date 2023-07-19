@@ -4,6 +4,12 @@ import textx.scoping.providers as scoping_providers
 from textx import get_location, TextXSemanticError
 from demol.definitions import *
 
+def raise_validation_error(obj, msg):
+    raise TextXSemanticError(
+        f'[Validation Error]: {msg}',
+        **get_location(obj)
+    )
+
 
 def get_device_mm():
     mm= metamodel_from_file(
@@ -67,16 +73,17 @@ def get_device_mm():
                         f'  {pin_conn.boardPin} -> {pin_conn.peripheralPin}'
                     )
                     if pin_conn.boardPin not in board_pins:
-                        raise TextXSemanticError(
+                        raise_validation_error(
+                            pin_conn,
                             f'Board {c.board.name} does not have a pin '
                             f'named {pin_conn.boardPin}'
                         )
                     if pin_conn.peripheralPin not in per_pins:
-                        raise TextXSemanticError(
+                        raise_validation_error(
+                            pin_conn,
                             f'Peripheral {c.peripheral.name} does not have a '
                             f'pin named {pin_conn.peripheralPin}'
                         )
-
                 elif ioconn.__class__.__name__ == 'SPIConnection':
                     miso = ioconn.miso
                     mosi = ioconn.mosi
@@ -92,12 +99,14 @@ def get_device_mm():
                     pin_conns = [miso, mosi, sck, cs]
                     for pc in pin_conns:
                         if pc.boardPin not in board_pins:
-                            raise TextXSemanticError(
+                            raise_validation_error(
+                                pc,
                                 f'Board {c.board.name} does not have a pin '
-                                f'named {pc.boardPin}'
+                                f'named {pc.boardPin}',
                             )
                         if pc.peripheralPin not in per_pins:
-                            raise TextXSemanticError(
+                            raise_validation_error(
+                                pc,
                                 f'Peripheral {c.peripheral.name} does not have a '
                                 f'pin named {pc.peripheralPin}'
                             )
@@ -112,16 +121,17 @@ def get_device_mm():
                     pin_conns = [sda, scl]
                     for pc in pin_conns:
                         if pc.boardPin not in board_pins:
-                            raise TextXSemanticError(
+                            raise_validation_error(
+                                pc,
                                 f'Board {c.board.name} does not have a pin '
-                                f'named {pc.boardPin}'
+                                f'named {pc.boardPin}',
                             )
                         if pc.peripheralPin not in per_pins:
-                            raise TextXSemanticError(
+                            raise_validation_error(
+                                pc,
                                 f'Peripheral {c.peripheral.name} does not have a '
                                 f'pin named {pc.peripheralPin}'
                             )
-
 
     mm.register_model_processor(model_proc)
 

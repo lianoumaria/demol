@@ -1,4 +1,4 @@
-Devices
+Components
     board: ESP32Wroom32
     peripherals:
         - SonarSRF04
