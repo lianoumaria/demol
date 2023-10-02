@@ -6,19 +6,11 @@ import communication
 
 DeviceModel:
     imports*=Import
-    components=ComponentBag
     (
         network=Network
         communication=CommunicationMiddleware
         connections+=Connection
     )#
-;
-
-ComponentBag:
-    'Components'
-	    ("board:" board=[Board:FQN|+m:component])  // RREL
-	    ("peripherals:" '-' peripherals*=[Peripheral:FQN|+m:component]['-'])? // RREL
-    'end'
 ;
 
 Connection:
@@ -63,15 +55,6 @@ GPIOMode:
     ('open_drain' ':' openDrain=BOOL)?
 ;
 
-/*
-GPIOMode:
-    'INPUT'                 |
-    'OUTPUT'                |
-    'OUTPUT_OPEN_DRAIN'     |
-    'INPUT_PULLUP'
-;
-*/
-
 SPIConnection:
 	"type" ":" type="spi"
     ('name:' name=NID)?
@@ -102,10 +85,13 @@ UARTConnection:
 ;
 
 Endpoint:
+    'Endpoint'
 	(
         ("topic:" topic=STRING)
+        ("type:" type=EndpointType)
 	    ("msg:" msg=MessageType)
     )#
+    'end'
 ;
 
 EndpointType:
@@ -116,28 +102,13 @@ EndpointType:
     "Action"
 ;
 
-Network:
-    "Network"
-	(
-	    ("ssid:" ssid=STRING)
-	    ("passwd:" passwd=STRING)
-	    ("address:" address=STRING)?
-	    ("channel:" channel=STRING)?
-    )#
-    "end"
-;
-
-
-ADDRESS_ID:
-	/([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/
-;
-
 MessageType:
 	SensorMsgType | ActuatorMsgType | CustomMsgType
 ;
 
 CustomMsgType: 'Custom';
 
+// Τα templates γράφονται με ωάση τα MsgType που υποστηρίζει η DSL
 SensorMsgType:
 	"Distance"      |
     "Temperature"   |

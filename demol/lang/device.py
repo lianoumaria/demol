@@ -25,10 +25,10 @@ def get_device_mm():
             #     importAs=True,
             # ),
             "*.*": scoping_providers.FQN(),
-            "ComponentBag.board": scoping_providers.FQNGlobalRepo(
+            "Connection.board": scoping_providers.FQNGlobalRepo(
                 os.path.join(BOARD_MODEL_REPO_PATH, '*.hwd')
             ),
-            "ComponentBag.peripherals": scoping_providers.FQNGlobalRepo(
+            "Connection.peripheral": scoping_providers.FQNGlobalRepo(
                 os.path.join(PERIPHERAL_MODEL_REPO_PATH, '*.hwd')
             ),
             # 'Connection.board': 'devices.board'
@@ -42,14 +42,14 @@ def get_device_mm():
         for c in model.connections:
             board_pins = [p.name for p in c.board.pins]
             per_pins = [p.name for p in c.peripheral.pins]
-            if c.peripheral not in model.components.peripherals:
-                raise TextXSemanticError(
-                    f'Peripheral {c.peripheral.name} not defined in Bag of components!'
-                )
-            if c.board != model.components.board:
-                raise TextXSemanticError(
-                    f'Board {c.board.name} not defined in Bag of components!'
-                )
+            # if c.peripheral not in model.components.peripherals:
+            #     raise TextXSemanticError(
+            #         f'Peripheral {c.peripheral.name} not defined in Bag of components!'
+            #     )
+            # if c.board != model.components.board:
+            #     raise TextXSemanticError(
+            #         f'Board {c.board.name} not defined in Bag of components!'
+            #     )
             for pconn in c.powerConns:
                 print(
                     f'PowerPinConnection:\n'

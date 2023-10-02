@@ -1,10 +1,3 @@
-Components
-    board: ESP32Wroom32
-    peripherals:
-        - SonarSRF04
-        - BME680
-end
-
 Network
     ssid: "Wifi_2.4GHz"
     passwd: "guest"
