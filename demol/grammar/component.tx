@@ -31,7 +31,8 @@ Actuator:
 	  ("msg:" msg=MessageType)
 	  ("pins" ":" "-" pins*=Pin["-"])
 	  ("attributes" ":" "-" attributes*=Attribute["-"])?
-	  ("driverTpl" ":" driverTpl=STRING)?
+	  ("riotTpl" ":" riotTpl=STRING)?
+	  ("piTpl" ":" piTpl=STRING)?
     )#
     'end'
 ;
@@ -43,7 +44,8 @@ Sensor:
 	  ("msg:" msg=MessageType)
 	  ("pins" ":" "-" pins*=Pin["-"])
 	  ("attributes" ":" "-" attributes*=Attribute["-"])?
-	  ("driverTpl" ":" driverTpl=STRING)?
+	  ("riotTpl" ":" riotTpl=STRING)?
+	  ("piTpl" ":" piTpl=STRING)?
     )#
     'end'
 ;

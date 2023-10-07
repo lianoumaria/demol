@@ -36,10 +36,15 @@ def board2dict(board):
 
 
 def peripheral2dict(peripheral):
-    return {
+    _d = {
         'name': peripheral.name,
-        'pins': pins2dict(peripheral.pins)
+        'pins': pins2dict(peripheral.pins),
+        'msg': peripheral.msg,
+        'attributes': peripheral.attributes,
+        'riotTpl': peripheral.riotTpl,
+        'piTpl': peripheral.piTpl,
     }
+    return _d
 
 
 def conn2dict(conn):

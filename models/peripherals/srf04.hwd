@@ -3,6 +3,8 @@
 Sensor SonarSRF04
     vcc: 5V
     msg: Distance
+    piTpl: "srf04"
+    riotTpl: "srf04"
     pins:
     - power:
         name: vcc
