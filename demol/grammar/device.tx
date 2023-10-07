@@ -7,10 +7,22 @@ import communication
 DeviceModel:
     imports*=Import
     (
+        metadata=Metadata
         network=Network
         communication=CommunicationMiddleware
         connections+=Connection
     )#
+;
+
+Metadata:
+    'Metadata'
+    (
+        ('name:' name=STRING)
+        ('description:' description=STRING)
+        ('author:' author=STRING)
+        ('os:' os=OperatingSystem)
+    )#
+    'end'
 ;
 
 Connection:
@@ -20,16 +32,10 @@ Connection:
 	    ("peripheral:" peripheral=[Peripheral:FQN|+m:component]) // Handled by Model processor
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
-	    ("driverTpl:" driverTpl=STRING)?
 	    ("endpoint:" endpoint=Endpoint)?
     )#
     'end'
 ;
-/*
-PowerConnection:
-	boardPin=[PowerPin:FQN|+m:device.pins] "--" peripheralPin=[PowerPin:FQN|+m:device.pins]
-;
-*/
 
 PinConnection:
     boardPin=ID "--" peripheralPin=ID
@@ -85,13 +91,10 @@ UARTConnection:
 ;
 
 Endpoint:
-    'Endpoint'
 	(
         ("topic:" topic=STRING)
         ("type:" type=EndpointType)
-	    ("msg:" msg=MessageType)
     )#
-    'end'
 ;
 
 EndpointType:
@@ -102,29 +105,9 @@ EndpointType:
     "Action"
 ;
 
-MessageType:
-	SensorMsgType | ActuatorMsgType | CustomMsgType
-;
-
-CustomMsgType: 'Custom';
-
-// Τα templates γράφονται με ωάση τα MsgType που υποστηρίζει η DSL
-SensorMsgType:
-	"Distance"      |
-    "Temperature"   |
-    "Humidity"      |
-    "Gas"           |
-    "Pressure"      |
-    "Env"           |
-    "Acceleration"  |
-    "Custom"
-;
-
-ActuatorMsgType:
-	"MotorController"   |
-    "LedController"     |
-    "ServoController"   |
-    "Custom"
+OperatingSystem:
+    'Raspbian' |
+    'RiotOS'
 ;
 
 NID: /(.*?)\n/;

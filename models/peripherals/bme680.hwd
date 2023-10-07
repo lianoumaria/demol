@@ -1,8 +1,8 @@
 // RIOT Configuration for SRF04 (HC-SR04) ultra sonic range finder
 
-Peripheral BME680
-    type: Sensor
-    vcc: 5
+Sensor BME680
+    vcc: 5V
+    msg: Env
     pins:
         - power:
             name: vcc

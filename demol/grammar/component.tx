@@ -8,36 +8,44 @@ Component:
 ;
 
 
-// Board meta-model
 Board:
     'Board' name=ID
 	(
 	    ("cpu" ":" cpu=CPU)
         ("memory" ":" memory=Memory)
-	    ("vcc" ":" vcc=FLOAT)
+        ("vcc" ":" vcc=PowerType)
 	    ("pins" ":" "-" pins*=Pin["-"])
-	    ("ioVcc" ":" vcc=FLOAT)?
 	    ('networking' ':' '-' networking*=NetworkInterface['-'])?
 	    ('bluetooth' ':' bluetooth=Bluetooth)?
+        ("ioVcc" ":" iovcc=PowerType)?
      )#
     'end'
 ;
 
-Peripheral:
-    'Peripheral' name=ID
+Peripheral: Sensor | Actuator;
+
+Actuator:
+    'Actuator' name=ID
 	(
-      ("type" ":" type=PeripheralType)
+	  ("vcc" ":" vcc=PowerType)
+	  ("msg:" msg=MessageType)
 	  ("pins" ":" "-" pins*=Pin["-"])
-	  ("vcc" ":" vcc=FLOAT)
-	  ("input" ":" "-" input*=Attribute["-"])
-	  ("ouput" ":" "-" output*=Attribute["-"])
-	  ("properties" ":" "-" properties*=Attribute["-"])
+	  ("attributes" ":" "-" attributes*=Attribute["-"])?
+	  ("driverTpl" ":" driverTpl=STRING)?
     )#
     'end'
 ;
 
-PeripheralType:
-	"Sensor" | "Actuator" | "Other"
+Sensor:
+    'Sensor' name=ID
+	(
+	  ("vcc" ":" vcc=PowerType)
+	  ("msg:" msg=MessageType)
+	  ("pins" ":" "-" pins*=Pin["-"])
+	  ("attributes" ":" "-" attributes*=Attribute["-"])?
+	  ("driverTpl" ":" driverTpl=STRING)?
+    )#
+    'end'
 ;
 
 Pin:
@@ -168,6 +176,30 @@ Bluetooth:
     'BT4' |
     'BT5'
 ;
+
+
+MessageType:
+	SensorMsgType | ActuatorMsgType
+;
+
+// Τα templates γράφονται με ωάση τα MsgType που υποστηρίζει η DSL
+SensorMsgType:
+	"Distance"      |
+    "Temperature"   |
+    "Humidity"      |
+    "Gas"           |
+    "Pressure"      |
+    "Env"           |
+    "Acceleration"  |
+    "IMU"
+;
+
+ActuatorMsgType:
+	"MotorController"   |
+    "ServoController"   |
+    "LedArray"
+;
+
 
 Attribute:
     NumericAttribute    |
