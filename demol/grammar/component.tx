@@ -57,7 +57,7 @@ PowerPin:
 	(
         ("name:" name=ID)
 	    ("number:" number=INT)
-	    ("type:" type=PowerType)
+	    ("type:" ptype=PowerType)
     )#
 ;
 
@@ -74,6 +74,7 @@ IOPin:
         ("functions:" funcs*=PinFunction[","])
         ("name:" name=ID)
 	    ("number:" number=INT)?
+	    ("vmin:" vmin=NUMBER)?
 	    ("vmax:" vmax=NUMBER)?
     )#
 ;
@@ -83,11 +84,11 @@ PinFunction:
 ;
 
 GPIO:
-	type="gpio"
+	ptype="gpio"
 ;
 
 I2C:
-	type=I2C_TYPE "-" bus=INT
+	ptype=I2C_TYPE "-" bus=INT
 ;
 
 I2C_TYPE:
@@ -95,7 +96,7 @@ I2C_TYPE:
 ;
 
 SPI:
-	type=SPIPinType "-" bus=INT
+	ptype=SPIPinType "-" bus=INT
 ;
 
 SPIPinType:
@@ -103,7 +104,7 @@ SPIPinType:
 ;
 
 UART:
-	type=UARTPinType "-" bus=INT
+	ptype=UARTPinType "-" bus=INT
 ;
 
 UARTPinType:
@@ -111,15 +112,15 @@ UARTPinType:
 ;
 
 PWM:
-	type="pwm-" interface=INT
+	ptype="pwm" "-" channel=INT
 ;
 
 ADC:
-	type="adc"
+	ptype="adc"
 ;
 
 DAC:
-	type="dac"
+	ptype="dac"
 ;
 
 

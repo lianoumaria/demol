@@ -4,6 +4,19 @@ import textx.scoping.providers as scoping_providers
 from textx import get_location, TextXSemanticError
 from demol.definitions import *
 
+from demol.mm_classes import (
+    Metadata, Network, BrokerAuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
+)
+
+CUSTOM_CLASSES = [
+    Metadata, Network, BrokerAuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
+]
+
+
+def class_provider(name):
+    classes = dict(map(lambda x: (x.__name__, x), CUSTOM_CLASSES))
+    return classes.get(name)
+
 
 def raise_validation_error(obj, msg):
     raise TextXSemanticError(
@@ -12,11 +25,13 @@ def raise_validation_error(obj, msg):
     )
 
 
-def get_device_mm():
-    mm= metamodel_from_file(
+def get_device_mm(debug=False):
+    mm = metamodel_from_file(
         os.path.join(METAMODEL_REPO_PATH, 'device.tx'),
+        classes=class_provider,
+        auto_init_attributes=True,
         global_repository=True,
-        debug=False
+        debug=debug
     )
 
     mm.register_scope_providers(

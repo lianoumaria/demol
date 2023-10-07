@@ -25,6 +25,7 @@ Metadata:
     'end'
 ;
 
+
 Connection:
 	"Connection"
 	(
@@ -75,7 +76,7 @@ I2CConnection:
     (
 	"type" ":" type="i2c"
     ('name:' name=NID)?
-    ("slave_address:" "0x" slave_addr=INT)
+    ("slave_address:" "0x" slaveAddr=INT)
     ('pins:')
         "sda" ":" sda=PinConnection
         "scl" ":" scl=PinConnection
