@@ -51,8 +51,8 @@ if not os.path.exists(TMP_DIR):
 
 class DeMoLModel(BaseModel):
     name: str
-    type: str
     text: str
+    type: str = ''
 
 
 @api.post("/validate/file")
@@ -91,14 +91,14 @@ async def validate(model: DeMoLModel,
                    api_key: str = Security(get_api_key)):
     text = model.text
     name = model.name
-    mtype = model.type
+    mtype = model.type if model.type not in (None, '') else 'device'
     if len(text) == 0:
         return 404
     resp = {
         'status': 200,
         'message': ''
     }
-    if mtype == 'component':
+    if mtype == 'peripheral':
         ext = 'hwd'
     elif mtype == 'device':
         ext = 'dev'
