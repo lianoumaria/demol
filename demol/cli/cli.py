@@ -1,6 +1,6 @@
 import click
 from demol.lang import build_model
-from demol.transformations import device_to_plantuml
+from demol.transformations import device_to_plantuml, model2json
 
 
 @click.group("demol")
@@ -19,6 +19,7 @@ def validate(ctx, model_filepath):
     if model:
         print(f'[*] Validation passed!')
 
+
 @cli.command("gen")
 @click.argument("generator")
 @click.argument("model_filepath")
@@ -30,6 +31,15 @@ def gen(ctx, generator, model_filepath):
         a = device_to_plantuml(model)
     else:
         return
+
+
+@cli.command("json")
+@click.argument("model_filepath")
+@click.pass_context
+def gen(ctx, model_filepath):
+    print(f'[*] Running Generator [PlanUML] for model {model_filepath}')
+    model = build_model(model_filepath)
+    a = model2json(model)
 
 
 def main():

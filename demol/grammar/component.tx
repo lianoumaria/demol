@@ -8,33 +8,46 @@ Component:
 ;
 
 
-// Board meta-model
 Board:
     'Board' name=ID
 	(
 	    ("cpu" ":" cpu=CPU)
         ("memory" ":" memory=Memory)
-	    ("vcc" ":" vcc=FLOAT)
+        ("vcc" ":" vcc=PowerType)
 	    ("pins" ":" "-" pins*=Pin["-"])
-	    ("ioVcc" ":" vcc=FLOAT)?
 	    ('networking' ':' '-' networking*=NetworkInterface['-'])?
 	    ('bluetooth' ':' bluetooth=Bluetooth)?
+        ("ioVcc" ":" iovcc=PowerType)?
      )#
     'end'
 ;
 
-Peripheral:
-    'Peripheral' name=ID
+Peripheral: Sensor | Actuator;
+
+Actuator:
+    'Actuator' name=ID
 	(
-      ("type" ":" type=PeripheralType)
+	  ("vcc" ":" vcc=PowerType)
+	  ("msg:" msg=MessageType)
 	  ("pins" ":" "-" pins*=Pin["-"])
-	  ("vcc" ":" vcc=FLOAT)
+	  ("attributes" ":" "-" attributes*=Attribute["-"])?
+	  ("riotTpl" ":" riotTpl=STRING)?
+	  ("piTpl" ":" piTpl=STRING)?
     )#
     'end'
 ;
 
-PeripheralType:
-	"Sensor" | "Actuator" | "Other"
+Sensor:
+    'Sensor' name=ID
+	(
+	  ("vcc" ":" vcc=PowerType)
+	  ("msg:" msg=MessageType)
+	  ("pins" ":" "-" pins*=Pin["-"])
+	  ("attributes" ":" "-" attributes*=Attribute["-"])?
+	  ("riotTpl" ":" riotTpl=STRING)?
+	  ("piTpl" ":" piTpl=STRING)?
+    )#
+    'end'
 ;
 
 Pin:
@@ -46,7 +59,7 @@ PowerPin:
 	(
         ("name:" name=ID)
 	    ("number:" number=INT)
-	    ("type:" type=PowerType)
+	    ("type:" ptype=PowerType)
     )#
 ;
 
@@ -63,6 +76,7 @@ IOPin:
         ("functions:" funcs*=PinFunction[","])
         ("name:" name=ID)
 	    ("number:" number=INT)?
+	    ("vmin:" vmin=NUMBER)?
 	    ("vmax:" vmax=NUMBER)?
     )#
 ;
@@ -72,11 +86,11 @@ PinFunction:
 ;
 
 GPIO:
-	type="gpio"
+	ptype="gpio"
 ;
 
 I2C:
-	type=I2C_TYPE "-" bus=INT
+	ptype=I2C_TYPE "-" bus=INT
 ;
 
 I2C_TYPE:
@@ -84,7 +98,7 @@ I2C_TYPE:
 ;
 
 SPI:
-	type=SPIPinType "-" bus=INT
+	ptype=SPIPinType "-" bus=INT
 ;
 
 SPIPinType:
@@ -92,7 +106,7 @@ SPIPinType:
 ;
 
 UART:
-	type=UARTPinType "-" bus=INT
+	ptype=UARTPinType "-" bus=INT
 ;
 
 UARTPinType:
@@ -100,15 +114,15 @@ UARTPinType:
 ;
 
 PWM:
-	type="pwm-" interface=INT
+	ptype="pwm" "-" channel=INT
 ;
 
 ADC:
-	type="adc"
+	ptype="adc"
 ;
 
 DAC:
-	type="dac"
+	ptype="dac"
 ;
 
 
@@ -122,21 +136,15 @@ CPU:
 
 
 CPUFamilyType:
-	( "ESP32" | "ESP8266" | "PiArmCortex")
+	("ESP32" | "ESP8266" | "PiArmCortex")
 ;
 
 Memory:
 	(
-        (("ram:" ram=NUMBER UNITS?)
-        ("rom:" rom=NUMBER UNITS?)?
-        ("flash:" flash=NUMBER UNITS?)?)# |
-        (("ram:" ram=NUMBER UNITS?)?
-        ("rom:" rom=NUMBER UNITS?)?
-        ("flash:" flash=NUMBER UNITS?))# |
-        (("ram:" ram=NUMBER UNITS?)?
-        ("rom:" rom=NUMBER UNITS?)
-        ("flash:" flash=NUMBER UNITS?)?)#
-    )
+        ("ram:" ram=NUMBER UNITS)?
+        ("rom:" rom=NUMBER UNITS)?
+        ("flash:" flash=NUMBER UNITS)?
+    )#
 ;
 
 UNITS:
@@ -170,6 +178,66 @@ Bluetooth:
     'BT3' |
     'BT4' |
     'BT5'
+;
+
+
+MessageType:
+	SensorMsgType | ActuatorMsgType
+;
+
+// Τα templates γράφονται με ωάση τα MsgType που υποστηρίζει η DSL
+SensorMsgType:
+	"Distance"      |
+    "Temperature"   |
+    "Humidity"      |
+    "Gas"           |
+    "Pressure"      |
+    "Env"           |
+    "Acceleration"  |
+    "IMU"
+;
+
+ActuatorMsgType:
+	"MotorController"   |
+    "ServoController"   |
+    "LedArray"
+;
+
+
+Attribute:
+    NumericAttribute    |
+    BoolAttribute       |
+    StringAttribute     |
+    ListAttribute       |
+    DictAttribute
+;
+
+NumericAttribute:
+    IntAttribute | FloatAttribute
+;
+
+IntAttribute:
+    name=ID ':' 'int' ('=' default=INT)?
+;
+
+FloatAttribute:
+    name=ID ':' 'float' ('=' default=FLOAT)?
+;
+
+StringAttribute:
+    name=ID ':' 'str' ('=' default=STRING)?
+;
+
+BoolAttribute:
+    name=ID ':' 'bool' ('=' default=BOOL)?
+;
+
+ListAttribute:
+    name=ID ':' 'list' ('=' '[' default*=OBJECT[','] ']')?
+;
+
+DictAttribute:
+    name=ID ':' 'dict' ('=' '{' items*=Attribute[','] '}')?
 ;
 
 NID:

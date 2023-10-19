@@ -1,8 +1,10 @@
 // RIOT Configuration for SRF04 (HC-SR04) ultra sonic range finder
 
-Peripheral SonarSRF04
-    type: Sensor
-    vcc: 5
+Sensor SonarSRF04
+    vcc: 5V
+    msg: Distance
+    piTpl: "srf04"
+    riotTpl: "srf04"
     pins:
     - power:
         name: vcc

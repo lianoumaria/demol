@@ -1,8 +1,8 @@
-Components
-    board: ESP32Wroom32
-    peripherals:
-        - SonarSRF04
-        - BME680
+Metadata
+    name: "MyESP32Device"
+    description: "My ESP32 IoT device"
+    author: "klpanagi"
+    os: RiotOS
 end
 
 Network
@@ -31,7 +31,7 @@ Connection
           pins: p_14 -- echo
     endpoint:
 	topic: "my_esp.sensors.srf04"
-	msg: Distance
+        type: Publisher
 end
 
 
@@ -49,5 +49,5 @@ Connection
               scl: p_22 -- scl
     endpoint:
         topic: "my_esp.sensors.bme680"
-        msg: Env
+        type: Publisher
 end

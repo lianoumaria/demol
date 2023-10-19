@@ -1,18 +1,18 @@
-// RIOT Configuration for ESP32-WROOM-32 boards
+// RIOT Configuration for all WEMOS LOLIN D1 mini boards (V2 / V3 / Lite / Pro)
 
-Board ESP32Wroom32
+Board RaspberryPi_4B_4GB
     vcc: 3V3
     memory:
-        flash: 4 mb
+        flash: 32 gb
+        ram: 4 gb
     cpu:
-        cpu_family: ESP32
-        max_freq: 240 mhz
+        cpu_family: PiArmCortex
+        max_freq: 1600 mhz
         fpu: false
     networking:
     - wifi:
         name: wifi_1
         freq: 2.5 ghz
-    bluetooth: BT4
     pins:
     - power:
         name: power_3v3

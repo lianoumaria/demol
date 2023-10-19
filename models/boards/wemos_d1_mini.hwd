@@ -1,7 +1,7 @@
 // RIOT Configuration for all WEMOS LOLIN D1 mini boards (V2 / V3 / Lite / Pro)
 
 Board WemosD1Mini
-    vcc: 3.3
+    vcc: 3V3
     memory:
 		flash: 16 mb
     cpu:

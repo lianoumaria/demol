@@ -1,23 +1,23 @@
 // RIOT Configuration for MPL3115A2 pressure sensor
 
-Peripheral Mpl3115a2
-    type: Sensor
-    vcc: 3.3
+Sensor Mpl3115a2
+    vcc: 3V3
+    msg: Pressure
     pins:
-		- power:
-			name: vcc
-			number: 1
-			type: 3V3
-		- power:
-			name: gnd
-			number: 2
-			type: GND
-		- io_pin:
-            functions: scl-0
-			name: scl
-			number: 5
-		- io_pin:
-            functions: sda-0
-			name: sda
-			number: 6
+    - power:
+        name: vcc
+        number: 1
+        type: 3V3
+    - power:
+        name: gnd
+        number: 2
+        type: GND
+    - io_pin:
+        functions: scl-0
+        name: scl
+        number: 5
+    - io_pin:
+        functions: sda-0
+        name: sda
+        number: 6
 end

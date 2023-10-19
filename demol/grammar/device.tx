@@ -6,20 +6,25 @@ import communication
 
 DeviceModel:
     imports*=Import
-    components=ComponentBag
     (
+        metadata=Metadata
         network=Network
         communication=CommunicationMiddleware
         connections+=Connection
     )#
 ;
 
-ComponentBag:
-    'Components'
-	    ("board:" board=[Board:FQN|+m:component])  // RREL
-	    ("peripherals:" '-' peripherals*=[Peripheral:FQN|+m:component]['-'])? // RREL
+Metadata:
+    'Metadata'
+    (
+        ('name:' name=STRING)
+        ('description:' description=STRING)
+        ('author:' author=STRING)
+        ('os:' os=OperatingSystem)
+    )#
     'end'
 ;
+
 
 Connection:
 	"Connection"
@@ -28,16 +33,10 @@ Connection:
 	    ("peripheral:" peripheral=[Peripheral:FQN|+m:component]) // Handled by Model processor
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
-	    ("driverTpl:" driverTpl=STRING)?
 	    ("endpoint:" endpoint=Endpoint)?
     )#
     'end'
 ;
-/*
-PowerConnection:
-	boardPin=[PowerPin:FQN|+m:device.pins] "--" peripheralPin=[PowerPin:FQN|+m:device.pins]
-;
-*/
 
 PinConnection:
     boardPin=ID "--" peripheralPin=ID
@@ -63,15 +62,6 @@ GPIOMode:
     ('open_drain' ':' openDrain=BOOL)?
 ;
 
-/*
-GPIOMode:
-    'INPUT'                 |
-    'OUTPUT'                |
-    'OUTPUT_OPEN_DRAIN'     |
-    'INPUT_PULLUP'
-;
-*/
-
 SPIConnection:
 	"type" ":" type="spi"
     ('name:' name=NID)?
@@ -86,7 +76,7 @@ I2CConnection:
     (
 	"type" ":" type="i2c"
     ('name:' name=NID)?
-    ("slave_address:" "0x" slave_addr=INT)
+    ("slave_address:" "0x" slaveAddr=INT)
     ('pins:')
         "sda" ":" sda=PinConnection
         "scl" ":" scl=PinConnection
@@ -104,7 +94,7 @@ UARTConnection:
 Endpoint:
 	(
         ("topic:" topic=STRING)
-	    ("msg:" msg=MessageType)
+        ("type:" type=EndpointType)
     )#
 ;
 
@@ -116,44 +106,9 @@ EndpointType:
     "Action"
 ;
 
-Network:
-    "Network"
-	(
-	    ("ssid:" ssid=STRING)
-	    ("passwd:" passwd=STRING)
-	    ("address:" address=STRING)?
-	    ("channel:" channel=STRING)?
-    )#
-    "end"
-;
-
-
-ADDRESS_ID:
-	/([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/
-;
-
-MessageType:
-	SensorMsgType | ActuatorMsgType | CustomMsgType
-;
-
-CustomMsgType: 'Custom';
-
-SensorMsgType:
-	"Distance"      |
-    "Temperature"   |
-    "Humidity"      |
-    "Gas"           |
-    "Pressure"      |
-    "Env"           |
-    "Acceleration"  |
-    "Custom"
-;
-
-ActuatorMsgType:
-	"MotorController"   |
-    "LedController"     |
-    "ServoController"   |
-    "Custom"
+OperatingSystem:
+    'Raspbian' |
+    'RiotOS'
 ;
 
 NID: /(.*?)\n/;
