@@ -3,8 +3,9 @@ version: '3.8'
 services:
   smauto:
     image: demol
-    command: uvicorn demol.api:api --host 0.0.0.0 --port 8081
+    command: uvicorn demol.api:api --host 0.0.0.0 --port 8080 --root-path /demol
     ports:
-      - 8081:8081
+      - 8081:8080
     environment:
-      - API_KEY=
+      - API_KEY=HFktrUY0u29G3keUeHCmEqwn
+
