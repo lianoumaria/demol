@@ -15,7 +15,7 @@ from fastapi.security import APIKeyHeader
 
 from demol.lang import build_model
 
-API_KEY = os.getenv("API_KEY", "Cslq4QfG0A4vNZzjOf1miz7v")
+API_KEY = os.getenv("API_KEY", "API_KEY")
 
 api_keys = [
     API_KEY
