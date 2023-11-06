@@ -7,7 +7,7 @@ Script that generates PlantUML text from textX models
 
 # PlantUML generation for connection model
 def device_to_plantuml(model):
-    filename = f'my_{model.components.board.name.lower()}.pu'
+    filename = f'my_{model.metadata.name}.pu'
     f = open(filename, "w")
 
     tmp = '@startuml\n' + \
