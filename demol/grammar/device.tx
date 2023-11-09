@@ -26,6 +26,15 @@ Metadata:
     'end'
 ;
 
+Components:
+	"Components"
+	(
+        'board: 'board=[Board:FQN|+m:component]
+        'peripherals:' '-' peripherals=[Peripheral:FQN|+m:component]['-']
+    )#
+    'end'
+;
+
 
 Connection:
 	"Connection"
@@ -95,7 +104,7 @@ UARTConnection:
 Endpoint:
 	(
         ("topic:" topic=STRING)
-        ("type:" type=EndpointType)
+        ("type:" type=EndpointType)?
     )#
 ;
 
@@ -111,4 +120,3 @@ OperatingSystem:
     'Raspbian' |
     'RiotOS'
 ;
-
