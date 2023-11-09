@@ -30,7 +30,7 @@ Connection
         - type: gpio
           pins: p_14 -- echo
     endpoint:
-	topic: "my_esp.sensors.srf04"
+	topic: "my_esp.sensors.distance.srf04"
         type: Publisher
 end
 
@@ -48,6 +48,6 @@ Connection
               sda: p_21 -- sda
               scl: p_22 -- scl
     endpoint:
-        topic: "my_esp.sensors.bme680"
+        topic: "my_esp.sensors.env.bme680"
         type: Publisher
 end

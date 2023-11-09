@@ -1,3 +1,5 @@
+import common
+
 //Device
 ComponentModel:
     component=Component
@@ -28,11 +30,12 @@ Actuator:
     'Actuator' name=ID
 	(
 	  ("vcc" ":" vcc=PowerType)
-	  ("msg:" msg=MessageType)
+	  ("msg:" msg=ActuatorMsgType)
 	  ("pins" ":" "-" pins*=Pin["-"])
 	  ("attributes" ":" "-" attributes*=Attribute["-"])?
 	  ("riotTpl" ":" riotTpl=STRING)?
 	  ("piTpl" ":" piTpl=STRING)?
+	  ("ioVcc" ":" ioVcc=PowerType)?
     )#
     'end'
 ;
@@ -41,11 +44,12 @@ Sensor:
     'Sensor' name=ID
 	(
 	  ("vcc" ":" vcc=PowerType)
-	  ("msg:" msg=MessageType)
+	  ("msg:" msg=SensorMsgType)
 	  ("pins" ":" "-" pins*=Pin["-"])
 	  ("attributes" ":" "-" attributes*=Attribute["-"])?
 	  ("riotTpl" ":" riotTpl=STRING)?
 	  ("piTpl" ":" piTpl=STRING)?
+	  ("ioVcc" ":" ioVcc=PowerType)?
     )#
     'end'
 ;
@@ -78,6 +82,7 @@ IOPin:
 	    ("number:" number=INT)?
 	    ("vmin:" vmin=NUMBER)?
 	    ("vmax:" vmax=NUMBER)?
+	    ("signalLevel:" signalLevel=NUMBER)?
     )#
 ;
 
@@ -180,10 +185,11 @@ Bluetooth:
     'BT5'
 ;
 
-
+/*
 MessageType:
 	SensorMsgType | ActuatorMsgType
 ;
+*/
 
 // Τα templates γράφονται με ωάση τα MsgType που υποστηρίζει η DSL
 SensorMsgType:
@@ -239,22 +245,3 @@ ListAttribute:
 DictAttribute:
     name=ID ':' 'dict' ('=' '{' items*=Attribute[','] '}')?
 ;
-
-NID:
-	/(.*?)\n/
-;
-
-FQN: ID+['.'];
-FQNI: ID+['.']('.*')?;
-Import: 'import' importURI=FQNI ('as' name=ID)?;
-
-Description: /\#(.*?)$/;
-
-// Special rule for comments. Comments start with //
-
-// Comments
-Comment: CommentLine | CommentBlock ;
-
-CommentLine: /\/\/.*?$/;
-
-CommentBlock: /\/\*(.|\n)*?\*\//;

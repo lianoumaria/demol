@@ -30,7 +30,24 @@ Connection
         - type: gpio
           pins: p_14 -- echo
     endpoint:
-	topic: "my_esp.sensors.srf04"
+	topic: "my_esp.sensors.distance.srf04_02"
+        type: Publisher
+end
+
+Connection
+    board: ESP32Wroom32
+    peripheral: Mpl3115a2
+    powerConnections:
+        - gnd_1 -- gnd
+        - power_5v -- vcc
+    ioConnections:
+        - type: i2c
+          slave_address: 0x78
+          pins:
+              sda: p_21 -- sda
+              scl: p_22 -- scl
+    endpoint:
+	topic: "my_esp.sensors.distance.srf04_1"
         type: Publisher
 end
 
@@ -48,6 +65,6 @@ Connection
               sda: p_21 -- sda
               scl: p_22 -- scl
     endpoint:
-        topic: "my_esp.sensors.bme680"
+        topic: "my_esp.sensors.env.bme680"
         type: Publisher
 end

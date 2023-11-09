@@ -3,6 +3,7 @@
 
 import component
 import communication
+import common
 
 DeviceModel:
     imports*=Import
@@ -111,19 +112,3 @@ OperatingSystem:
     'RiotOS'
 ;
 
-NID: /(.*?)\n/;
-// FQN: ID+['.'];
-FQN: ID('.'ID)*;
-FQNI: ID+['.']('.*')?;
-Import: 'import' importURI=FQNI ('as' name=ID)?;
-
-Description: /\#(.*?)$/;
-
-// Special rule for comments. Comments start with //
-
-// Comments
-Comment: CommentLine | CommentBlock ;
-
-CommentLine: /\/\/.*?$/;
-
-CommentBlock: /\/\*(.|\n)*?\*\//;
