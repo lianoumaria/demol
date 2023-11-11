@@ -21,7 +21,6 @@ Metadata:
         ('name:' name=STRING)
         ('description:' description=STRING)
         ('author:' author=STRING)
-        ('os:' os=OperatingSystem)
     )#
     'end'
 ;
@@ -30,7 +29,7 @@ Components:
 	"Components"
 	(
         'board: 'board=[Board:FQN|+m:component]
-        'peripherals:' '-' peripherals=[Peripheral:FQN|+m:component]['-']
+        'peripherals:' '-' peripherals*=[Peripheral:FQN|+m:component]['-']
     )#
     'end'
 ;
