@@ -12,7 +12,7 @@ BrokerAuthPlain:
 ;
 
 AMQPBroker:
-    'Communication<AMQP>'
+    'Broker<AMQP>'
     (
         ('host:' host=STRING)
         ('port:' port=INT)
@@ -23,7 +23,7 @@ AMQPBroker:
 ;
 
 MQTTBroker:
-    'Communication<MQTT>'
+    'Broker<MQTT>'
     (
         ('host:' host=STRING)
         ('port:' port=INT)
@@ -33,7 +33,7 @@ MQTTBroker:
 ;
 
 RedisBroker:
-    'Communication<Redis>'
+    'Broker<Redis>'
     (
         ('host:' host=STRING)
         ('port:' port=INT)
