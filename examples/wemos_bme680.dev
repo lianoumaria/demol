@@ -1,8 +1,7 @@
 Metadata
-    name: "MyPiIotDevice"
-    description: "My RaspberryPi IoT device"
+    name: "MyWemos"
+    description: "My WemosD1Mini IoT device"
     author: "klpanagi"
-    os: Raspbian
 end
 
 Network
@@ -10,33 +9,31 @@ Network
     passwd: "guest"
 end
 
-Communication<MQTT>
+Broker<MQTT>
     host: "node.mqtt.local"
-    port: 1885
+    port: 1883
     auth:
         username: "guest"
         password: "guest"
 end
 
 Components
-    board: RaspberryPi_4B_4GB
+    board: WemosD1Mini
     peripherals:
         - BME680(BME)
 end
 
 Connection
-    board: RaspberryPi_4B_4GB
-    peripheral: BME680
+    peripheral: BME
     powerConnections:
         - gnd_1 -- gnd
         - power_5v -- vcc
     ioConnections:
         - type: i2c
-          slave_address: 0x76
+          slave_address: 0x78
           pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
+              sda: d2 -- sda
+              scl: d1 -- scl
     endpoint:
-        topic: "my_esp.sensors.env.bme680"
-        type: Publisher
+        topic: "my_wemos.actuators.visual.ledstrip"
 end
