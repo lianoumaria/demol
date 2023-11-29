@@ -42,16 +42,20 @@ Components:
 	"Components"
 	(
         ('board:' board=[Board:FQN|+m:component])
-        ('peripherals:' '-' peripherals*=[Peripheral:FQN|+m:component]['-'])
+        ('peripherals:' '-' peripherals*=PeripheralDef['-'])
     )#
     'end'
 ;
 
+PeripheralDef:
+    peripheral=[Peripheral:FQN|+m:component] '(' name=ID ')'
+;
 
 Connection:
 	"Connection"
 	(
-	    ("peripheral:" peripheral=[Peripheral:FQN|+m:component]) // Handled by Model processor
+	    ("peripheral:" peripheral=[PeripheralDef:FQN|~components.peripherals])
+	    //("peripheral:" peripheral=ID)
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
 	    ("endpoint:" endpoint=Endpoint)?

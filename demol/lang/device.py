@@ -28,8 +28,9 @@ def raise_validation_error(obj, msg):
 def model_proc(model, metamodel):
     for c in model.connections:
         board = model.components.board
+        peripheral = c.peripheral.peripheral
         board_pins = [p.name for p in board.pins]
-        per_pins = [p.name for p in c.peripheral.pins]
+        per_pins = [p.name for p in peripheral.pins]
         # if c.peripheral not in model.components.peripherals:
         #     raise TextXSemanticError(
         #         f'Peripheral {c.peripheral.name} not defined in Bag of components!'
@@ -64,13 +65,13 @@ def model_proc(model, metamodel):
                 if pin_conn.boardPin not in board_pins:
                     raise_validation_error(
                         pin_conn,
-                        f'Board {c.board.name} does not have a pin '
+                        f'Board {board.name} does not have a pin '
                         f'named {pin_conn.boardPin}'
                     )
                 if pin_conn.peripheralPin not in per_pins:
                     raise_validation_error(
                         pin_conn,
-                        f'Peripheral {c.peripheral.name} does not have a '
+                        f'Peripheral {peripheral.name} does not have a '
                         f'pin named {pin_conn.peripheralPin}'
                     )
             elif ioconn.__class__.__name__ == 'SPIConnection':
@@ -90,13 +91,13 @@ def model_proc(model, metamodel):
                     if pc.boardPin not in board_pins:
                         raise_validation_error(
                             pc,
-                            f'Board {c.board.name} does not have a pin '
+                            f'Board {board.name} does not have a pin '
                             f'named {pc.boardPin}',
                         )
                     if pc.peripheralPin not in per_pins:
                         raise_validation_error(
                             pc,
-                            f'Peripheral {c.peripheral.name} does not have a '
+                            f'Peripheral {peripheral.name} does not have a '
                             f'pin named {pc.peripheralPin}'
                         )
             elif ioconn.__class__.__name__ == 'I2CConnection':
@@ -118,7 +119,7 @@ def model_proc(model, metamodel):
                     if pc.peripheralPin not in per_pins:
                         raise_validation_error(
                             pc,
-                            f'Peripheral {c.peripheral.name} does not have a '
+                            f'Peripheral {peripheral.name} does not have a '
                             f'pin named {pc.peripheralPin}'
                         )
 
@@ -134,7 +135,7 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
 
     mm.register_scope_providers(
         {
-            # "*.*": scoping_providers.FQN(),
+            "*.*": scoping_providers.FQN(),
             "*.*": scoping_providers.FQNImportURI(importAs=True),
             "Components.peripherals": scoping_providers.FQNGlobalRepo(
                 os.path.join(PERIPHERAL_MODEL_REPO_PATH, '*.hwd')
@@ -142,6 +143,7 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
             "Components.board": scoping_providers.FQNGlobalRepo(
                 os.path.join(BOARD_MODEL_REPO_PATH, '*.hwd')
             ),
+            # "Connection.peripheral": "^components.peripherals*"
         }
     )
 

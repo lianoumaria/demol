@@ -21,13 +21,12 @@ end
 Components
     board: ESP32Wroom32
     peripherals:
-        - SonarSRF04
-        - Mpl3115a2
-        - BME680
+        - SonarSRF04(MySonar)
+        - BME680(MyBME)
 end
 
 Connection
-    peripheral: SonarSRF04
+    peripheral: MySonar
     powerConnections:
         - gnd_1 -- gnd
         - power_5v -- vcc
@@ -42,24 +41,7 @@ Connection
 end
 
 Connection
-    peripheral: Mpl3115a2
-    powerConnections:
-        - gnd_1 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: i2c
-          slave_address: 0x78
-          pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
-    endpoint:
-	topic: "my_esp.sensors.distance.srf04_1"
-        type: Publisher
-end
-
-
-Connection
-    peripheral: BME680
+    peripheral: MyBME
     powerConnections:
         - gnd_1 -- gnd
         - power_5v -- vcc
