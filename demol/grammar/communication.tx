@@ -16,7 +16,8 @@ AMQPBroker:
     (
         ('host:' host=STRING)
         ('port:' port=INT)
-        ('vhost:' vhost=STRING)
+        ('ssl:' ssl=BOOL)?
+        ('vhost:' vhost=STRING)?
         ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
@@ -27,6 +28,7 @@ MQTTBroker:
     (
         ('host:' host=STRING)
         ('port:' port=INT)
+        ('ssl:' ssl=BOOL)?
         ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
@@ -37,21 +39,9 @@ RedisBroker:
     (
         ('host:' host=STRING)
         ('port:' port=INT)
+        ('ssl:' ssl=BOOL)?
         ('db:' db=INT)?
         ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
 ;
-
-Network:
-    "Network"
-	(
-	    ("ssid:" ssid=STRING)
-	    ("passwd:" passwd=STRING)
-	    ("address:" address=STRING)?
-	    ("channel:" channel=STRING)?
-    )#
-    "end"
-;
-
-

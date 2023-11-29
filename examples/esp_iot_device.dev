@@ -10,7 +10,7 @@ Network
     passwd: "guest"
 end
 
-Communication<MQTT>
+Broker<MQTT>
     host: "node.mqtt.local"
     port: 1885
     auth:
@@ -18,24 +18,30 @@ Communication<MQTT>
         password: "guest"
 end
 
-Connection
+Components
     board: ESP32Wroom32
+    peripherals:
+        - SonarSRF04
+        - Mpl3115a2
+        - BME680
+end
+
+Connection
     peripheral: SonarSRF04
     powerConnections:
         - gnd_1 -- gnd
         - power_5v -- vcc
     ioConnections:
         - type: gpio
-          pins: p_13 -- trigger
+          pin: p_13 -- trigger
         - type: gpio
-          pins: p_14 -- echo
+          pin: p_14 -- echo
     endpoint:
 	topic: "my_esp.sensors.distance.srf04_02"
         type: Publisher
 end
 
 Connection
-    board: ESP32Wroom32
     peripheral: Mpl3115a2
     powerConnections:
         - gnd_1 -- gnd
@@ -53,7 +59,6 @@ end
 
 
 Connection
-    board: ESP32Wroom32
     peripheral: BME680
     powerConnections:
         - gnd_1 -- gnd

@@ -14,7 +14,7 @@ METAMODEL_REPO_PATH=os.path.join(THIS_DIR_PATH, 'grammar')
 
 DEVICES_MODEL_REPO_PATH=os.getenv(
     "DEVICES_MODEL_REPO_PATH",
-    os.path.join(THIS_DIR_PATH, '..','models')
+    os.path.join(THIS_DIR_PATH, 'builtin_models')
 )
 
 BOARD_MODEL_REPO_PATH=os.getenv(

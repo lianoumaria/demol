@@ -19,25 +19,23 @@ def class_provider(name):
     return classes.get(name)
 
 
-def get_component_mm():
+def get_component_mm(global_repo: bool = False):
     # Get meta-model from language description
     mm= metamodel_from_file(
         os.path.join(METAMODEL_REPO_PATH, 'component.tx'),
         classes=class_provider,
         auto_init_attributes=True,
-        global_repository=True,
+        global_repository=global_repo,
         debug=False
     )
 
     mm.register_scope_providers(
         {
-            "*.*": scoping_providers.FQNImportURI(
-                importAs=True,
-            )
+            "*.*": scoping_providers.FQNImportURI(importAs=True),
         }
     )
+
     mm.register_obj_processors({
-        # EMPTY
     })
 
     return mm

@@ -26,13 +26,14 @@ class PowerPin(SClass):
 
 
 class IOPin(SClass):
-    def __init__(self, parent, funcs, name, number, vmin, vmax):
+    def __init__(self, parent, funcs, name, number, vmin, vmax, signalLevel):
         self.parent = parent
         self.funcs = funcs
         self.name = name
         self.number = number
         self.vmin = vmin
         self.vmax = vmax
+        self.signalLevel = signalLevel
 
 
 class GPIO(SClass):

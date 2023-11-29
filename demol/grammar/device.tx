@@ -10,6 +10,7 @@ DeviceModel:
     (
         metadata=Metadata
         network=Network
+        components=Components
         communication=CommunicationMiddleware
         connections+=Connection
     )#
@@ -21,15 +22,27 @@ Metadata:
         ('name:' name=STRING)
         ('description:' description=STRING)
         ('author:' author=STRING)
+        ('os:' os=OperatingSystem)
     )#
     'end'
+;
+
+Network:
+    "Network"
+	(
+	    ("ssid:" ssid=STRING)
+	    ("passwd:" passwd=STRING)
+	    ("address:" address=IP_ADDRESS)?
+	    ("channel:" channel=STRING)?
+    )#
+    "end"
 ;
 
 Components:
 	"Components"
 	(
-        'board: 'board=[Board:FQN|+m:component]
-        'peripherals:' '-' peripherals*=[Peripheral:FQN|+m:component]['-']
+        ('board:' board=[Board:FQN|+m:component])
+        ('peripherals:' '-' peripherals*=[Peripheral:FQN|+m:component]['-'])
     )#
     'end'
 ;
@@ -38,7 +51,6 @@ Components:
 Connection:
 	"Connection"
 	(
-	    ("board:" board=[Board:FQN|+m:component])  // Hanled by Model Processor
 	    ("peripheral:" peripheral=[Peripheral:FQN|+m:component]) // Handled by Model processor
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
@@ -60,7 +72,8 @@ IOConnection:
 GPIOConnection:
 	"type" ":"  type="gpio"
     ('name:' name=NID)?
-    ('pins:' pinConn=PinConnection)
+    (mode=GPIOMode)?
+    ('pin:' pinConn=PinConnection)
 ;
 
 GPIOMode:
@@ -75,29 +88,36 @@ SPIConnection:
 	"type" ":" type="spi"
     ('name:' name=NID)?
     ('pins:')
-        "mosi" ":" mosi=PinConnection
-        "miso" ":" miso=PinConnection
-        "sck" ":" sck=PinConnection
-        "cs" ":" cs=PinConnection
+    (
+        ("mosi" ":" mosi=PinConnection)
+        ("miso" ":" miso=PinConnection)
+        ("sck" ":" sck=PinConnection)
+        ("cs" ":" cs=PinConnection)
+    )#
 ;
 
 I2CConnection:
-    (
 	"type" ":" type="i2c"
+    (
     ('name:' name=NID)?
     ("slave_address:" "0x" slaveAddr=INT)
     ('pins:')
-        "sda" ":" sda=PinConnection
-        "scl" ":" scl=PinConnection
+    (
+        ("sda" ":" sda=PinConnection)
+        ("scl" ":" scl=PinConnection)
+    )#
     )#
 ;
 
 UARTConnection:
 	"type" ":" type="uart"
     ('name:' name=NID)?
-    "tx" ":" tx=PinConnection
-    "rx" ":" rx=PinConnection
-    "baudrate:" baudrate=INT
+    ('pins:')
+    (
+        ("tx" ":" tx=PinConnection)
+        ("rx" ":" rx=PinConnection)
+        ("baudrate:" baudrate=INT)
+    )#
 ;
 
 Endpoint:
@@ -110,7 +130,6 @@ Endpoint:
 EndpointType:
     "Publisher"     |
     "Subscriber"    |
-    "Consumer"      |
     "RPC"           |
     "Action"
 ;
