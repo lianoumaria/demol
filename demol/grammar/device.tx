@@ -55,7 +55,6 @@ Connection:
 	"Connection"
 	(
 	    ("peripheral:" peripheral=[PeripheralDef:FQN|~components.peripherals])
-	    //("peripheral:" peripheral=ID)
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
 	    ("endpoint:" endpoint=Endpoint)?

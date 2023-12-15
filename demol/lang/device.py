@@ -20,7 +20,7 @@ def class_provider(name):
 
 def raise_validation_error(obj, msg):
     raise TextXSemanticError(
-        f'[Validation Error]: {msg}',
+        f'{msg}',
         **get_location(obj)
     )
 
@@ -45,14 +45,16 @@ def model_proc(model, metamodel):
                 f'  {pconn.boardPin} -> {pconn.peripheralPin}'
             )
             if pconn.boardPin not in board_pins:
-                raise TextXSemanticError(
-                    f'Board {c.board.name} does not have a pin '
-                    'named {pconn.boardPin}'
+                raise_validation_error(
+                    pconn,
+                    f'Board {board.name} does not have a pin '
+                    f'named {pconn.boardPin}'
                 )
             if pconn.peripheralPin not in per_pins:
-                raise TextXSemanticError(
+                raise_validation_error(
+                    pconn,
                     f'Peripheral {c.peripheral.name} does not have a '
-                    'pin named {pconn.peripheralPin}'
+                    f'pin named {pconn.peripheralPin}'
                 )
 
         for ioconn in c.ioConns:

@@ -32,9 +32,9 @@ Connection
         - power_5v -- vcc
     ioConnections:
         - type: gpio
-          pins: p_13 -- trigger
+          pin: p_13 -- trigger
         - type: gpio
-          pins: p_14 -- echo
+          pin: p_14 -- echo
     endpoint:
 	topic: "my_wemos.sensors.distance.sonar"
 end
