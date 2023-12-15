@@ -51,7 +51,7 @@ if not os.path.exists(TMP_DIR):
 
 class DeMoLModel(BaseModel):
     name: str
-    text: str
+    model: str
     type: str = ''
 
 
@@ -89,10 +89,10 @@ async def validate_file(file: UploadFile = File(...),
 @api.post("/validate")
 async def validate(model: DeMoLModel,
                    api_key: str = Security(get_api_key)):
-    text = model.text
+    model_txt = model.model
     name = model.name
     mtype = model.type if model.type not in (None, '') else 'device'
-    if len(text) == 0:
+    if len(model_txt) == 0:
         return 404
     resp = {
         'status': 200,
@@ -110,7 +110,7 @@ async def validate(model: DeMoLModel,
         f'model_for_validation-{u_id}.{ext}'
     )
     with open(fpath, 'w') as f:
-        f.write(text)
+        f.write(model_txt)
     try:
         model = build_model(fpath)
         print('Model validation success!!')
