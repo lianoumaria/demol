@@ -1,3 +1,5 @@
+import common
+
 CommunicationMiddleware:
     AMQPBroker | MQTTBroker | RedisBroker
 ;
@@ -10,50 +12,36 @@ BrokerAuthPlain:
 ;
 
 AMQPBroker:
-    'Communication<AMQP>'
+    'Broker<AMQP>'
     (
         ('host:' host=STRING)
         ('port:' port=INT)
-        ('vhost:' vhost=STRING)
+        ('ssl:' ssl=BOOL)?
+        ('vhost:' vhost=STRING)?
         ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
 ;
 
 MQTTBroker:
-    'Communication<MQTT>'
+    'Broker<MQTT>'
     (
         ('host:' host=STRING)
         ('port:' port=INT)
+        ('ssl:' ssl=BOOL)?
         ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
 ;
 
 RedisBroker:
-    'Communication<Redis>'
+    'Broker<Redis>'
     (
         ('host:' host=STRING)
         ('port:' port=INT)
+        ('ssl:' ssl=BOOL)?
         ('db:' db=INT)?
         ('auth' ':' auth=BrokerAuth)?
     )#
     'end'
 ;
-
-Network:
-    "Network"
-	(
-	    ("ssid:" ssid=STRING)
-	    ("passwd:" passwd=STRING)
-	    ("address:" address=STRING)?
-	    ("channel:" channel=STRING)?
-    )#
-    "end"
-;
-
-
-ADDRESS_ID:
-	/([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/
-;
-

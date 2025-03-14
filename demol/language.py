@@ -6,7 +6,6 @@ from demol.lang import (
 )
 
 
-
 @language('demol-component', '*.hwd')
 def component_language():
     return get_component_mm()

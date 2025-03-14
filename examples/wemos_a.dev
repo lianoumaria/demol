@@ -1,6 +1,6 @@
 Metadata
-    name: "MyESP32Device"
-    description: "My ESP32 IoT device"
+    name: "MyWemosDevice_A"
+    description: "My WemosD1Mini IoT device"
     author: "klpanagi"
     os: RiotOS
 end
@@ -10,44 +10,46 @@ Network
     passwd: "guest"
 end
 
-Communication<MQTT>
+Broker<MQTT>
     host: "node.mqtt.local"
-    port: 1885
+    port: 1883
     auth:
         username: "guest"
         password: "guest"
 end
 
+Components
+    board: WemosD1Mini
+    peripherals:
+        - SonarSRF04(Sonar)
+        - WS281X(Ledstrip)
+end
+
 Connection
-    board: ESP32Wroom32
-    peripheral: SonarSRF04
+    peripheral: Sonar
     powerConnections:
         - gnd_1 -- gnd
         - power_5v -- vcc
     ioConnections:
         - type: gpio
-          pins: p_13 -- trigger
+          pin: p_13 -- trigger
         - type: gpio
-          pins: p_14 -- echo
+          pin: p_14 -- echo
     endpoint:
-	topic: "my_esp.sensors.srf04"
-        type: Publisher
+	topic: "my_wemos.sensors.distance.sonar"
 end
 
-
 Connection
-    board: ESP32Wroom32
-    peripheral: BME680
+    peripheral: Ledstrip
     powerConnections:
         - gnd_1 -- gnd
         - power_5v -- vcc
     ioConnections:
         - type: i2c
-          slave_address: 0x76
+          slave_address: 0x78
           pins:
               sda: p_21 -- sda
               scl: p_22 -- scl
     endpoint:
-        topic: "my_esp.sensors.bme680"
-        type: Publisher
+        topic: "my_wemos.actuators.visual.ledstrip"
 end

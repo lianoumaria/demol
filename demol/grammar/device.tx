@@ -3,12 +3,14 @@
 
 import component
 import communication
+import common
 
 DeviceModel:
     imports*=Import
     (
         metadata=Metadata
         network=Network
+        components=Components
         communication=CommunicationMiddleware
         connections+=Connection
     )#
@@ -25,12 +27,34 @@ Metadata:
     'end'
 ;
 
+Network:
+    "Network"
+	(
+	    ("ssid:" ssid=STRING)
+	    ("passwd:" passwd=STRING)
+	    ("address:" address=IP_ADDRESS)?
+	    ("channel:" channel=STRING)?
+    )#
+    "end"
+;
+
+Components:
+	"Components"
+	(
+        ('board:' board=[Board:FQN|+m:component])
+        ('peripherals:' '-' peripherals*=PeripheralDef['-'])
+    )#
+    'end'
+;
+
+PeripheralDef:
+    peripheral=[Peripheral:FQN|+m:component] '(' name=ID ')'
+;
 
 Connection:
 	"Connection"
 	(
-	    ("board:" board=[Board:FQN|+m:component])  // Hanled by Model Processor
-	    ("peripheral:" peripheral=[Peripheral:FQN|+m:component]) // Handled by Model processor
+	    ("peripheral:" peripheral=[PeripheralDef:FQN|~components.peripherals])
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
 	    ("endpoint:" endpoint=Endpoint)?
@@ -51,7 +75,8 @@ IOConnection:
 GPIOConnection:
 	"type" ":"  type="gpio"
     ('name:' name=NID)?
-    ('pins:' pinConn=PinConnection)
+    (mode=GPIOMode)?
+    ('pin:' pinConn=PinConnection)
 ;
 
 GPIOMode:
@@ -66,42 +91,48 @@ SPIConnection:
 	"type" ":" type="spi"
     ('name:' name=NID)?
     ('pins:')
-        "mosi" ":" mosi=PinConnection
-        "miso" ":" miso=PinConnection
-        "sck" ":" sck=PinConnection
-        "cs" ":" cs=PinConnection
+    (
+        ("mosi" ":" mosi=PinConnection)
+        ("miso" ":" miso=PinConnection)
+        ("sck" ":" sck=PinConnection)
+        ("cs" ":" cs=PinConnection)
+    )#
 ;
 
 I2CConnection:
-    (
 	"type" ":" type="i2c"
+    (
     ('name:' name=NID)?
     ("slave_address:" "0x" slaveAddr=INT)
     ('pins:')
-        "sda" ":" sda=PinConnection
-        "scl" ":" scl=PinConnection
+    (
+        ("sda" ":" sda=PinConnection)
+        ("scl" ":" scl=PinConnection)
+    )#
     )#
 ;
 
 UARTConnection:
 	"type" ":" type="uart"
     ('name:' name=NID)?
-    "tx" ":" tx=PinConnection
-    "rx" ":" rx=PinConnection
-    "baudrate:" baudrate=INT
+    ('pins:')
+    (
+        ("tx" ":" tx=PinConnection)
+        ("rx" ":" rx=PinConnection)
+        ("baudrate:" baudrate=INT)
+    )#
 ;
 
 Endpoint:
 	(
         ("topic:" topic=STRING)
-        ("type:" type=EndpointType)
+        ("type:" type=EndpointType)?
     )#
 ;
 
 EndpointType:
     "Publisher"     |
     "Subscriber"    |
-    "Consumer"      |
     "RPC"           |
     "Action"
 ;
@@ -110,20 +141,3 @@ OperatingSystem:
     'Raspbian' |
     'RiotOS'
 ;
-
-NID: /(.*?)\n/;
-// FQN: ID+['.'];
-FQN: ID('.'ID)*;
-FQNI: ID+['.']('.*')?;
-Import: 'import' importURI=FQNI ('as' name=ID)?;
-
-Description: /\#(.*?)$/;
-
-// Special rule for comments. Comments start with //
-
-// Comments
-Comment: CommentLine | CommentBlock ;
-
-CommentLine: /\/\/.*?$/;
-
-CommentBlock: /\/\*(.|\n)*?\*\//;

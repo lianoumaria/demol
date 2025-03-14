@@ -1,0 +1,23 @@
+IP_ADDRESS:
+	/([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}/
+;
+
+NID:
+	/(.*?)\n/
+;
+
+FQN: ID+['.'];
+FQNI: ID+['.']('.*')?;
+Import: 'import' importURI=FQNI ('as' name=ID)?;
+
+Description: /\#(.*?)$/;
+
+// Special rule for comments. Comments start with //
+
+// Comments
+Comment: CommentLine | CommentBlock ;
+
+CommentLine: /\/\/.*?$/;
+
+CommentBlock: /\/\*(.|\n)*?\*\//;
+

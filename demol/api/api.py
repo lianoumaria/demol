@@ -15,7 +15,7 @@ from fastapi.security import APIKeyHeader
 
 from demol.lang import build_model
 
-API_KEY = os.getenv("API_KEY", "Cslq4QfG0A4vNZzjOf1miz7v")
+API_KEY = os.getenv("API_KEY", "API_KEY")
 
 api_keys = [
     API_KEY
@@ -51,8 +51,8 @@ if not os.path.exists(TMP_DIR):
 
 class DeMoLModel(BaseModel):
     name: str
-    type: str
-    text: str
+    model: str
+    type: str = ''
 
 
 @api.post("/validate/file")
@@ -89,16 +89,16 @@ async def validate_file(file: UploadFile = File(...),
 @api.post("/validate")
 async def validate(model: DeMoLModel,
                    api_key: str = Security(get_api_key)):
-    text = model.text
+    model_txt = model.model
     name = model.name
-    mtype = model.type
-    if len(text) == 0:
+    mtype = model.type if model.type not in (None, '') else 'device'
+    if len(model_txt) == 0:
         return 404
     resp = {
         'status': 200,
         'message': ''
     }
-    if mtype == 'component':
+    if mtype == 'peripheral':
         ext = 'hwd'
     elif mtype == 'device':
         ext = 'dev'
@@ -110,7 +110,7 @@ async def validate(model: DeMoLModel,
         f'model_for_validation-{u_id}.{ext}'
     )
     with open(fpath, 'w') as f:
-        f.write(text)
+        f.write(model_txt)
     try:
         model = build_model(fpath)
         print('Model validation success!!')
