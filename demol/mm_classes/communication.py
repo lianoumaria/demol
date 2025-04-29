@@ -12,8 +12,9 @@ class BrokerAuthPlain:
 
 
 class AMQPBroker:
-    def __init__(self, parent, host, port, ssl, vhost, auth):
+    def __init__(self, parent, name, host, port, ssl, vhost, auth, *args, **kwargs):
         self.parent = parent
+        self.name = name
         self.host = host
         self.port = port
         self.ssl = ssl
@@ -30,8 +31,9 @@ class AMQPBroker:
 
 
 class RedisBroker:
-    def __init__(self, parent, host, port, ssl, db, auth):
+    def __init__(self, parent, name, host, port, ssl, db, auth,  *args, **kwargs):
         self.parent = parent
+        self.name = name
         self.host = host
         self.port = port
         self.ssl = ssl
@@ -48,8 +50,9 @@ class RedisBroker:
 
 
 class MQTTBroker:
-    def __init__(self, parent, host, port, ssl, auth):
+    def __init__(self, parent, name, host, port, ssl, auth,  *args, **kwargs):
         self.parent = parent
+        self.name = name
         self.host = host
         self.port = port
         self.ssl = ssl

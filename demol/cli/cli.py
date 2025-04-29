@@ -1,6 +1,6 @@
 import click
 from demol.lang import build_model
-from demol.transformations import device_to_plantuml, model2json
+from demol.transformations import device_to_plantuml, m2t_json
 
 
 @click.group("demol")

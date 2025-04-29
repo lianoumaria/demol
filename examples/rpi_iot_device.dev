@@ -16,10 +16,10 @@ Network
     passwd: "guest"
 end
 
-Broker<MQTT>
+Broker<MQTT> MyMqttBroker
     host: "node.mqtt.local"
     port: 1883
-    ssl: false
+    ssl: False
     auth:
         username: "guest"
         password: "guest"

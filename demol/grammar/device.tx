@@ -11,7 +11,7 @@ DeviceModel:
         metadata=Metadata
         network=Network
         components=Components
-        communication=CommunicationMiddleware
+        (broker=MessageBroker)?
         connections+=Connection
     )#
 ;

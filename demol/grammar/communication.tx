@@ -1,47 +1,64 @@
-import common
+import utils
 
-CommunicationMiddleware:
-    AMQPBroker | MQTTBroker | RedisBroker
-;
+MessageBroker: AMQPBroker | MQTTBroker | RedisBroker;
 
-BrokerAuth: BrokerAuthPlain;
 
-BrokerAuthPlain:
+Authentication: AuthPlain | AuthApiKey | AuthCert;
+
+AuthPlain:
     'username' ':' username=STRING
     'password' ':' password=STRING
 ;
 
+AuthApiKey:
+    'key' ':' key=STRING
+;
+
+AuthCert:
+    ('cert' ':' cert=STRING) | ('certPath' ':' certPath=STRING)
+;
+
 AMQPBroker:
-    'Broker<AMQP>'
+    'Broker<AMQP>' name=ID
     (
         ('host:' host=STRING)
         ('port:' port=INT)
-        ('ssl:' ssl=BOOL)?
         ('vhost:' vhost=STRING)?
-        ('auth' ':' auth=BrokerAuth)?
+        ('topicExchange:' topicE=STRING)?
+        ('rpcExchange:' rpcE=STRING)?
+        ('ssl' ':' ssl=BOOL)?
+        ('auth' ':' auth=Authentication)?
     )#
     'end'
 ;
 
 MQTTBroker:
-    'Broker<MQTT>'
+    'Broker<MQTT>' name=ID
     (
         ('host:' host=STRING)
         ('port:' port=INT)
-        ('ssl:' ssl=BOOL)?
-        ('auth' ':' auth=BrokerAuth)?
+        ('ssl' ':' ssl=BOOL)?
+        ('basePath:' basePath=STRING)?
+        ('webPath:' webPath=STRING)?
+        ('webPort:' webPort=INT)?
+        ('auth' ':' auth=Authentication)?
     )#
     'end'
 ;
 
 RedisBroker:
-    'Broker<Redis>'
+    'Broker<Redis>' name=ID
     (
         ('host:' host=STRING)
         ('port:' port=INT)
-        ('ssl:' ssl=BOOL)?
         ('db:' db=INT)?
-        ('auth' ':' auth=BrokerAuth)?
+        ('ssl' ':' ssl=BOOL)?
+        ('auth' ':' auth=Authentication)?
     )#
     'end'
 ;
+
+IPv4_ADDR: /([0-9]{1,3}\.){3}[0-9]{1,3}/;
+IPv6_ADDR: /([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}/;
+IP_ADDR: IPv4_ADDR | IPv6_ADDR;
+MAC_ADDR: /([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})/;

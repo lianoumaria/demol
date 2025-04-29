@@ -13,6 +13,9 @@ CUSTOM_CLASSES = [
 ]
 
 
+GRAMMAR_BULTINS = {}
+
+
 def class_provider(name):
     classes = dict(map(lambda x: (x.__name__, x), CUSTOM_CLASSES))
     return classes.get(name)
@@ -132,6 +135,7 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
         classes=class_provider,
         auto_init_attributes=True,
         global_repository=global_repo,
+        textx_tools_support=True,
         debug=debug
     )
 
@@ -145,7 +149,7 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
             "Components.board": scoping_providers.FQNGlobalRepo(
                 os.path.join(BOARD_MODEL_REPO_PATH, '*.hwd')
             ),
-            # "Connection.peripheral": "^components.peripherals*"
+
         }
     )
 
