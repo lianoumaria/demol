@@ -128,7 +128,6 @@ def model2json(model, output: str = "model.json") -> Dict:
     conns = []
 
     for conn in model.connections:
-        setattr(conn, 'board', model.components.board)
         c = conn2dict(conn)
         conns.append(c)
 

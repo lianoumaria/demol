@@ -31,6 +31,9 @@ def raise_validation_error(obj, msg):
 def model_proc(model, metamodel):
     for c in model.connections:
         board = model.components.board
+        # It is useful to set the board for the connection instances to easily
+        # navigate later on in M2M and M2T transformations.
+        setattr(c, 'board', model.components.board)
         peripheral = c.peripheral.ref
         board_pins = [p.name for p in board.pins]
         per_pins = [p.name for p in peripheral.pins]

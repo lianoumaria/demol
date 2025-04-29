@@ -1,6 +1,6 @@
 import click
 from demol.lang import build_model
-from demol.transformations import device_to_plantuml, m2t_device_json
+from demol.transformations import m2t_device_plantuml, m2t_device_json
 
 
 @click.group("demol")
@@ -28,7 +28,7 @@ def gen(ctx, generator, model_filepath):
     if generator == 'plantuml':
         print(f'[*] Running Generator [PlanUML] for model {model_filepath}')
         model = build_model(model_filepath)
-        a = device_to_plantuml(model)
+        a = m2t_device_plantuml(model)
     elif generator == 'json':
         print(f'[*] Running Generator [JSON] for model {model_filepath}')
         model = build_model(model_filepath)
