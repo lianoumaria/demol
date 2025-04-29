@@ -5,12 +5,15 @@ from textx import get_location, TextXSemanticError
 from demol.definitions import *
 
 from demol.mm_classes import (
-    Metadata, Network, BrokerAuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
+    Metadata, Network, AuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
 )
 
 CUSTOM_CLASSES = [
-    Metadata, Network, BrokerAuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
+    Metadata, Network, AuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
 ]
+
+
+GRAMMAR_BULTINS = {}
 
 
 def class_provider(name):
@@ -28,7 +31,10 @@ def raise_validation_error(obj, msg):
 def model_proc(model, metamodel):
     for c in model.connections:
         board = model.components.board
-        peripheral = c.peripheral.peripheral
+        # It is useful to set the board for the connection instances to easily
+        # navigate later on in M2M and M2T transformations.
+        setattr(c, 'board', model.components.board)
+        peripheral = c.peripheral.ref
         board_pins = [p.name for p in board.pins]
         per_pins = [p.name for p in peripheral.pins]
         # if c.peripheral not in model.components.peripherals:
@@ -132,6 +138,7 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
         classes=class_provider,
         auto_init_attributes=True,
         global_repository=global_repo,
+        textx_tools_support=True,
         debug=debug
     )
 
@@ -145,7 +152,7 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
             "Components.board": scoping_providers.FQNGlobalRepo(
                 os.path.join(BOARD_MODEL_REPO_PATH, '*.hwd')
             ),
-            # "Connection.peripheral": "^components.peripherals*"
+
         }
     )
 

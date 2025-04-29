@@ -3,7 +3,7 @@
 
 import component
 import communication
-import common
+import utils
 
 DeviceModel:
     imports*=Import
@@ -11,7 +11,7 @@ DeviceModel:
         metadata=Metadata
         network=Network
         components=Components
-        communication=CommunicationMiddleware
+        (broker=MessageBroker)?
         connections+=Connection
     )#
 ;
@@ -32,7 +32,7 @@ Network:
 	(
 	    ("ssid:" ssid=STRING)
 	    ("passwd:" passwd=STRING)
-	    ("address:" address=IP_ADDRESS)?
+	    ("address:" address=IP_ADDR)?
 	    ("channel:" channel=STRING)?
     )#
     "end"
@@ -48,7 +48,7 @@ Components:
 ;
 
 PeripheralDef:
-    peripheral=[Peripheral:FQN|+m:component] '(' name=ID ')'
+    ref=[Peripheral:FQN|+m:component] '(' name=ID ')'
 ;
 
 Connection:
@@ -74,7 +74,7 @@ IOConnection:
 
 GPIOConnection:
 	"type" ":"  type="gpio"
-    ('name:' name=NID)?
+    ('name:' name=ID)?
     (mode=GPIOMode)?
     ('pin:' pinConn=PinConnection)
 ;
@@ -89,7 +89,7 @@ GPIOMode:
 
 SPIConnection:
 	"type" ":" type="spi"
-    ('name:' name=NID)?
+    ('name:' name=ID)?
     ('pins:')
     (
         ("mosi" ":" mosi=PinConnection)
@@ -102,7 +102,7 @@ SPIConnection:
 I2CConnection:
 	"type" ":" type="i2c"
     (
-    ('name:' name=NID)?
+    ('name:' name=ID)?
     ("slave_address:" "0x" slaveAddr=INT)
     ('pins:')
     (
@@ -114,7 +114,7 @@ I2CConnection:
 
 UARTConnection:
 	"type" ":" type="uart"
-    ('name:' name=NID)?
+    ('name:' name=ID)?
     ('pins:')
     (
         ("tx" ":" tx=PinConnection)
