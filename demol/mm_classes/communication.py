@@ -1,4 +1,4 @@
-class BrokerAuthPlain:
+class AuthPlain:
     def __init__(self, parent, username, password):
         self.parent = parent
         self.username = username

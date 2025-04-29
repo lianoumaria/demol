@@ -50,7 +50,7 @@ def peripheral2dict(peripheral):
 def conn2dict(conn):
     # print(conn.__dict__)
     board = board2dict(conn.board)
-    peripheral = peripheral2dict(conn.peripheral)
+    peripheral = peripheral2dict(conn.peripheral.ref)
     endpoint = {
         'topic': conn.endpoint.topic,
         'type': conn.endpoint.type,
@@ -120,22 +120,24 @@ def conn2dict(conn):
     }
 
 
-def model2json(model) -> Dict:
+def model2json(model, output: str = "model.json") -> Dict:
     # print(PRIMITIVE_PYTHON_TYPES)
     metadata = model.metadata.to_dict()
     network = model.network.to_dict()
-    comm = model.communication.to_dict()
+    comm = model.broker.to_dict()
     conns = []
 
     for conn in model.connections:
+        setattr(conn, 'board', model.components.board)
         c = conn2dict(conn)
         conns.append(c)
 
-    data = {
+    _json = {
         'metadata': metadata,
         'network': network,
         'communication': comm,
         'connections': conns
     }
-    with open('model.json', 'w') as f:
-        json.dump(data, f)
+    with open(output, 'w') as f:
+        json.dump(_json, f)
+    return _json

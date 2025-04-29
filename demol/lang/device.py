@@ -5,11 +5,11 @@ from textx import get_location, TextXSemanticError
 from demol.definitions import *
 
 from demol.mm_classes import (
-    Metadata, Network, BrokerAuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
+    Metadata, Network, AuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
 )
 
 CUSTOM_CLASSES = [
-    Metadata, Network, BrokerAuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
+    Metadata, Network, AuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
 ]
 
 
@@ -31,7 +31,7 @@ def raise_validation_error(obj, msg):
 def model_proc(model, metamodel):
     for c in model.connections:
         board = model.components.board
-        peripheral = c.peripheral.peripheral
+        peripheral = c.peripheral.ref
         board_pins = [p.name for p in board.pins]
         per_pins = [p.name for p in peripheral.pins]
         # if c.peripheral not in model.components.peripherals:
