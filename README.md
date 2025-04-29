@@ -3,7 +3,7 @@
 <!-- HEADER STYLE: CLASSIC -->
 <div align="center">
 
-![image](https://github.com/robotics-4-all/demol/assets/demol.png)
+![image](https://github.com/robotics-4-all/demol/blob/main/assets/demol_logo.png)
 
 
 <em></em>
