@@ -1,0 +1,25 @@
+Sensor TFMini
+    vcc: 5V
+    msg: Distance
+    pins:
+    -power:
+        name: GND
+        number: 1
+        type: GND
+    -power:
+        name: VCC
+        number: 2
+        type: 5V
+    -io_pin:
+        functions: rx-0
+        name: RXD
+        number: 3
+        //Maybe signalLevel here is 3V3 even though it is supplied with 5V
+    -io_pin:
+        functions: tx-0
+        name: TXD
+        number: 4
+        //Maybe signalLevel here is 3V3 even though it is supplied with 5V
+    attributes:
+    -serial_port : str = "/dev/ttyAMA0"
+end

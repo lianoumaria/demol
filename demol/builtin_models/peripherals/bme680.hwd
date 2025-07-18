@@ -1,16 +1,14 @@
-// RIOT Configuration for SRF04 (HC-SR04) ultra sonic range finder
-
 Sensor BME680
     vcc: 5V
     msg: Env
     pins:
         - power:
-            name: vcc
+            name: VCC
             number: 1
             type: 5V
         - power:
-            name: gnd
-            number: 4
+            name: GND
+            number: 5
             type: GND
         - io_pin:
             functions: sda-0
@@ -20,4 +18,17 @@ Sensor BME680
             functions: scl-0
             name: scl
             number: 3
+    attributes:
+        -poll_period : int = 10 //Sampling rate equivalent
+        -humidity_oversample : int = 2
+        -pressure_oversample : int = 4
+        -temperature_oversample : int = 8
+        -filter_size : int = 3
+        -gas_status : str = "ENABLE_GAS_MEAS"//Maybe inside the constructor there will be some enumerations
+        -heater_temp : int = 320
+        -heater_duration : int = 150
+        -heater_profile : int = 0   
+    constraints:
+        -max_frequency : 20 hz
+    powerConsumption: 3 mW
 end

@@ -4,10 +4,13 @@ import os
 
 THIS_DIR_PATH = os.path.dirname(__file__)
 
-REPO_PATH = os.path.abspath(os.getcwd())
-CODE_PATH = REPO_PATH + "/demol"
-META_MODELS = CODE_PATH + "/grammar/"
-TEMPLATES = CODE_PATH + "/templates/"
+#CURRENT_PATH = os.path.abspath(os.getcwd())
+REPO_PATH = os.path.dirname(THIS_DIR_PATH)
+CODE_PATH = os.path.join(REPO_PATH, "demol") #+ "/demol"
+META_MODELS = os.path.join(CODE_PATH + "grammar")
+CLASS_TEMPLATES = os.path.join(CODE_PATH , "templates", "sensor_classes")
+TEMPLATES = os.path.join(CODE_PATH , "templates", "riot_old")
+TEMPLATES_RASPI = os.path.join(CODE_PATH , "templates", "raspi_new")
 RIOT_SOURCE_DIRNAME = "src"
 DIAGRAMS_DIRNAME = 'diagrams'
 METAMODEL_REPO_PATH=os.path.join(THIS_DIR_PATH, 'grammar')

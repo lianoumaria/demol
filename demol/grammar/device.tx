@@ -22,7 +22,7 @@ Metadata:
         ('name:' name=STRING)
         ('description:' description=STRING)
         ('author:' author=STRING)
-        ('os:' os=OperatingSystem)
+        ('os:' os=OperatingSystem)?
     )#
     'end'
 ;

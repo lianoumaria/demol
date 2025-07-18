@@ -1,0 +1,23 @@
+Sensor HW006
+    vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα.. 
+    //ίσως αλλάξω τις προδιαγραφές ώτα να δέχονται για input range
+    msg: Tracker
+    pins:
+    -io_pin:
+        functions: gpio
+        name: OUT
+        number: 1
+    -power:
+        name: VCC
+        number: 2
+        type: 5V
+    -power:
+        name: GND
+        number: 3
+        type: GND
+    attributes:
+    -frequency: int = 100 //Hz
+    constraints:
+    -max_frequency : 3 khz
+    powerConsumption: 100 mW
+end    

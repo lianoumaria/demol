@@ -1,0 +1,36 @@
+Sensor VL53L1X
+    vcc: 3V3 //According to the datasheet it is 2.6-5.5V
+    msg: Distance
+    pins :
+    -power://Maybe gpio
+        name: VDD
+        number: 1
+        type: 2.8V 
+    -power:
+        name: VIN
+        number: 2
+        type: 3V3
+    -power:
+        name: GND
+        number: 3
+        type: GND
+    -io_pin:
+        functions: sda-0
+        name: SDA 
+        number: 4
+    -io_pin:
+        functions: scl-0
+        name: SCL 
+        number: 5
+    -io_pin:
+        functions: gpio
+        name: XSHUT
+        number: 6
+    -io_pin:
+        functions: gpio
+        name: GPIO1
+        number: 7
+    constraints:
+        -max_distance : 300.0 cm
+        -min_distance : 0.0 cm
+end

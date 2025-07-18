@@ -37,30 +37,43 @@ def gen_src_riot(connection_model, device_models, out_dir):
     num_of_peripherals_tmp = len(connection_model.connections)
 
     # Name of board
-    board_name_tmp = connection_model.connections[0].board.device
+    board_name_tmp = connection_model.connections[0].board.name
     if board_name_tmp == 'esp32_wroom_32':
         board_name_tmp = 'esp32-wroom-32'
     elif board_name_tmp == 'wemos_d1_mini':
         board_name_tmp = 'esp8266-esp-12x'
 
     # Wifi credentials
-    wifi_ssid_tmp = connection_model.connections[0].com_endpoint.wifi_ssid[:-1]
-    wifi_passwd_tmp = connection_model.connections[0].com_endpoint.wifi_passwd[:-1]
+    #wifi_ssid_tmp = connection_model.connections[0].com_endpoint.wifi_ssid[:-1]
+    #wifi_passwd_tmp = connection_model.connections[0].com_endpoint.wifi_passwd[:-1]
+    wifi_ssid_tmp = connection_model.network.ssid[:-1]
+    wifi_passwd_tmp = connection_model.network.passwd[:-1]
 
     for i in range(len(connection_model.connections)):
 
         # Parse info from the created models
-        address_tmp = connection_model.connections[i].com_endpoint.addr
+        # Network has address
+        address_tmp = connection_model.network.address
         id_tmp[i] = i + 1
-        mqtt_port = connection_model.connections[i].com_endpoint.port
-        peripheral_name_tmp[i] = connection_model.connections[i].peripheral.device
-        peripheral_type_tmp[peripheral_name_tmp[i]] = device_models[peripheral_name_tmp[i]].type
-        module_tmp[i] = connection_model.connections[i].peripheral.device
-        topic_tmp[i] = connection_model.connections[i].com_endpoint.topic[:-1]
+        # Broker's port
+        mqtt_port = connection_model.broker.port
+        # Peripheral's have attribute name but not device. This may be a mistake
+        peripheral_name_tmp[i] = connection_model.connections[i].peripheral.name
+        # For each name we get if it is a sensor or an actuator
+        peripheral_type_tmp[peripheral_name_tmp[i]] = type(connection_model.connections[i].peripheral.ref).__name__
+        # Until now this variable holds the same value as peripheral_name_tmp[i]
+        module_tmp[i] = connection_model.connections[i].peripheral.ref.name
+        print(module_tmp)
+        # From the Endpoint or the broker
+        topic_tmp[i] = connection_model.connections[i].endpoint.topic[:-1]
 
         # Publishing frequency (always convert to Hz)
         # If not given, default value is 1Hz
-        if( hasattr(connection_model.connections[i].com_endpoint.freq, 'val') ):
+        # I don't know if the com_.. stands for communication or component
+        #if( hasattr(connection_model.connections[i].endpoint.freq, 'val') ):
+        endpoint = connection_model.connections[i].endpoint
+
+        if hasattr(endpoint, 'freq') and hasattr(endpoint.freq, 'val'):
             frequency_tmp[i] = connection_model.connections[i].com_endpoint.freq.val
             frequency_unit = connection_model.connections[i].com_endpoint.freq.unit
             if (frequency_unit == "khz"):
@@ -75,20 +88,22 @@ def gen_src_riot(connection_model, device_models, out_dir):
         # Hardware connection args
         args_tmp[i] = {}
 
-        if (connection_model.connections[i].hw_conns[0].type == 'gpio'):
-            for hw_conn in connection_model.connections[i].hw_conns:
-                args_tmp[i][hw_conn.peripheral_int] = (hw_conn.board_int).split("_",1)[1]
-        elif (connection_model.connections[i].hw_conns[0].type == 'i2c'):
-            args_tmp[i]["sda"] = (connection_model.connections[i].hw_conns[0].board_int[0]).split("_",1)[1]
-            args_tmp[i]["scl"] = (connection_model.connections[i].hw_conns[0].board_int[1]).split("_",1)[1]
-            args_tmp[i]["slave_address"] = connection_model.connections[i].hw_conns[0].slave_addr
-            if(connection_model.connections[i].peripheral.device == 'bme680'):
+        if (connection_model.connections[i].ioConns[0].type == 'gpio'):
+            for ioConns in connection_model.connections[i].ioConns:
+                args_tmp[i][ioConns.pinConn.peripheralPin] = (ioConns.pinConn.boardPin).split("_",1)[1]
+        elif (connection_model.connections[i].ioConns[0].type == 'i2c'):
+            args_tmp[i]["sda"] = (connection_model.connections[i].ioConns[0].sda.boardPin).split("_",1)[1]
+            args_tmp[i]["scl"] = (connection_model.connections[i].ioConns[0].scl.boardPin).split("_",1)[1]
+            args_tmp[i]["slave_address"] = connection_model.connections[i].ioConns[0].slaveAddr
+            if(connection_model.connections[i].peripheral.ref.name == 'bme680'):
                 module_tmp[i] = module_tmp[i] + '_i2c'
 
     # Check if a template exists for each given peripheral
     all_tmpl_exist = True
     for peripheral in peripheral_name_tmp.values():
-        file = TEMPLATES + peripheral + '.c.tmpl'
+        tmpl_name = peripheral.ref.name + '.c.tmpl'
+        file = os.path.join(TEMPLATES , tmpl_name)
+        print(f"Looking for tempalte named: {file}")
         if os.path.isfile(file) == False:
             print("No template for peripheral " + peripheral + " found!")
             all_tmpl_exist = False
