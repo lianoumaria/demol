@@ -10,7 +10,7 @@ Network
     passwd: "guest"
 end
 
-Broker<MQTT>
+Broker<MQTT> MyMqttBroker
     host: "node.mqtt.local"
     port: 1883
     auth:
@@ -28,13 +28,13 @@ end
 Connection
     peripheral: Sonar
     powerConnections:
-        - gnd_1 -- gnd
+        - gnd -- gnd
         - power_5v -- vcc
     ioConnections:
         - type: gpio
-          pin: p_13 -- trigger
+          pin: d3 -- trigger
         - type: gpio
-          pin: p_14 -- echo
+          pin: d4 -- echo
     endpoint:
 	topic: "my_wemos.sensors.distance.sonar"
 end
@@ -42,14 +42,14 @@ end
 Connection
     peripheral: Ledstrip
     powerConnections:
-        - gnd_1 -- gnd
+        - gnd -- gnd
         - power_5v -- vcc
     ioConnections:
         - type: i2c
           slave_address: 0x78
           pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
+              sda: d2 -- data_in
+              scl: d1 -- data_out
     endpoint:
         topic: "my_wemos.actuators.visual.ledstrip"
 end
