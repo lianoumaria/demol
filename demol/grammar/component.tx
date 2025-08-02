@@ -211,7 +211,8 @@ SensorMsgType:
     "Env"           |
     "Acceleration"  |
     "IMU"           |
-    "Tracker"
+    "Tracker"	    |
+    "ADC"
 ;
 
 ActuatorMsgType:
