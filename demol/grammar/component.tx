@@ -280,3 +280,8 @@ DistanceUnit:
 PowerUnit:
 	"W" | "mW" | "uW"
 ;
+
+OBJECT: 
+	INT | STRING | FLOAT | BOOL 
+;
+
