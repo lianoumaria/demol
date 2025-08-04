@@ -1,0 +1,135 @@
+Sensor ADC_Differential_Pi
+    vcc: 5V
+    msg: ADC
+    pins:
+        -power:
+            name: VCC
+            number: 1
+            type: 5V
+        -power:
+            name: GND
+            number: 2
+            type: GND
+        -io_pin:
+            functions: sda-1
+            name: SDA
+            number: 3
+            vmin: 0
+            vmax: 5
+            signalLevel: 3.3
+        -io_pin:
+            functions: scl-1
+            name: SCL
+            number: 4
+            vmin: 0
+            vmax: 5
+            signalLevel: 3.3
+        -io_pin:
+            functions: adc
+            name: CH1_PLUS
+            number: 5
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH1_MINUS
+            number: 6
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH2_PLUS
+            number: 7
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH2_MINUS
+            number: 8
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH3_PLUS
+            number: 9
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH3_MINUS
+            number: 10
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH4_PLUS
+            number: 11
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH4_MINUS
+            number: 12
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH5_PLUS
+            number: 13
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH5_MINUS
+            number: 14
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH6_PLUS
+            number: 15
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH6_MINUS
+            number: 16
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH7_PLUS
+            number: 17
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH7_MINUS
+            number: 18
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH8_PLUS
+            number: 19
+            //vmin: -2.048
+            vmax: 2.048
+        -io_pin:
+            functions: adc
+            name: CH8_MINUS
+            number: 20
+            //vmin: -2.048
+            vmax: 2.048
+    attributes:
+        -num_channels: int = 8 //This attribute is fixed
+        -resolution: list = [12, 14, 16, 18]//bit_mode
+        -gain: list = [1, 2, 4, 8]//pga
+        -gain: dict = {num_channels: int = 8,voltage_reference: float = 2.048}
+        -voltage_reference: float = 2.048
+        //Specific channel should be chosen in the device model
+    constraints:
+        -max_frequency: 240 hz
+    powerConsumption: 25 mW
+    piTpl: "adc_differential_pi.tmpl"
+    ioVcc: 3V3
+end
