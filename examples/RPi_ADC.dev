@@ -13,7 +13,7 @@ Components
         - TFMini(MyTFMini)
         - BME680(MyBME)
         - SRF05(MySRF)
-        - ADC_Differential_Pi(MyADC)
+        - ADCDifferentialPi(MyADC)
 end
 
 Network

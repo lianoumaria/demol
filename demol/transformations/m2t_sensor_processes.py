@@ -37,6 +37,14 @@ host = ""
 port = 0
 constraints = {}
 
+def convert_DictAttribute_to_dict(attribute):
+    temp_dict = {}
+    for item in attribute.items:
+        if item.__class__.__name__ == "DictAttribute":
+            temp_dict[item.name] = convert_DictAttribute_to_dict(item)
+        else:
+            temp_dict[item.name] = item.default
+    return temp_dict
 
 def get_info(device_model, component_models, outputDir):
     # device_model is the .dev (parsed file) 
@@ -82,7 +90,14 @@ def get_info(device_model, component_models, outputDir):
         
         attr[i] = {}
         for attribute in device_model.connections[i].peripheral.ref.attributes:
-            attr[i] = attr[i] | {attribute.name: attribute.default}
+            if attribute.__class__.__name__ == "DictAttribute":
+                temp_dict = convert_DictAttribute_to_dict(attribute)
+                '''temp_dict = {}
+                for item in attribute.items:
+                    temp_dict[item.name] = item.default'''
+                attr[i] = attr[i] | {attribute.name: temp_dict}
+            else:
+                attr[i] = attr[i] | {attribute.name: attribute.default}
         constraints[i] = {}
         for constraint in device_model.connections[i].peripheral.ref.constraints:
             # Here i have to add code to bring all attributes to Hz and m and then create the dictrionary
@@ -127,6 +142,8 @@ def create_classes():
             template = env.get_template('EnvSensor.py.tmpl')
         elif sensor_type == "TFMini":
             template = env.get_template('TFMiniSensor.py.tmpl')
+        elif sensor_type == "ADCDifferentialPi":
+            template = env.get_template('ADCDifferentialPi.py.tmpl')
         else:
             print("Not a prebuilt sensor. Add your template")
 

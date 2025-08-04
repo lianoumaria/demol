@@ -1,4 +1,4 @@
-Sensor ADC_Differential_Pi
+Sensor ADCDifferentialPi
     vcc: 5V
     msg: ADC
     pins:
@@ -124,7 +124,6 @@ Sensor ADC_Differential_Pi
         -num_channels: int = 8 //This attribute is fixed
         -resolution: list = [12, 14, 16, 18]//bit_mode
         -gain: list = [1, 2, 4, 8]//pga
-        -gain: dict = {num_channels: int = 8,voltage_reference: float = 2.048}
         -voltage_reference: float = 2.048
         //Specific channel should be chosen in the device model
     constraints:
