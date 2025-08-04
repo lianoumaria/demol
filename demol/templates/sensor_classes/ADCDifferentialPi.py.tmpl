@@ -1,0 +1,25 @@
+from ADCDifferentialPi import ADCDifferentialPi as ADCimported
+import time
+
+#Get the value from the device, else leave it as it is.
+PGA = {{gain | default(1)}}
+BIT_MODE = {{resolution | default(18)}}
+CHANNEL = {{channel | default(1)}} #Same as above
+PRIMARY_SLAVE_ADDRESS = 0x{{slaveAddr | default(68)}}
+SECONDARY_SLAVE_ADDRESS = 0x{{secondary_slave_address | default(69)}}
+
+class DifferentialADC:
+    def __init__(self):
+        self.adc = ADCimported(PRIMARY_SLAVE_ADDRESS, SECONDARY_SLAVE_ADDRESS)
+        self.adc.set_pga(PGA)
+        self.adc.set_bit_mode(BIT_MODE)
+    
+    def read_data(self):
+        voltage = self.adc.read_voltage(channel=CHANNEL)
+        return voltage
+    
+    def disconnect(self):
+        pass
+
+class ADCDifferentialPi(DifferentialADC):
+    pass

@@ -11,7 +11,7 @@ ToF_path = os.path.join(PERIPHERAL_MODEL_REPO_PATH, "VL53L1X.hwd")
 rpi5_path = os.path.join(BOARD_MODEL_REPO_PATH, "rpi_5.hwd")
 
 # collect .dev models
-rpi5_device_path = os.path.join(REPO_PATH, "examples", "rpi5_ToF.dev")
+rpi5_device_path = os.path.join(REPO_PATH, "examples", "RPi_ADC.dev")
 
 # Build the component models
 
