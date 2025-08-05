@@ -58,6 +58,7 @@ Connection:
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
 	    ("endpoint:" endpoint=Endpoint)?
+        ("settings" ":" "-" settings*=Settings["-"])?
     )#
     'end'
 ;
@@ -140,4 +141,12 @@ EndpointType:
 OperatingSystem:
     'Raspbian' |
     'RiotOS'
+;
+
+Settings:
+    name=ID ":" value=OBJECT
+;
+
+OBJECT: 
+	INT | STRING | FLOAT | BOOL 
 ;

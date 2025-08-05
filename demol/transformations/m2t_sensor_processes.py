@@ -99,6 +99,7 @@ def get_info(device_model, component_models, outputDir):
             else:
                 attr[i] = attr[i] | {attribute.name: attribute.default}
         constraints[i] = {}
+        
         for constraint in device_model.connections[i].peripheral.ref.constraints:
             # Here i have to add code to bring all attributes to Hz and m and then create the dictrionary
             if constraint.name == "max_frequency": #Consider Hz the base
@@ -119,8 +120,13 @@ def get_info(device_model, component_models, outputDir):
                     constraints[i] = constraints[i] | {constraint.name: constraint.value / 100}
         print(device_model.connections[i].endpoint.topic)
         topic.append(device_model.connections[i].endpoint.topic)
-
         
+        for setting in device_model.connections[i].settings:
+            if setting.name in attr[i].keys():
+                attr[i][setting.name] = setting.value
+            else:
+                attr[i] = attr[i] | {setting.name: setting.value}
+
         # Εδώ στα attributes για απλότητα θα μπορούσα να κάνω έλεγχο για κατάληψη ίδιων pins από
         # διαφορετικούς αισθητήρες. Υπενθύμιση ότι στα i2c επιτρέπεται αλλά εκεί πρέπει να γίνει 
         # έλεγχος για ίδια slave_addresses

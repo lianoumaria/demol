@@ -130,5 +130,9 @@ Connection
     endpoint:
         topic: "my_raspi.sensors.adc.MyADC"
         type: Publisher 
+    settings:
+        - resolution: 18
+        - gain: 1
+        - channel: 8
 end
 
