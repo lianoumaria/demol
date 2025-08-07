@@ -1,0 +1,31 @@
+// Model of NeoPixel_Ring_12
+Actuator WS2812
+    vcc: 5V
+    msg: LedArray
+    pins:
+        - power:
+            name: VCC
+            number: 1
+            type: 5V
+        - power:
+            name: GND
+            number: 2
+            type: GND
+        - io_pin:
+            functions: gpio
+            name: DIN
+            number: 3
+            vmin: 0
+            vmax: 5
+            signalLevel: 3.3
+    attributes:
+        - num_leds: int = 12
+        - color_format: str = "GRB"
+        - brightness: float = 0.5
+        //- colors: list = [0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF, 0xFFFFFF, 0x800000, 0x008000, 0x000080, 0xFFA500, 0x800080]
+    constraints:
+        - max_frequency: 800 khz
+    powerConsumption: 720 mW
+    piTpl: "WS2812.py.tmpl"
+    ioVcc: 5V
+end

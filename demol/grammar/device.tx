@@ -148,5 +148,13 @@ Settings:
 ;
 
 OBJECT: 
-	INT | STRING | FLOAT | BOOL 
+    PrimitiveValue | LIST
+;
+
+LIST:
+    "[" items*=OBJECT[","] "]"
+;
+
+PrimitiveValue:
+    INT | STRING | FLOAT | BOOL
 ;
