@@ -150,6 +150,8 @@ def create_classes():
             template = env.get_template('TFMiniSensor.py.tmpl')
         elif sensor_type == "ADCDifferentialPi":
             template = env.get_template('ADCDifferentialPi.py.tmpl')
+        elif sensor_type == "WS2812":
+            template = env.get_template('WS2812.py.tmpl')
         else:
             print("Not a prebuilt sensor. Add your template")
 

@@ -2,11 +2,11 @@ import time
 import board
 import neopixel_spi as neopixel
 
-NUM_PIXELS = {{num_pixels | default(12)}}
-PIXEL_ORDER = neopixel.{{color_format | default("GRB")}}
-COLORS = {{colors | default("[0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF, 0xFFFFFF, 0x800000, 0x008000, 0x000080, 0xFFA500, 0x800080]")}}
-DELAY = {{delay | default(0.1)}}
-BRIGHTNESS = {{brightness | default(0.5)}}
+NUM_PIXELS = 12
+PIXEL_ORDER = neopixel.GRB
+COLORS = <textx:device.LIST instance at 0x268a62f16a0>
+DELAY = 0.1
+BRIGHTNESS = 0.5
 
 class LEDArray:
     def __init__(self):
