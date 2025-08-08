@@ -144,7 +144,7 @@ OperatingSystem:
 ;
 
 Settings:
-    name=ID ":" value=Attribute
+    name=ID ":" value=OBJECT
 ;
 
 OBJECT: 
@@ -156,9 +156,5 @@ LIST:
 ;
 
 PrimitiveValue:
-    INT | STRING | FLOAT | BOOL | HEX
-;
-
-HEX: 
-    /0x[0-9a-fA-F]+/
+    INT | STRING | FLOAT | BOOL 
 ;

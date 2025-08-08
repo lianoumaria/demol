@@ -4,7 +4,7 @@ import neopixel_spi as neopixel
 
 NUM_PIXELS = 12
 PIXEL_ORDER = neopixel.GRB
-COLORS = <textx:device.LIST instance at 0x268a62f16a0>
+COLORS = ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']
 DELAY = 0.1
 BRIGHTNESS = 0.5
 

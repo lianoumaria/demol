@@ -26,9 +26,9 @@ out_dir = os.path.join(REPO_PATH, "rpi5_out")
 
 fsloader = jinja2.FileSystemLoader(CLASS_TEMPLATES)
 env = jinja2.Environment(loader=fsloader)
-peripheral_ref_name = {}
-peripheral_real_name = {}
-peripheral_type = {}
+peripheral_ref_name = {} #Name given in the .dev file
+peripheral_real_name = {} #actual name/type of the peripheral
+peripheral_type = {} 
 pins = {}
 attr = {}
 template = []
@@ -122,10 +122,13 @@ def get_info(device_model, component_models, outputDir):
         topic.append(device_model.connections[i].endpoint.topic)
         
         for setting in device_model.connections[i].settings:
+            if setting.value.__class__.__name__ == "LIST":
+                setting.value = [item for item in setting.value.items]
             if setting.name in attr[i].keys():
                 attr[i][setting.name] = setting.value
             else:
                 attr[i] = attr[i] | {setting.name: setting.value}
+
 
         # Εδώ στα attributes για απλότητα θα μπορούσα να κάνω έλεγχο για κατάληψη ίδιων pins από
         # διαφορετικούς αισθητήρες. Υπενθύμιση ότι στα i2c επιτρέπεται αλλά εκεί πρέπει να γίνει 
@@ -210,9 +213,13 @@ def generate_process():
 def main():
     print("Collecting info")
     get_info(rpi5_device, [rpi5,VL53L1X], out_dir) 
+    print("pins")
     print(pins)
+    print("peripheral_ref_name")
     print(peripheral_ref_name)
+    peripheral_real_name("peripheral_real_name")
     print(peripheral_real_name)
+    print("peripheral_type")
     print(peripheral_type)
     print("Attributes")
     print(attr)
