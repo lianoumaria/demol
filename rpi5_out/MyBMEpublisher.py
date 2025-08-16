@@ -31,7 +31,7 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.BME680', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=SensorMessage, topic="my_raspi.sensors.env.bme680")
+    pub = node.create_publisher(msg_type=SensorMessage, topic=""rpicomplete.sensor.env.mybme"")
     node.run()
     msg = SensorMessage()
     sample(msg = msg)

@@ -126,7 +126,7 @@ UARTConnection:
 
 Endpoint:
 	(
-        ("topic:" topic=STRING)
+        ("topic:" topic=STRING)?
         ("type:" type=EndpointType)?
     )#
 ;

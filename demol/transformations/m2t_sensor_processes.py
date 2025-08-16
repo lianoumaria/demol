@@ -217,7 +217,7 @@ def main():
     print(pins)
     print("peripheral_ref_name")
     print(peripheral_ref_name)
-    peripheral_real_name("peripheral_real_name")
+    print("peripheral_real_name")
     print(peripheral_real_name)
     print("peripheral_type")
     print(peripheral_type)

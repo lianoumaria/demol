@@ -1,5 +1,5 @@
 Metadata
-    name: "RpiTrackerSensor"
+    name: "RpiComplete"
     description: "My RaspberryPi 5 with a TCRT5000 tracker sensor"
     author: "maria"
     os: Raspbian
@@ -93,7 +93,7 @@ Connection
             sda: GPIO2 -- sda
             scl: GPIO3 -- scl
     endpoint:
-        topic: "my_raspi.sensors.env.bme680"
+    //    topic: "my_raspi.sensors.env.bme680"
         type: Publisher 
 end
 
@@ -149,7 +149,7 @@ Connection
           pin:
               GPIO6 -- DIN
     endpoint:
-        topic: "my_raspi.actuators.ws2812.MyLedRing"
+    //    topic: "my_raspi.actuators.ws2812.MyLedRing"
         type: Subscriber
     settings:
         - colors: ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']

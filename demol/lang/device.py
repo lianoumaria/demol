@@ -29,6 +29,7 @@ def raise_validation_error(obj, msg):
 
 
 def model_proc(model, metamodel):
+    device_name = model.metadata.name.strip('"')
     for c in model.connections:
         board = model.components.board
         # It is useful to set the board for the connection instances to easily
@@ -131,6 +132,19 @@ def model_proc(model, metamodel):
                             f'pin named {pc.peripheralPin}'
                         )
 
+        # Here i will try to add a topic generator
+        if c.endpoint and not c.endpoint.topic:
+            peripheral_def = c.peripheral #Name defined in device
+            peripheral_ref = peripheral_def.ref #Actual peripheral instance to find out the type and message
+            peripheral_def_name = peripheral_def.name #Peripheral's reference name
+
+            peripheral_type = type(peripheral_ref).__name__ #Sensor/Actuator
+
+            peripheral_msg = peripheral_ref.msg #Peripheral's message
+
+            default_topic = f'"{device_name}.{peripheral_type}.{peripheral_msg}.{peripheral_def_name}"'
+            c.endpoint.topic = default_topic.lower()
+
 
 def get_device_mm(debug: bool = False, global_repo: bool = False):
     mm = metamodel_from_file(
@@ -159,6 +173,7 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
     mm.register_model_processor(model_proc)
 
     mm.register_obj_processors({
+
         # EMPTY
     })
 
