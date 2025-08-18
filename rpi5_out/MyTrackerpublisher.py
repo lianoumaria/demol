@@ -3,13 +3,16 @@ import time
 from MyTracker import TCRT5000
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
-from commlib.msg import MessageHeader, PubSubMessage
+#from commlib.msg import MessageHeader, PubSubMessage
+from MQTTMessages import TrackerMessage 
 
 FREQUENCY = 100
 
+'''
 class SensorMessage(PubSubMessage):
     header: MessageHeader = MessageHeader()
     data : dict = {}
+'''
 
 def sample(msg):
     global FREQUENCY
@@ -23,7 +26,11 @@ def sample(msg):
     try:
         while True:
             pub.publish(msg)
-            msg.data = sensor.read_data()
+            #msg.data = sensor.read_data()
+            data = sensor.read_data()
+            for key,value in data.items():
+                key = key.strip('""')
+                setattr(msg, key, value)
             time.sleep(period)
     except KeyboardInterrupt:
             sensor.disconnect()
@@ -31,7 +38,9 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.TCRT5000', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=SensorMessage, topic="my_raspi.sensors.tracker.TCRT5000")
+    #pub = node.create_publisher(msg_type=SensorMessage, topic="my_raspi.sensors.tracker.TCRT5000")
+    pub = node.create_publisher(msg_type=TrackerMessage, topic="my_raspi.sensors.tracker.TCRT5000")
     node.run()
-    msg = SensorMessage()
+    #msg = SensorMessage()
+    msg = TrackerMessage()
     sample(msg = msg)

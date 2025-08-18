@@ -24,7 +24,7 @@ class VL53L1X:
     def read_data(self):
         if self.vl53.data_ready:
             data = {
-                    "sensor_name": self.__class__.__name__,
+                   # "sensor_name": self.__class__.__name__,
                     "max_distance": self.max_distance,
                     "min_distance": self.min_distance,
                     "distance": self.vl53.distance

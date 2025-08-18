@@ -3,13 +3,16 @@ import time
 from MyLedRing import WS2812
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
-from commlib.msg import MessageHeader, PubSubMessage
+#from commlib.msg import MessageHeader, PubSubMessage
+from MQTTMessages import LedArrayMessage 
 
 FREQUENCY = 1
 
+'''
 class SensorMessage(PubSubMessage):
     header: MessageHeader = MessageHeader()
     data : dict = {}
+'''
 
 def sample(msg):
     global FREQUENCY
@@ -23,7 +26,11 @@ def sample(msg):
     try:
         while True:
             pub.publish(msg)
-            msg.data = sensor.read_data()
+            #msg.data = sensor.read_data()
+            data = sensor.read_data()
+            for key,value in data.items():
+                key = key.strip('""')
+                setattr(msg, key, value)
             time.sleep(period)
     except KeyboardInterrupt:
             sensor.disconnect()
@@ -31,7 +38,9 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.WS2812', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=SensorMessage, topic="rpicomplete.actuator.ledarray.myledring")
+    #pub = node.create_publisher(msg_type=SensorMessage, topic="rpicomplete.actuator.ledarray.myledring")
+    pub = node.create_publisher(msg_type=LedArrayMessage, topic="rpicomplete.actuator.ledarray.myledring")
     node.run()
-    msg = SensorMessage()
+    #msg = SensorMessage()
+    msg = LedArrayMessage()
     sample(msg = msg)

@@ -33,7 +33,7 @@ class Distance_sensor:
     def read_data(self):
         #The distance is returned in centimeters
         data = {
-            "sensor_name": "{{sensor_type}}",
+            #"sensor_name": "{{sensor_type}}",
             "distance": self.sensor.distance * 100,
             "max_distance": self.max_distance,
             "min_distance": self.min_distance

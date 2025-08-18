@@ -18,8 +18,8 @@ class TFMini:
     def read_data(self):
         data = {
             "distance": self.tfmini.distance,
-            "signal_strength": self.tfmini.strength,
-            "mode": self.tfmini.mode,
+           # "signal_strength": self.tfmini.strength,
+           # "mode": self.tfmini.mode,
             "max_distance": self.max_distance,
             "min_distance": self.min_distance
         }
