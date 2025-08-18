@@ -16,7 +16,7 @@ if __name__ == '__main__':
     node = Node(node_name='node.BME680', connection_params=conn_params)
 
     node.create_subscriber(msg_type=SensorMessage,
-                           topic=""rpicomplete.sensor.env.mybme"",
+                           topic="rpicomplete.sensor.env.mybme",
                            on_message=on_message)  # Define a callback function
 
     node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz

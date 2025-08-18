@@ -31,7 +31,7 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.WS2812', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=SensorMessage, topic=""rpicomplete.actuator.ledarray.myledring"")
+    pub = node.create_publisher(msg_type=SensorMessage, topic="rpicomplete.actuator.ledarray.myledring")
     node.run()
     msg = SensorMessage()
     sample(msg = msg)

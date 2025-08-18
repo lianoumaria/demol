@@ -143,7 +143,7 @@ def model_proc(model, metamodel):
             peripheral_msg = peripheral_ref.msg #Peripheral's message
 
             default_topic = f'"{device_name}.{peripheral_type}.{peripheral_msg}.{peripheral_def_name}"'
-            c.endpoint.topic = default_topic.lower()
+            c.endpoint.topic = default_topic.lower().strip('""')
 
 
 def get_device_mm(debug: bool = False, global_repo: bool = False):

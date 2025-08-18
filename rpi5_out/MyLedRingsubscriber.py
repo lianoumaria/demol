@@ -16,7 +16,7 @@ if __name__ == '__main__':
     node = Node(node_name='node.WS2812', connection_params=conn_params)
 
     node.create_subscriber(msg_type=SensorMessage,
-                           topic=""rpicomplete.actuator.ledarray.myledring"",
+                           topic="rpicomplete.actuator.ledarray.myledring",
                            on_message=on_message)  # Define a callback function
 
     node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz
