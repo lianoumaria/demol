@@ -195,14 +195,14 @@ def generate_process():
         } | attr[i]
             
         
-        template = env.get_template("MQTTpublisher.py.tmpl")
+        template = env.get_template("MQTTSensorPublisher.py.tmpl")
         rt = template.render(**sensor_attr)
         filepath = os.path.join(out_dir, f"{sensor_name}publisher.py")
         ofh = codecs.open(filepath, "w", encoding="utf-8")
         ofh.write(rt)
         ofh.close()  
 
-        template = env.get_template("MQTTsubscriber.py.tmpl")
+        template = env.get_template("MQTTSensorSubscriber.py.tmpl")
         rt = template.render(**sensor_attr)
         filepath = os.path.join(out_dir, f"{sensor_name}subscriber.py")
         ofh = codecs.open(filepath, "w", encoding="utf-8")
