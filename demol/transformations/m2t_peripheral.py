@@ -138,79 +138,100 @@ def get_info(device_model, component_models, outputDir):
     #modules = list(peripheral_real_name.values())
 
 #Add try/except to create template if not found
+# This method produces both actuator and sensor classes  from corresponding templates
 def create_classes():
     i = 0
-    for sensor_name, sensor_type in peripheral_real_name.items():
-        sensor_attr = {}
-        if sensor_type == "SRF05" or sensor_type == "HC_SR04":
+    for per_name, per_type in peripheral_real_name.items():
+        peripheral_attr = {}
+        if per_type == "SRF05" or per_type == "HC_SR04":
             template = env.get_template('DistanceSensor.py.tmpl')
-        elif sensor_type == "VL53L1X":
+        elif per_type == "VL53L1X":
             template = env.get_template('ToFSensor.py.tmpl')
-        elif sensor_type == "HW006" or sensor_type == "TCRT5000":
+        elif per_type == "HW006" or per_type == "TCRT5000":
             template = env.get_template('TrackerSensor.py.tmpl')
-        elif sensor_type == "BME680":
+        elif per_type == "BME680":
             template = env.get_template('EnvSensor.py.tmpl')
-        elif sensor_type == "TFMini":
+        elif per_type == "TFMini":
             template = env.get_template('TFMiniSensor.py.tmpl')
-        elif sensor_type == "ADCDifferentialPi":
+        elif per_type == "ADCDifferentialPi":
             template = env.get_template('ADCDifferentialPi.py.tmpl')
-        elif sensor_type == "WS2812":
+        elif per_type == "WS2812":
             template = env.get_template('WS2812.py.tmpl')
         else:
-            print("Not a prebuilt sensor. Add your template")
+            print("Not a prebuilt sensor or actuator. Add your template")
 
-        sensor_attr = {"sensor_type": sensor_type}
-        sensor_attr = sensor_attr | pins[i]
-        sensor_attr = sensor_attr | attr[i]
-        sensor_attr = sensor_attr | constraints[i]
-                    
-        print(sensor_attr)
+        if peripheral_type[per_type] == "Sensor":
+            peripheral_attr = {"sensor_type": per_type}
+        else:
+            peripheral_attr = {"actuator_type": per_type}
+        peripheral_attr = peripheral_attr | pins[i]
+        peripheral_attr = peripheral_attr | attr[i]
+        peripheral_attr = peripheral_attr | constraints[i]
 
-        rt = template.render(**sensor_attr)
-        filepath = os.path.join(out_dir, f"{sensor_name}.py")
+        print(peripheral_attr)
+
+        rt = template.render(**peripheral_attr)
+        filepath = os.path.join(out_dir, f"{per_name}.py")
         ofh = codecs.open(filepath, "w", encoding="utf-8")
         ofh.write(rt)
         ofh.close()   
         i += 1  
 
 def generate_process():
-    '''
-    For every sensor there must be a process created by
-    using a new template MQTT class.
-
-    There must be a check for weather the frequency is supported by the sensor.
-
-    Add in sensor classes a Constant MAX_FREQUENCY that has a default value that can be overwritten
-    '''
     
     i = 0
-    for sensor_name, sensor_type in peripheral_real_name.items():
-        sensor_attr = {
-            "sensor_name": sensor_name,
-            "sensor_type": sensor_type,
-            "sensorMsg": peripheralMsg[i],
-            "topic": topic[i],
-            "host": host,
-            "port": port
-        } | attr[i]
+    for per_name, per_type in peripheral_real_name.items():
+        if peripheral_type[per_type] == "Sensor":
+            sensor_attr = {
+                "sensor_name": per_name,
+                "sensor_type": per_type,
+                "sensorMsg": peripheralMsg[i],
+                "topic": topic[i],
+                "host": host,
+                "port": port
+            } | attr[i]
+                  
+            template = env.get_template("MQTTSensorPublisher.py.tmpl")
+            rt = template.render(**sensor_attr)
+            filepath = os.path.join(out_dir, f"{per_name}publisher.py")
+            ofh = codecs.open(filepath, "w", encoding="utf-8")
+            ofh.write(rt)
+            ofh.close()  
+
+            template = env.get_template("MQTTSensorSubscriber.py.tmpl")
+            rt = template.render(**sensor_attr)
+            filepath = os.path.join(out_dir, f"{per_name}subscriber.py")
+            ofh = codecs.open(filepath, "w", encoding="utf-8")
+            ofh.write(rt)
+            ofh.close() 
             
+            i += 1  
         
-        template = env.get_template("MQTTSensorPublisher.py.tmpl")
-        rt = template.render(**sensor_attr)
-        filepath = os.path.join(out_dir, f"{sensor_name}publisher.py")
-        ofh = codecs.open(filepath, "w", encoding="utf-8")
-        ofh.write(rt)
-        ofh.close()  
+        elif peripheral_type[per_type] == "Actuator":
+            actuator_attr = {
+                "actuator_name": per_name,
+                "actuator_type": per_type,
+                "actuatorMsg": peripheralMsg[i],
+                "topic": topic[i],
+                "host": host,
+                "port": port
+            } | attr[i]         
+                
+            template = env.get_template("MQTTActuatorPublisher.py.tmpl")
+            rt = template.render(**actuator_attr)
+            filepath = os.path.join(out_dir, f"{per_name}publisher.py")
+            ofh = codecs.open(filepath, "w", encoding="utf-8")
+            ofh.write(rt)
+            ofh.close()  
 
-        template = env.get_template("MQTTSensorSubscriber.py.tmpl")
-        rt = template.render(**sensor_attr)
-        filepath = os.path.join(out_dir, f"{sensor_name}subscriber.py")
-        ofh = codecs.open(filepath, "w", encoding="utf-8")
-        ofh.write(rt)
-        ofh.close() 
-        
-        i += 1  
-
+            template = env.get_template("MQTTActuatorSubscriber.py.tmpl")
+            rt = template.render(**actuator_attr)
+            filepath = os.path.join(out_dir, f"{per_name}subscriber.py")
+            ofh = codecs.open(filepath, "w", encoding="utf-8")
+            ofh.write(rt)
+            ofh.close() 
+            
+            i += 1  
 
 def main():
     print("Collecting info")

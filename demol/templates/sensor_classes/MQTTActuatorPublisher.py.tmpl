@@ -2,7 +2,7 @@ import time
 import sys
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
-from MQTTMessages import LedArrayMessage
+from MQTTMessages import {{actuatorMsg}}Message
 import ast
 
 if __name__ == "__main__":
@@ -16,7 +16,7 @@ if __name__ == "__main__":
             print(f"  Argument {i}: {arg}")
 
             # get attribute names
-            attr_names = list(LedArrayMessage.__annotations__.keys())
+            attr_names = list({{actuatorMsg}}Message.__annotations__.keys())
             # filter out "header"
             attr_names = [name for name in attr_names if name != "header"]
             # build the CLI-style strings
@@ -26,7 +26,7 @@ if __name__ == "__main__":
             for cli_arg, attr_name in zip(cli_args, attr_names):
                 if arg.startswith(cli_arg):
                     raw_val = arg.split('=')[1]
-                    expected_type = LedArrayMessage.__annotations__[attr_name]
+                    expected_type = {{actuatorMsg}}Message.__annotations__[attr_name]
 
                     try:
                         # Try to parse as a Python literal first
@@ -41,11 +41,11 @@ if __name__ == "__main__":
                         attr_values[attr_name] = parsed_val
 
     print(attr_values)
-    conn_params = ConnectionParameters(host="localhost", port=1883)
-    node = Node(node_name='actuators.WS2812', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=LedArrayMessage, topic="rpicomplete.actuator.ledarray.myledring")
+    conn_params = ConnectionParameters(host="{{host}}", port={{port}})
+    node = Node(node_name='actuators.{{actuator_type}}', connection_params=conn_params)
+    pub = node.create_publisher(msg_type={{actuatorMsg}}Message, topic="{{topic}}")
     node.run()
-    msg = LedArrayMessage()
+    msg = {{actuatorMsg}}Message()
 
     try:
         while True:
@@ -56,3 +56,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nStopping publisher...")
         node.stop()
+
