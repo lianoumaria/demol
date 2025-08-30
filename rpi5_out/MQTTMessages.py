@@ -40,5 +40,7 @@ class LedArrayMessage(PubSubMessage):
 
 class ServoControllerMessage(PubSubMessage):
     header: MessageHeader = MessageHeader()
-    position: float = 0.0
-    angle: float = 0.0
+    initial_angle: float = 0.0
+    final_angle: float = 180.0
+    angular_speed: float = 0.5 # degrees per second
+    angular_step: float = 1.0 # degrees

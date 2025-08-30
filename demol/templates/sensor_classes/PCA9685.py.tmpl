@@ -18,7 +18,7 @@ MAX_FREQUENCY = {{max_frequency | default(1000)}}
 MIN_PULSE = {{min_pulse | default(500)}}
 MAX_PULSE = {{max_pulse | default(2500)}}
 
-class ServoClass:
+class ServoControllerClass:
     def __init__(self):
         self.i2c = board.I2C()
         self.pca = PCA9685(self.i2c)
@@ -28,15 +28,20 @@ class ServoClass:
         self.servo7 = servo.Servo(self.pca.channels[CHANNEL], min_pulse=MIN_PULSE, max_pulse=MAX_PULSE)
     
 
-    def set_action(self):
-        angle_range = np.arange(INITIAL_ANGLE, FINAL_ANGLE + ANGULAR_STEP, ANGULAR_STEP)
-        speed = ANGULAR_SPEED / ANGULAR_STEP  # Speed in seconds per step
+    def set_action(self, **params):
+        initial_angle = params.get('initial_angle', INITIAL_ANGLE)
+        final_angle = params.get('final_angle', FINAL_ANGLE)
+        angular_step = params.get('angular_step', ANGULAR_STEP)
+        angular_speed = params.get('angular_speed', ANGULAR_SPEED)
+
+        angle_range = np.arange(initial_angle, final_angle + angular_step, angular_step)
+        time_per_step = angular_step / angular_speed  # Time = Distance / Speed
         for angle in angle_range:
             self.servo7.angle = angle
-            time.sleep(speed)
+            time.sleep(time_per_step)
 
     def disconnect(self):
         self.pca.deinit()
 
-class MG996R_PCA9685(ServoClass):
+class PCA9685(ServoControllerClass):
     pass
