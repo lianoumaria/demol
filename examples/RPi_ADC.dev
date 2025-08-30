@@ -15,6 +15,7 @@ Components
         - SRF05(MySRF)
         - ADCDifferentialPi(MyADC)
         - WS2812(MyLedRing)
+        - PCA9685(MyServoController)
 end
 
 Network
@@ -153,4 +154,25 @@ Connection
         type: Subscriber
     settings:
         - colors: ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']
+end
+
+Connection
+    peripheral: MyServoController
+    powerConnections:
+        - GND_1 -- GND_1
+        - power_5v_a -- VCC_1
+    ioConnections:
+        - type: i2c
+          name: pca_control
+          slave_address: 0x64
+          pins:
+            sda: GPIO2 -- SDA_1
+            scl: GPIO3 -- SCL_1
+    endpoint:
+        type: Subscriber
+    settings:
+        - channel : 2
+        - initial_angle : 90
+        - final_angle : 180
+        - angular_speed : 0.5
 end

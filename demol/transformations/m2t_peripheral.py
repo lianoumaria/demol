@@ -157,6 +157,8 @@ def create_classes():
             template = env.get_template('ADCDifferentialPi.py.tmpl')
         elif per_type == "WS2812":
             template = env.get_template('WS2812.py.tmpl')
+        elif per_type == "PCA9685":
+            template = env.get_template('PCA9685.py.tmpl')
         else:
             print("Not a prebuilt sensor or actuator. Add your template")
 

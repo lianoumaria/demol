@@ -2,9 +2,9 @@ from ADCDifferentialPi import ADCDifferentialPi as ADCimported
 import time
 
 #Get the value from the device, else leave it as it is.
-PGA = 1
-BIT_MODE = 18
-CHANNEL = 8 #Same as above
+PGA = 1.0
+BIT_MODE = 18.0
+CHANNEL = 8.0 #Same as above
 PRIMARY_SLAVE_ADDRESS = 0x68
 SECONDARY_SLAVE_ADDRESS = 0x69
 MAX_FREQUENCY = 240

@@ -156,5 +156,5 @@ LIST:
 ;
 
 PrimitiveValue:
-    INT | STRING | FLOAT | BOOL 
+    FLOAT | INT | STRING | BOOL 
 ;

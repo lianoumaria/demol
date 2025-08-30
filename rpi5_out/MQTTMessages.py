@@ -37,3 +37,8 @@ class LedArrayMessage(PubSubMessage):
     )
     delay: float = 0.1 
     brightness: float = 0.5
+
+class ServoControllerMessage(PubSubMessage):
+    header: MessageHeader = MessageHeader()
+    position: float = 0.0
+    angle: float = 0.0

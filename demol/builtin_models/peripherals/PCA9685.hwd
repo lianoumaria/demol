@@ -1,0 +1,252 @@
+Actuator PCA9685
+    vcc: 5V
+    msg: ServoController
+    pins: 
+        -power:
+            name: GND_1
+            number: 1
+            type: GND
+        -io_pin:
+            functions: scl-0
+            name: SCL_1
+            number: 2
+        -io_pin:
+            functions: sda-0
+            name: SDA_1
+            number: 3
+        -power:
+            name: VCC_1
+            number: 4
+            type: 5V
+        -power:
+            name: Vplus_1
+            number: 5
+            type: 5V
+        -power:
+            name: GND_2
+            number: 6
+            type: GND
+        -io_pin:
+            functions: scl-0
+            name: SCL_2
+            number: 7
+        -io_pin:
+            functions: sda-0
+            name: SDA_2
+            number: 8
+        -power:
+            name: VCC_2
+            number: 9
+            type: 5V
+        -power:
+            name: Vplus_2
+            number: 10
+            type: 5V
+        -power:
+            name: Vplus_get
+            number: 11
+            type: 5V
+        -power:
+            name: GND_3
+            number: 12
+            type: GND
+        -io_pin:
+            functions: pwm-0
+            name: PWM_CH0
+            number: 13
+        -power:
+            name: Vplus_CH0
+            number: 14
+            type: 5V
+        -power:
+            name: GND_CH0
+            number: 15
+            type: GND
+        -io_pin:
+            functions: pwm-1
+            name: PWM_CH1
+            number: 16
+        -power:
+            name: Vplus_CH1
+            number: 17
+            type: 5V
+        -power:
+            name: GND_CH1
+            number: 18
+            type: GND
+        -io_pin:
+            functions: pwm-2
+            name: PWM_CH2
+            number: 19
+        -power:
+            name: Vplus_CH2
+            number: 20
+            type: 5V
+        -power:
+            name: GND_CH2
+            number: 21
+            type: GND
+        -io_pin:
+            functions: pwm-3
+            name: PWM_CH3
+            number: 22
+        -power:
+            name: Vplus_CH3
+            number: 23
+            type: 5V
+        -power:
+            name: GND_CH3
+            number: 24
+            type: GND
+        -io_pin:
+            functions: pwm-4
+            name: PWM_CH4
+            number: 25
+        -power:
+            name: Vplus_CH4
+            number: 26
+            type: 5V
+        -power:
+            name: GND_CH4
+            number: 27
+            type: GND
+        -io_pin:
+            functions: pwm-5
+            name: PWM_CH5
+            number: 28
+        -power:
+            name: Vplus_CH5
+            number: 29
+            type: 5V
+        -power:
+            name: GND_CH5
+            number: 30
+            type: GND
+        -io_pin:
+            functions: pwm-6
+            name: PWM_CH6
+            number: 31
+        -power:
+            name: Vplus_CH6
+            number: 32
+            type: 5V
+        -power:
+            name: GND_CH6
+            number: 33
+            type: GND
+        -io_pin:
+            functions: pwm-7
+            name: PWM_CH7
+            number: 34
+        -power:
+            name: Vplus_CH7
+            number: 35
+            type: 5V
+        -power:
+            name: GND_CH7
+            number: 36
+            type: GND
+        -io_pin:
+            functions: pwm-8
+            name: PWM_CH8
+            number: 37
+        -power:
+            name: Vplus_CH8
+            number: 38
+            type: 5V
+        -power:
+            name: GND_CH8
+            number: 39
+            type: GND
+        -io_pin:
+            functions: pwm-9
+            name: PWM_CH9
+            number: 40
+        -power:
+            name: Vplus_CH9
+            number: 41
+            type: 5V
+        -power:
+            name: GND_CH9
+            number: 42
+            type: GND
+        -io_pin:
+            functions: pwm-10
+            name: PWM_CH10
+            number: 43
+        -power:
+            name: Vplus_CH10
+            number: 44
+            type: 5V
+        -power:
+            name: GND_CH10
+            number: 45
+            type: GND
+        -io_pin:
+            functions: pwm-11
+            name: PWM_CH11
+            number: 46
+        -power:
+            name: Vplus_CH11
+            number: 47
+            type: 5V
+        -power:
+            name: GND_CH11
+            number: 48
+            type: GND
+        -io_pin:
+            functions: pwm-12
+            name: PWM_CH12
+            number: 49
+        -power:
+            name: Vplus_CH12
+            number: 50
+            type: 5V
+        -power:
+            name: GND_CH12
+            number: 51
+            type: GND
+        -io_pin:
+            functions: pwm-13
+            name: PWM_CH13
+            number: 52
+        -power:
+            name: Vplus_CH13
+            number: 53
+            type: 5V
+        -power:
+            name: GND_CH13
+            number: 54
+            type: GND
+        -io_pin:
+            functions: pwm-14
+            name: PWM_CH14
+            number: 55
+        -power:
+            name: Vplus_CH14
+            number: 56
+            type: 5V
+        -power:
+            name: GND_CH14
+            number: 57
+            type: GND
+        -io_pin:
+            functions: pwm-15
+            name: PWM_CH15
+            number: 58
+        -power:
+            name: Vplus_CH15
+            number: 59
+            type: 5V
+        -power:
+            name: GND_CH15
+            number: 60
+            type: GND
+    attributes:
+        -channels: int = 16
+        -frequency: int = 50
+    constraints:
+        - max_frequency: 1000 hz
+    powerConsumption: 10 mW
+    piTpl: "PCA9685.py.tmpl"
+end
