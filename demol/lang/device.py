@@ -132,7 +132,7 @@ def model_proc(model, metamodel):
                             f'pin named {pc.peripheralPin}'
                         )
 
-        # Here i will try to add a topic generator
+        # Topic generator
         if c.endpoint and not c.endpoint.topic:
             peripheral_def = c.peripheral #Name defined in device
             peripheral_ref = peripheral_def.ref #Actual peripheral instance to find out the type and message
