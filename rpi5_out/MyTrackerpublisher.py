@@ -8,12 +8,6 @@ from MQTTMessages import TrackerMessage
 
 FREQUENCY = 100
 
-'''
-class SensorMessage(PubSubMessage):
-    header: MessageHeader = MessageHeader()
-    data : dict = {}
-'''
-
 def sample(msg):
     global FREQUENCY
     sensor = TCRT5000()
@@ -38,9 +32,7 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.TCRT5000', connection_params=conn_params)
-    #pub = node.create_publisher(msg_type=SensorMessage, topic="my_raspi.sensors.tracker.TCRT5000")
     pub = node.create_publisher(msg_type=TrackerMessage, topic="my_raspi.sensors.tracker.TCRT5000")
     node.run()
-    #msg = SensorMessage()
     msg = TrackerMessage()
     sample(msg = msg)

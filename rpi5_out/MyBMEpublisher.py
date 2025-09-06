@@ -8,12 +8,6 @@ from MQTTMessages import EnvMessage
 
 FREQUENCY = 1
 
-'''
-class SensorMessage(PubSubMessage):
-    header: MessageHeader = MessageHeader()
-    data : dict = {}
-'''
-
 def sample(msg):
     global FREQUENCY
     sensor = BME680()
@@ -38,9 +32,7 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.BME680', connection_params=conn_params)
-    #pub = node.create_publisher(msg_type=SensorMessage, topic="rpicomplete.sensor.env.mybme")
     pub = node.create_publisher(msg_type=EnvMessage, topic="rpicomplete.sensor.env.mybme")
     node.run()
-    #msg = SensorMessage()
     msg = EnvMessage()
     sample(msg = msg)

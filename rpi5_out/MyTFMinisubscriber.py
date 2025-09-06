@@ -4,12 +4,6 @@ from commlib.transports.mqtt import ConnectionParameters
 #from commlib.msg import MessageHeader, PubSubMessage
 from MQTTMessages import DistanceMessage
 
-'''
-class SensorMessage(PubSubMessage):
-    header: MessageHeader = MessageHeader()
-    data : dict = {}
-'''
-
 def on_message(msg):
     print(f'Received data: {msg}')
 
@@ -17,11 +11,7 @@ if __name__ == '__main__':
     conn_params = ConnectionParameters(host="localhost", port=1883)
 
     node = Node(node_name='node.TFMini', connection_params=conn_params)
-    '''
-    node.create_subscriber(msg_type=SensorMessage,
-                           topic="my_raspi.sensors.tfmini",
-                           on_message=on_message)  # Define a callback function
-    '''
+
     node.create_subscriber(msg_type=DistanceMessage,
                            topic="my_raspi.sensors.tfmini",
                            on_message=on_message)  # Define a callback function

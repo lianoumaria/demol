@@ -8,12 +8,6 @@ from MQTTMessages import ADCMessage
 
 FREQUENCY = 1
 
-'''
-class SensorMessage(PubSubMessage):
-    header: MessageHeader = MessageHeader()
-    data : dict = {}
-'''
-
 def sample(msg):
     global FREQUENCY
     sensor = ADCDifferentialPi()
@@ -38,9 +32,7 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.ADCDifferentialPi', connection_params=conn_params)
-    #pub = node.create_publisher(msg_type=SensorMessage, topic="my_raspi.sensors.adc.MyADC")
     pub = node.create_publisher(msg_type=ADCMessage, topic="my_raspi.sensors.adc.MyADC")
     node.run()
-    #msg = SensorMessage()
     msg = ADCMessage()
     sample(msg = msg)

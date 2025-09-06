@@ -8,12 +8,6 @@ from MQTTMessages import {{sensorMsg}}Message
 
 FREQUENCY = {{frequency | default(1)}}
 
-'''
-class SensorMessage(PubSubMessage):
-    header: MessageHeader = MessageHeader()
-    data : dict = {}
-'''
-
 def sample(msg):
     global FREQUENCY
     sensor = {{sensor_type}}()
@@ -38,9 +32,7 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="{{host}}", port={{port}})
     node = Node(node_name='sensors.{{sensor_type}}', connection_params=conn_params)
-    #pub = node.create_publisher(msg_type=SensorMessage, topic="{{topic}}")
     pub = node.create_publisher(msg_type={{sensorMsg}}Message, topic="{{topic}}")
     node.run()
-    #msg = SensorMessage()
     msg = {{sensorMsg}}Message()
     sample(msg = msg)

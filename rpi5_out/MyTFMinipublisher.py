@@ -8,12 +8,6 @@ from MQTTMessages import DistanceMessage
 
 FREQUENCY = 1
 
-'''
-class SensorMessage(PubSubMessage):
-    header: MessageHeader = MessageHeader()
-    data : dict = {}
-'''
-
 def sample(msg):
     global FREQUENCY
     sensor = TFMini()
@@ -38,9 +32,7 @@ def sample(msg):
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
     node = Node(node_name='sensors.TFMini', connection_params=conn_params)
-    #pub = node.create_publisher(msg_type=SensorMessage, topic="my_raspi.sensors.tfmini")
     pub = node.create_publisher(msg_type=DistanceMessage, topic="my_raspi.sensors.tfmini")
     node.run()
-    #msg = SensorMessage()
     msg = DistanceMessage()
     sample(msg = msg)
