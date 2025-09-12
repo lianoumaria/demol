@@ -1,5 +1,5 @@
 Sensor SRF05
-    vcc: 3V3 //Νομίζω στο 3.3 το συνδέσαμε αλλά λέει 5.. Αν συνδεθεί στα 5 θέλει level shifter
+    vcc: 5V //Νομίζω στο 3.3 το συνδέσαμε αλλά λέει 5.. Αν συνδεθεί στα 5 θέλει level shifter
     msg: Distance
     pins:
     -power:
