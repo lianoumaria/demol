@@ -216,6 +216,13 @@ def generate_process(out_dir):
             
             i += 1  
 
+            template = env.get_template("MQTTMessages.py.tmpl")
+            rt = template.render()
+            filepath = os.path.join(out_dir, f"MQTTMessages.py")
+            ofh = codecs.open(filepath, "w", encoding="utf-8")
+            ofh.write(rt)
+            ofh.close()  
+
 def main(dev_model, output_dir):
     # collect .dev models
     rpi5_device_path = os.path.join(REPO_PATH, "examples", dev_model)
@@ -252,4 +259,4 @@ def main(dev_model, output_dir):
 
 
 if __name__ == "__main__":
-    main("RPi_ADC.dev", "rpi5_out")
+    main("RPi_gas_led.dev", "rpi_gas")
