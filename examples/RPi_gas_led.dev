@@ -1,0 +1,61 @@
+Metadata
+    name: "RpiGasLeak"
+    description: "My RaspberryPi 5 with a BME680 and a LedRing"
+    author: "maria"
+    os: Raspbian
+end
+
+Components
+    board: RaspberryPi_5_16GB
+    peripherals:
+        - BME680(GasSensor)
+        - WS2812(LedWarning)
+end
+
+Network
+    ssid: "Wifi_2.4GHz"
+    passwd: "guest"
+end
+
+Broker<MQTT> MyBroker
+    host: "localhost"
+    port: 1883
+    ssl: False
+    auth:
+        username: "guest"
+        password: "guest"
+end
+
+Connection
+    peripheral: GasSensor
+    powerConnections:
+        - GND_1 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: i2c
+          name: env_data
+          slave_address: 0x76
+          pins:
+            sda: GPIO2 -- sda
+            scl: GPIO3 -- scl
+    endpoint:
+        type: Publisher 
+end
+
+Connection
+    peripheral: LedWarning
+    powerConnections:
+        - GND_2 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: LedControl
+          output: true
+          pin:
+              GPIO6 -- DIN
+    endpoint:
+        type: Subscriber
+    settings:
+        - colors: ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']
+end
+
