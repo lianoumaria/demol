@@ -34,11 +34,15 @@ class ServoControllerClass:
         angular_step = params.get('angular_step', ANGULAR_STEP)
         angular_speed = params.get('angular_speed', ANGULAR_SPEED)
 
-        angle_range = np.arange(initial_angle, final_angle + angular_step, angular_step)
-        time_per_step = angular_step / angular_speed  # Time = Distance / Speed
-        for angle in angle_range:
-            self.servo7.angle = angle
-            time.sleep(time_per_step)
+        if (angular_speed != 0):
+            angle_range = np.arange(initial_angle, final_angle + angular_step, angular_step)
+            time_per_step = angular_step / angular_speed  # Time = Distance / Speed
+            for angle in angle_range:
+                self.servo7.angle = angle
+                time.sleep(time_per_step)
+        else:   
+            print("Speed is set to zero. Servo will stop moving.")
+            self.disconnect()
 
     def disconnect(self):
         self.pca.deinit()
