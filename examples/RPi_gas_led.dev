@@ -1,5 +1,5 @@
 Metadata
-    name: "RpiGasLeak"
+    name: "RpiRoom"
     description: "My RaspberryPi 5 with a BME680 and a LedRing"
     author: "maria"
     os: Raspbian
@@ -8,7 +8,7 @@ end
 Components
     board: RaspberryPi_5_16GB
     peripherals:
-        - BME680(GasSensor)
+        - BME680(RoomSensor)
         - WS2812(LedWarning)
 end
 
@@ -27,7 +27,7 @@ Broker<MQTT> MyBroker
 end
 
 Connection
-    peripheral: GasSensor
+    peripheral: RoomSensor
     powerConnections:
         - GND_1 -- GND
         - power_5v_a -- VCC
