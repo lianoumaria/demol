@@ -39,6 +39,8 @@ def get_info(device_model):
     if str(device_model.broker.__class__.__name__) == "MQTTBroker":
         host = device_model.broker.host
         port = device_model.broker.port
+    else:
+        raise TypeError("This transformation does not support other Broker types than MQTTBroker.")
 
 
     for i in range(len(device_model.connections)):

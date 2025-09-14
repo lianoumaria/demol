@@ -9,6 +9,7 @@ REPO_PATH = os.path.dirname(THIS_DIR_PATH)
 CODE_PATH = os.path.join(REPO_PATH, "demol") #+ "/demol"
 META_MODELS = os.path.join(CODE_PATH + "grammar")
 CLASS_TEMPLATES = os.path.join(CODE_PATH , "templates", "sensor_classes")
+SMAUTO_TEMPLATES = os.path.join(CODE_PATH , "templates", "SmAutoTmpl")
 TEMPLATES = os.path.join(CODE_PATH , "templates", "riot_old")
 TEMPLATES_RASPI = os.path.join(CODE_PATH , "templates", "raspi_new")
 RIOT_SOURCE_DIRNAME = "src"
