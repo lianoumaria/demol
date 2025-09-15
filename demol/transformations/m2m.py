@@ -10,8 +10,9 @@ fsloader = jinja2.FileSystemLoader(SMAUTO_TEMPLATES)
 env = jinja2.Environment(loader=fsloader)
 broker_data = {}
 device_name = ""
+peripherals_data = []
 
-def get_info(device_model):
+def get_broker_info(device_model):
     #Device name to name the output file
     global device_name
     device_name = device_model.metadata.name
@@ -22,7 +23,7 @@ def get_info(device_model):
     broker_data["broker_host"] = device_model.broker.host
     broker_data["broker_port"] = device_model.broker.port
     broker_data["broker_name"] = device_model.broker.name
-    #Set
+    #Set username and password if plain auth is used, otherwise warn and set to None because SmAuto requires username and password
     if hasattr(device_model.broker, "auth") and str(device_model.broker.auth.__class__.__name__) == "AuthPlain":
         broker_data["broker_username"] = device_model.broker.auth.username
         broker_data["broker_password"] = device_model.broker.auth.password
@@ -34,7 +35,7 @@ def get_info(device_model):
         broker_data["broker_username"] = None
         broker_data["broker_password"] = None
 
-
+    #Gather additional info for specific brokers
     if broker_data["broker_type"] == "AMQP" and hasattr(device_model.broker, "vhost"):
         broker_data["broker_vhost"] = device_model.broker.vhost
         print(f"Broker vhost: {broker_data['broker_vhost']}")  
@@ -47,6 +48,7 @@ def get_info(device_model):
         broker_data["broker_db"] = device_model.broker.db
         print(f"Broker db: {broker_data['broker_db']}")
 
+    #Print gathered info for debugging
     print(f"Broker type: {broker_data['broker_type']}")
     print(f"Broker host: {broker_data['broker_host']}")
     print(f"Broker port: {broker_data['broker_port']}")
@@ -54,10 +56,35 @@ def get_info(device_model):
     print(f"Broker username: {broker_data['broker_username']}")
     print(f"Broker password: {broker_data['broker_password']}")
 
+def get_peripherals_info(device_model):
+    global peripherals_data
 
+    for i in range(len(device_model.connections)):
+        per_frequency = 0
+        # Gather peripheral info
+        per_dev_name = device_model.connections[i].peripheral.name
+        per_real_name = device_model.connections[i].peripheral.ref.name
+        per_type =  type(device_model.connections[i].peripheral.ref).__name__
+        per_topic = device_model.connections[i].endpoint.topic
+        per_broker = broker_data["broker_name"]
+        per_msg_type = device_model.connections[i].peripheral.ref.msg
+        for attribute in device_model.connections[i].peripheral.ref.attributes:
+            if attribute.name == "frequency":
+                per_frequency = attribute.default
+        #In a peripheral model a default frequency might be given, but it must be overwritten if a new one is given in the device model.
+        for setting in device_model.connections[i].settings:
+            if setting.name == "frequency":
+                per_frequency = setting.value
+                peripheral_data = peripheral_data | {"per_frequency": per_frequency}
+ 
+        # Create a dictionary for each peripheral and append it to the list
+        peripheral_data = {"per_name": per_dev_name, "per_real_name": per_real_name, "per_type": per_type, "per_topic": per_topic, "per_broker": per_broker, "per_msg_type": per_msg_type}
+        peripherals_data.append(peripheral_data)
+
+#Generate SmAuto model
 def demol2smauto(output_dir):
     template = env.get_template("BrokerAndEntity.tmpl")
-    rt = template.render(**broker_data)
+    rt = template.render(**broker_data, peripherals=peripherals_data)
     filepath = os.path.join(output_dir, f"{device_name}SmAutoModel.txt")
     ofh = codecs.open(filepath, "w", encoding="utf-8")
     ofh.write(rt)
@@ -69,10 +96,13 @@ def main(dev_model,output_dir):
 
     output = os.path.join(REPO_PATH, output_dir)
 
-    print("Collecting info...")
-    get_info(rpi5_device) 
+    print("Collecting broker info...")
+    get_broker_info(rpi5_device) 
+    print("Collecting peripherals info...")
+    get_peripherals_info(rpi5_device)
+    print(peripherals_data)
     print("Generating SmAuto model...")
     demol2smauto(output_dir = output)
 
 if __name__ == "__main__":
-    main("rpi_5_TCRT.dev", "output_m2m")
+    main("RPi_fan_temp.dev", "output_m2m")

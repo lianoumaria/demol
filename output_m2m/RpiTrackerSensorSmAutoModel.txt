@@ -7,3 +7,10 @@ Broker<AMQP> MyBroker
     vhost: "host"
     topicExchange: "Thistopic"
 end
+
+
+Entity MyTracker
+    type: Sensor
+    topic: my_raspi.sensors.tracker.TCRT5000
+    broker: MyBroker
+    

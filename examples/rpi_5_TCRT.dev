@@ -9,10 +9,6 @@ Components
     board: RaspberryPi_5_16GB
     peripherals:
         - TCRT5000(MyTracker)
-        - SRF05(MySRF)
-        - VL53L1X(MyToF)
-        - TFMini(MyTFMini)
-        - BME680(MyBME)
 end
 
 Network
@@ -46,74 +42,5 @@ Connection
         type: Publisher
 end
 
-Connection
-    peripheral: MySRF
-    powerConnections:
-        - GND_2 -- GND
-        - power_5v_b -- VCC
-    ioConnections:
-        - type: gpio
-          name: echo
-          pin:
-              GPIO24 -- echo
-        - type: gpio
-          name: trigger
-          pin:
-              GPIO23 -- trigger
-    endpoint:
-        topic: "my_raspi.sensors.distance.srf05"
-        type: Publisher
-end    
-
-Connection
-    peripheral: MyToF
-    powerConnections:
-        - GND_3 -- GND
-        - power_5v_a -- VIN
-    ioConnections:
-        - type: i2c
-          name: data
-          slave_address: 0x29
-          pins:
-            sda: GPIO2 -- SDA
-            scl: GPIO3 -- SCL
-    endpoint:
-        topic: "my_raspi.sensors.tof.vl53l1x"
-        type: Publisher 
-end
-
-Connection
-    peripheral: MyTFMini
-    powerConnections:
-        - GND_4 -- GND
-        - power_5v_b -- VCC
-    ioConnections:
-        - type: uart
-          name: data
-          pins:
-            tx: GPIO15 -- TXD //Here i assigned to tx the sensor's tx
-            rx: GPIO14 -- RXD //Respectively
-            baudrate: 115200
-    endpoint:
-        topic: "my_raspi.sensors.tfmini"
-        type: Publisher 
-end
-
-Connection
-    peripheral: MyBME
-    powerConnections:
-        - GND_3 -- GND
-        - power_5v_a -- VCC
-    ioConnections:
-        - type: i2c
-          name: env_data
-          slave_address: 0x76
-          pins:
-            sda: GPIO2 -- sda
-            scl: GPIO3 -- scl
-    endpoint:
-        topic: "my_raspi.sensors.env.bme680"
-        type: Publisher 
-end
     
         

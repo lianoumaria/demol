@@ -5,3 +5,30 @@ Broker<MQTT> MyBroker
         username: "guest"
         password: "guest"
 end
+
+
+Entity TempSensor
+    type: Sensor
+    topic: rpifan.sensor.env.tempsensor
+    broker: MyBroker
+    attributes:
+    
+        - temperature : float
+        - pressure : float 
+        - humidity : float
+        - gas_resistance : float  
+    
+end    
+
+Entity FanController
+    type: Actuator
+    topic: rpifan.actuator.servocontroller.fancontroller
+    broker: MyBroker
+    attributes:
+     
+        - initial_angle: float = 0.0
+        - final_angle: float = 180.0
+        - angular_speed: float = 0.5 
+        - angular_step: float = 1.0   
+    
+end    
