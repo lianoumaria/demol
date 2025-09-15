@@ -1,0 +1,16 @@
+Broker<{{broker_type}}> {{broker_name}}
+    host: "{{broker_host}}"
+    port: {{broker_port}}
+    auth:
+        username: "{{broker_username}}"
+        password: "{{broker_password}}"
+    {%- if broker_vhost is defined and broker_vhost %}
+    vhost: "{{ broker_vhost }}"
+    {%- endif %}
+    {%- if broker_topicExchange is defined and broker_topicExchange %}
+    topicExchange: "{{ broker_topicExchange }}"
+    {%- endif %}
+    {%-  if broker_db is defined and broker_db %}
+    db: {{ broker_db }}
+    {%- endif %}
+end

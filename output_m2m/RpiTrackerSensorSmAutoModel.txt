@@ -1,0 +1,9 @@
+Broker<AMQP> MyBroker
+    host: "node.mqtt.local"
+    port: 1883
+    auth:
+        username: "guest"
+        password: "guest"
+    vhost: "host"
+    topicExchange: "Thistopic"
+end

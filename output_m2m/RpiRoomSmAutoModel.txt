@@ -1,0 +1,7 @@
+Broker<MQTT> MyBroker
+    host: "localhost"
+    port: 1883
+    auth:
+        username: "guest"
+        password: "guest"
+end

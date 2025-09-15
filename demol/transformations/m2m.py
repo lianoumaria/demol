@@ -4,52 +4,75 @@ from demol.lang import utils
 from demol.transformations import m2t_riot_old, device_to_plantuml
 import jinja2
 import codecs
+import warnings
 
 fsloader = jinja2.FileSystemLoader(SMAUTO_TEMPLATES)
 env = jinja2.Environment(loader=fsloader)
+broker_data = {}
+device_name = ""
 
 def get_info(device_model):
+    #Device name to name the output file
+    global device_name
+    device_name = device_model.metadata.name
     #Gather Broker info
     broker_type = device_model.broker.__class__.__name__
     # keep only the type name, without the "Broker" suffix
-    broker_type = broker_type.replace("Broker", "")
-    broker_host = device_model.broker.host
- 
-    broker_port = device_model.broker.port
-    broker_name = device_model.broker.name
-
+    broker_data["broker_type"] = broker_type.replace("Broker", "")
+    broker_data["broker_host"] = device_model.broker.host
+    broker_data["broker_port"] = device_model.broker.port
+    broker_data["broker_name"] = device_model.broker.name
+    #Set
     if hasattr(device_model.broker, "auth") and str(device_model.broker.auth.__class__.__name__) == "AuthPlain":
-        broker_username = device_model.broker.auth.username
-        broker_password = device_model.broker.auth.password
+        broker_data["broker_username"] = device_model.broker.auth.username
+        broker_data["broker_password"] = device_model.broker.auth.password
     else:
         warnings.warn(
         "SmAuto currently supports only plain authentication for all brokers.",
         category=UserWarning
         )
-        broker_username = None
-        broker_password = None
-    
-    if broker_type == "AMQP" and hasattr(device_model.broker, "vhost"):
-        broker_vhost = device_model.broker.vhost
-    if broker_type == "AMQP" and hasattr(device_model.broker, "topicExchange"):
-        broker_topicExchange = device_model.broker.topicExchange
-
-    if broker_type == "Redis" and hasattr(device_model.broker, "db"):
-        broker_db = device_model.broker.db
-
-    print(f"Broker type: {broker_type}")
-    print(f"Broker host: {broker_host}")
-    print(f"Broker port: {broker_port}")
-    print(f"Broker name: {broker_name}")
-    print(f"Broker username: {broker_username}")
-    print(f"Broker password: {broker_password}")
+        broker_data["broker_username"] = None
+        broker_data["broker_password"] = None
 
 
-def main(dev_model):
+    if broker_data["broker_type"] == "AMQP" and hasattr(device_model.broker, "vhost"):
+        broker_data["broker_vhost"] = device_model.broker.vhost
+        print(f"Broker vhost: {broker_data['broker_vhost']}")  
+
+    if broker_data["broker_type"] == "AMQP" and hasattr(device_model.broker, "topicE"):
+        broker_data["broker_topicExchange"] = device_model.broker.topicE
+        print(f"Broker topicExchange: {broker_data['broker_topicExchange']}")
+
+    if broker_data["broker_type"] == "Redis" and hasattr(device_model.broker, "db"):
+        broker_data["broker_db"] = device_model.broker.db
+        print(f"Broker db: {broker_data['broker_db']}")
+
+    print(f"Broker type: {broker_data['broker_type']}")
+    print(f"Broker host: {broker_data['broker_host']}")
+    print(f"Broker port: {broker_data['broker_port']}")
+    print(f"Broker name: {broker_data['broker_name']}")
+    print(f"Broker username: {broker_data['broker_username']}")
+    print(f"Broker password: {broker_data['broker_password']}")
+
+
+def demol2smauto(output_dir):
+    template = env.get_template("BrokerAndEntity.tmpl")
+    rt = template.render(**broker_data)
+    filepath = os.path.join(output_dir, f"{device_name}SmAutoModel.txt")
+    ofh = codecs.open(filepath, "w", encoding="utf-8")
+    ofh.write(rt)
+    ofh.close()
+
+def main(dev_model,output_dir):
     rpi5_device_path = os.path.join(REPO_PATH, "examples", dev_model)
     rpi5_device = utils.build_model(rpi5_device_path)
+
+    output = os.path.join(REPO_PATH, output_dir)
+
     print("Collecting info...")
     get_info(rpi5_device) 
+    print("Generating SmAuto model...")
+    demol2smauto(output_dir = output)
 
 if __name__ == "__main__":
-    main("RPi_gas_led.dev")
+    main("rpi_5_TCRT.dev", "output_m2m")
