@@ -261,4 +261,4 @@ def main(dev_model, output_dir):
 
 
 if __name__ == "__main__":
-    main("RPi_gas_led.dev", "rpi_gas")
+    main("RPi_ADC.dev", "rpi5_out")

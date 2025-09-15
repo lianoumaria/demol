@@ -19,9 +19,13 @@ class TrackerMessage(PubSubMessage):
     object_detection : bool = 0
     color : str = "Black"
 
+class ADCMessage(PubSubMessage):
+    header: MessageHeader = MessageHeader()
+    voltage: float = 0.0
+
 class LedArrayMessage(PubSubMessage):
     header: MessageHeader = MessageHeader()
-    colors : list = (  # defined in the device
+    colors : list = [  # defined in the device
         0xFF0000,  # Red
         0x00FF00,  # Green
         0x0000FF,  # Blue
@@ -34,7 +38,7 @@ class LedArrayMessage(PubSubMessage):
         0x000080,  # Navy
         0xFFA500,  # Orange
         0x800080,  # Purple
-    )
+    ]
     delay: float = 0.1 
     brightness: float = 0.5
 

@@ -60,6 +60,7 @@ def get_peripherals_info(device_model):
     global peripherals_data
 
     for i in range(len(device_model.connections)):
+        peripheral_data = {}
         per_frequency = 0
         # Gather peripheral info
         per_dev_name = device_model.connections[i].peripheral.name
@@ -80,6 +81,7 @@ def get_peripherals_info(device_model):
         # Create a dictionary for each peripheral and append it to the list
         peripheral_data = {"per_name": per_dev_name, "per_real_name": per_real_name, "per_type": per_type, "per_topic": per_topic, "per_broker": per_broker, "per_msg_type": per_msg_type}
         peripherals_data.append(peripheral_data)
+
 
 #Generate SmAuto model
 def demol2smauto(output_dir):
@@ -105,4 +107,4 @@ def main(dev_model,output_dir):
     demol2smauto(output_dir = output)
 
 if __name__ == "__main__":
-    main("RPi_fan_temp.dev", "output_m2m")
+    main("RPi_ADC.dev", "output_m2m")
