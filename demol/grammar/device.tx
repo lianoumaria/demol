@@ -144,17 +144,41 @@ OperatingSystem:
 ;
 
 Settings:
-    name=ID ":" value=OBJECT
+    NumericSetting    |
+    BoolSetting       |
+    StringSetting     |
+    ListSetting       |
+    DictSetting
+;
+
+NumericSetting:
+    IntSetting | FloatSetting
+;
+
+IntSetting:
+    name=ID ':' type='int' ('=' default=INT)?
+;
+
+FloatSetting:
+    name=ID ':' type='float' ('=' default=FLOAT)?
+;
+
+StringSetting:
+    name=ID ':' type='str' ('=' default=STRING)?
+;
+
+BoolSetting:
+    name=ID ':' type='bool' ('=' default=BOOL)?
+;
+
+ListSetting:
+    name=ID ':' type='list' ('=' '[' default*=OBJECT[','] ']')?
+;
+
+DictSetting:
+    name=ID ':' type='dict' ('=' '{' items*=Settings[','] '}')?
 ;
 
 OBJECT: 
-    PrimitiveValue | LIST
-;
-
-LIST:
-    "[" items*=OBJECT[","] "]"
-;
-
-PrimitiveValue:
-    FLOAT | INT | STRING | BOOL 
+	INT | STRING | FLOAT | BOOL 
 ;

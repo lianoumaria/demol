@@ -46,5 +46,8 @@ Entity {{peripheral["per_name"]}}
         - angular_speed: float = 0.5 
         - angular_step: float = 1.0   
     {%- endif %}
+    {%- if peripheral["per_type"] == "Sensor" and peripheral["per_frequency"] is defined and peripheral["per_frequency"] %}
+    freq: {{ peripheral["per_frequency"] }}
+    {%- endif %}
 end    
 {% endfor %}

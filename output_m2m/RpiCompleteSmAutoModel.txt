@@ -25,6 +25,7 @@ Entity MyTracker
     attributes:
         - object_detection : bool
         - color : str
+    freq: 100
 end    
 
 Entity MyTFMini
@@ -58,6 +59,7 @@ Entity MySRF
         - unit: str 
         - max_distance : float
         - min_distance : float
+    freq: 10.0
 end    
 
 Entity MyADC

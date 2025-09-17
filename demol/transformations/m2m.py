@@ -69,17 +69,23 @@ def get_peripherals_info(device_model):
         per_topic = device_model.connections[i].endpoint.topic
         per_broker = broker_data["broker_name"]
         per_msg_type = device_model.connections[i].peripheral.ref.msg
+        peripheral_data = {"per_name": per_dev_name, "per_real_name": per_real_name, "per_type": per_type, "per_topic": per_topic, "per_broker": per_broker, "per_msg_type": per_msg_type}
+
         for attribute in device_model.connections[i].peripheral.ref.attributes:
+            print("Checking attributes for frequency...")
             if attribute.name == "frequency":
+                print("Found frequency attribute!")
                 per_frequency = attribute.default
+                peripheral_data = peripheral_data | {"per_frequency": per_frequency}
         #In a peripheral model a default frequency might be given, but it must be overwritten if a new one is given in the device model.
         for setting in device_model.connections[i].settings:
+            print("Checking settings for frequency...")
             if setting.name == "frequency":
-                per_frequency = setting.value
-                peripheral_data = peripheral_data | {"per_frequency": per_frequency}
+                print("Found frequency setting!")
+                per_frequency = setting.default
+                peripheral_data["per_frequency"] = per_frequency
  
         # Create a dictionary for each peripheral and append it to the list
-        peripheral_data = {"per_name": per_dev_name, "per_real_name": per_real_name, "per_type": per_type, "per_topic": per_topic, "per_broker": per_broker, "per_msg_type": per_msg_type}
         peripherals_data.append(peripheral_data)
 
 

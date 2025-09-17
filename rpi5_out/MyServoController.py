@@ -9,7 +9,7 @@ from adafruit_motor import servo
 from adafruit_pca9685 import PCA9685
 
 FREQUENCY = 50  # Frequency for the PCA9685
-CHANNEL = 2.0 
+CHANNEL = 2 
 INITIAL_ANGLE = 90.0  # Initial angle for the servo
 FINAL_ANGLE = 180.0  # Final angle for the servo
 ANGULAR_SPEED = 0.5  # Speed of the servo movement in degrees per second

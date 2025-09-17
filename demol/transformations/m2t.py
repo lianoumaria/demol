@@ -22,7 +22,7 @@ peripheralMsg = []
 def convert_DictAttribute_to_dict(attribute):
     temp_dict = {}
     for item in attribute.items:
-        if item.__class__.__name__ == "DictAttribute":
+        if (item.__class__.__name__ == "DictAttribute") | (item.__class__.__name__ == "DictSetting"):
             temp_dict[item.name] = convert_DictAttribute_to_dict(item)
         else:
             temp_dict[item.name] = item.default
@@ -107,18 +107,22 @@ def get_info(device_model):
         peripheralMsg.append(device_model.connections[i].peripheral.ref.msg)
 
         for setting in device_model.connections[i].settings:
-            if setting.value.__class__.__name__ == "LIST":
-                setting.value = [item for item in setting.value.items]
-            if setting.name in attr[i].keys():
-                attr[i][setting.name] = setting.value
+            if setting.__class__.__name__ == "DictSetting":
+                temp_setting_value = convert_DictAttribute_to_dict(setting)
+                if setting.name in attr[i].keys():
+                    attr[i][setting.name] = temp_setting_value
+                else:
+                    attr[i] = attr[i] | {setting.name: temp_setting_value}
             else:
-                attr[i] = attr[i] | {setting.name: setting.value}
+                if setting.name in attr[i].keys():
+                    attr[i][setting.name] = setting.default
+                else:
+                    attr[i] = attr[i] | {setting.name: setting.default}
 
         # Εδώ στα attributes για απλότητα θα μπορούσα να κάνω έλεγχο για κατάληψη ίδιων pins από
         # διαφορετικούς αισθητήρες. Υπενθύμιση ότι στα i2c επιτρέπεται αλλά εκεί πρέπει να γίνει 
         # έλεγχος για ίδια slave_addresses
                    
-    #modules = list(peripheral_real_name.values())
 
 #Add try/except to create template if not found
 # This method produces both actuator and sensor classes  from corresponding templates
