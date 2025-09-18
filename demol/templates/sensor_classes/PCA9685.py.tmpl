@@ -6,7 +6,7 @@ import time
 import numpy as np
 import board
 from adafruit_motor import servo
-from adafruit_pca9685 import PCA9685
+from adafruit_pca9685 import PCA9685 as PCA
 
 FREQUENCY = {{frequency | default(50)}}  # Frequency for the PCA9685
 CHANNEL = {{channel | default(0)}} 
@@ -21,7 +21,7 @@ MAX_PULSE = {{max_pulse | default(2500)}}
 class ServoControllerClass:
     def __init__(self):
         self.i2c = board.I2C()
-        self.pca = PCA9685(self.i2c)
+        self.pca = PCA(self.i2c)
         if FREQUENCY >= MAX_FREQUENCY:
             raise ValueError(f"Frequency {FREQUENCY} Hz exceeds maximum {MAX_FREQUENCY} Hz.")
         self.pca.frequency = FREQUENCY
