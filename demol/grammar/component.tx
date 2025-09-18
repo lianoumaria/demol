@@ -9,7 +9,6 @@ Component:
     Board | Peripheral
 ;
 
-
 Board:
     'Board' name=ID
 	(
@@ -168,7 +167,6 @@ Memory:
     )#
 ;
 
-
 NetworkInterface:
     WifiInterface   |
     EthernetInterface
@@ -182,7 +180,6 @@ WifiInterface:
     )#
 ;
 
-
 EthernetInterface:
 	"ethernet:"
         "name:" name=ID
@@ -195,13 +192,6 @@ Bluetooth:
     'BT5'
 ;
 
-/*
-MessageType:
-	SensorMsgType | ActuatorMsgType
-;
-*/
-
-// Τα templates γράφονται με ωάση τα MsgType που υποστηρίζει η DSL
 SensorMsgType:
 	"Distance"      |
     "Temperature"   |
@@ -220,7 +210,6 @@ ActuatorMsgType:
     "ServoController"   |
     "LedArray"
 ;
-
 
 Attribute:
     NumericAttribute    |
@@ -262,8 +251,7 @@ Constraint:
 	name = "max_frequency" ":" value=NUMBER unit=FrequencyUnit |
 	name = "min_distance" ":" value=NUMBER unit=DistanceUnit |
 	name = "max_distance" ":" value=NUMBER unit=DistanceUnit
-;
-		
+;	
 
 UNITS:
     ("kb" | "mb" | "gb" | "b")

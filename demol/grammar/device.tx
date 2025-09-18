@@ -1,4 +1,4 @@
-// Grammar for a system. A system consists a board (ESP32/ESP8266)
+// Grammar for a system. A system consists a board
 // and one or more peripherals (sensors/actuators).
 
 import component
