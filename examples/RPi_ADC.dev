@@ -174,5 +174,5 @@ Connection
         - channel : int = 2
         - initial_angle : float = 90.0
         - final_angle : float = 180.0
-        - angular_speed : float = 0.5
+        - angular_speed : float = 10.0
 end

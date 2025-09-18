@@ -29,6 +29,8 @@ class LEDArray:
         if 'brightness' in params:
             self.pixels.brightness = brightness
         
+        # Turn the colors into integers so the neopixel library will understand.
+        colors = [int(x, 16) for x in colors]
         # Execute the LED sequence
         i = 0
         for color in colors:

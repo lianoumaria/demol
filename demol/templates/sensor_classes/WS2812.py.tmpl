@@ -4,7 +4,7 @@ import neopixel_spi as neopixel
 
 NUM_PIXELS = {{num_pixels | default(12)}}
 PIXEL_ORDER = neopixel.{{color_format | default("GRB")}}
-COLORS = {{colors | default("[0xFF0000, 0x00FF00, 0x0000FF, 0xFFFF00, 0xFF00FF, 0x00FFFF, 0xFFFFFF, 0x800000, 0x008000, 0x000080, 0xFFA500, 0x800080]")}}
+COLORS = {{colors | default("['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']")}}
 DELAY = {{delay | default(0.1)}}
 BRIGHTNESS = {{brightness | default(0.5)}}
 
@@ -29,6 +29,8 @@ class LEDArray:
         if 'brightness' in params:
             self.pixels.brightness = brightness
         
+        # Turn the colors into integers so the neopixel library will understand.
+        colors = [int(x, 16) for x in colors]
         # Execute the LED sequence
         i = 0
         for color in colors:
