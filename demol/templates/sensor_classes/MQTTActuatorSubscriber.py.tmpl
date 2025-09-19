@@ -23,7 +23,7 @@ def on_message(msg):
 if __name__ == '__main__':
     actuator = {{actuator_type}}()
     try:
-        conn_params = ConnectionParameters()
+        conn_params = ConnectionParameters(host="{{host}}", port={{port}})
 
         node = Node(node_name='actuators.{{actuator_type}}', connection_params=conn_params)
 

@@ -1,16 +1,16 @@
 import time
 
-from TempSensor import BME680
+from MySRF import SRF05
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
 #from commlib.msg import MessageHeader, PubSubMessage
-from MQTTMessages import EnvMessage 
+from MQTTMessages import DistanceMessage 
 
-FREQUENCY = 1
+FREQUENCY = 10.0
 
 def sample(msg):
     global FREQUENCY
-    sensor = BME680()
+    sensor = SRF05()
     if FREQUENCY == 0:
         raise ValueError("Frequency zero is not valid")
     elif FREQUENCY > sensor.get_max_frequency():
@@ -30,9 +30,9 @@ def sample(msg):
             sensor.disconnect()
     
 if __name__ == "__main__":
-    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=8883)
-    node = Node(node_name='sensors.BME680', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=EnvMessage, topic="rpifan.sensor.env.tempsensor")
+    conn_params = ConnectionParameters(host="localhost", port=1883)
+    node = Node(node_name='sensors.SRF05', connection_params=conn_params)
+    pub = node.create_publisher(msg_type=DistanceMessage, topic="my_raspi.sensor.distance.mysrf")
     node.run()
-    msg = EnvMessage()
+    msg = DistanceMessage()
     sample(msg = msg)

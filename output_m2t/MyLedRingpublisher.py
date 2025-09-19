@@ -2,7 +2,7 @@ import time
 import sys
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
-from MQTTMessages import ServoControllerMessage
+from MQTTMessages import LedArrayMessage
 import ast
 
 if __name__ == "__main__":
@@ -16,7 +16,7 @@ if __name__ == "__main__":
             print(f"  Argument {i}: {arg}")
 
             # get attribute names
-            attr_names = list(ServoControllerMessage.__annotations__.keys())
+            attr_names = list(LedArrayMessage.__annotations__.keys())
             # filter out "header"
             attr_names = [name for name in attr_names if name != "header"]
             # build the CLI-style strings
@@ -26,7 +26,7 @@ if __name__ == "__main__":
             for cli_arg, attr_name in zip(cli_args, attr_names):
                 if arg.startswith(cli_arg):
                     raw_val = arg.split('=')[1]
-                    expected_type = ServoControllerMessage.__annotations__[attr_name]
+                    expected_type = LedArrayMessage.__annotations__[attr_name]
 
                     try:
                         # Try to parse as a Python literal first
@@ -41,11 +41,11 @@ if __name__ == "__main__":
                         attr_values[attr_name] = parsed_val
 
     print(attr_values)
-    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=8883)
-    node = Node(node_name='actuators.PCA9685', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=ServoControllerMessage, topic="rpifan.actuator.servocontroller.fancontroller")
+    conn_params = ConnectionParameters(host="localhost", port=1883)
+    node = Node(node_name='actuators.WS2812', connection_params=conn_params)
+    pub = node.create_publisher(msg_type=LedArrayMessage, topic="my_raspi.actuator.ledarray.myledring")
     node.run()
-    msg = ServoControllerMessage()
+    msg = LedArrayMessage()
 
     try:
         while True:
