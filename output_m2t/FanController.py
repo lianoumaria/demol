@@ -1,0 +1,51 @@
+# servo classes are defined considering a pca9685 servo driver
+# SPDX-FileCopyrightText: 2021 ladyada for Adafruit Industries
+# SPDX-License-Identifier: MIT
+
+import time
+import numpy as np
+import board
+from adafruit_motor import servo
+from adafruit_pca9685 import PCA9685 as PCA
+
+FREQUENCY = 50  # Frequency for the PCA9685
+CHANNEL = 2 
+INITIAL_ANGLE = 0.0  # Initial angle for the servo
+FINAL_ANGLE = 0.0  # Final angle for the servo
+ANGULAR_SPEED = 0.0  # Speed of the servo movement in degrees per second
+ANGULAR_STEP = 1  # Step size for the servo movement in degrees
+MAX_FREQUENCY = 1000
+MIN_PULSE = 500
+MAX_PULSE = 2500
+
+class ServoControllerClass:
+    def __init__(self):
+        self.i2c = board.I2C()
+        self.pca = PCA(self.i2c)
+        if FREQUENCY >= MAX_FREQUENCY:
+            raise ValueError(f"Frequency {FREQUENCY} Hz exceeds maximum {MAX_FREQUENCY} Hz.")
+        self.pca.frequency = FREQUENCY
+        self.servo7 = servo.Servo(self.pca.channels[CHANNEL], min_pulse=MIN_PULSE, max_pulse=MAX_PULSE)
+    
+
+    def set_action(self, **params):
+        initial_angle = params.get('initial_angle', INITIAL_ANGLE)
+        final_angle = params.get('final_angle', FINAL_ANGLE)
+        angular_step = params.get('angular_step', ANGULAR_STEP)
+        angular_speed = params.get('angular_speed', ANGULAR_SPEED)
+
+        if (angular_speed != 0):
+            angle_range = np.arange(initial_angle, final_angle + angular_step, angular_step)
+            time_per_step = angular_step / angular_speed  # Time = Distance / Speed
+            for angle in angle_range:
+                self.servo7.angle = angle
+                time.sleep(time_per_step)
+        else:   
+            print("Speed is set to zero. Servo will stop moving.")
+            self.disconnect()
+
+    def disconnect(self):
+        self.pca.deinit()
+
+class PCA9685(ServoControllerClass):
+    pass
