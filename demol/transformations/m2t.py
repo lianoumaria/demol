@@ -265,4 +265,4 @@ def main(dev_model, output_dir):
 
 
 if __name__ == "__main__":
-    main("RPi_ADC.dev", "rpi5_out")
+    main("RPi_fan_temp.dev", "output_m2t")
