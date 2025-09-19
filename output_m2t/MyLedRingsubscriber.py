@@ -25,7 +25,7 @@ if __name__ == '__main__':
     try:
         conn_params = ConnectionParameters(host="localhost", port=1883)
 
-        node = Node(node_name='actuators.WS2812', connection_params=conn_params)
+        node = Node(node_name='actuators.WS2812', connection_params=conn_params, heartbeats=False)
 
         node.create_subscriber(msg_type=LedArrayMessage,
                                topic="my_raspi.actuator.ledarray.myledring",

@@ -10,7 +10,7 @@ def on_message(msg):
 if __name__ == '__main__':
     conn_params = ConnectionParameters(host="localhost", port=1883)
 
-    node = Node(node_name='node.SRF05', connection_params=conn_params)
+    node = Node(node_name='node.SRF05', connection_params=conn_params, heartbeats=False)
 
     node.create_subscriber(msg_type=DistanceMessage,
                            topic="my_raspi.sensor.distance.mysrf",

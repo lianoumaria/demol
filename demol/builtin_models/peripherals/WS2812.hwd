@@ -12,7 +12,7 @@ Actuator WS2812
             number: 2
             type: GND
         - io_pin:
-            functions: gpio
+            functions: gpio, mosi-0
             name: DIN
             number: 3
             vmin: 0

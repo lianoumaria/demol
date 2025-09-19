@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     print(attr_values)
     conn_params = ConnectionParameters(host="localhost", port=1883)
-    node = Node(node_name='actuators.WS2812', connection_params=conn_params)
+    node = Node(node_name='actuators.WS2812', connection_params=conn_params, heartbeats=False)
     pub = node.create_publisher(msg_type=LedArrayMessage, topic="my_raspi.actuator.ledarray.myledring")
     node.run()
     msg = LedArrayMessage()

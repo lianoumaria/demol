@@ -146,9 +146,7 @@ Connection
     ioConnections:
         - type: gpio
           name: LedControl
-          output: true
-          pin:
-              GPIO6 -- DIN
+          pin: GPIO10 -- DIN
     endpoint:
     //    topic: "my_raspi.actuators.ws2812.MyLedRing"
         type: Subscriber

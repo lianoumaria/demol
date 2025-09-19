@@ -31,7 +31,7 @@ def sample(msg):
     
 if __name__ == "__main__":
     conn_params = ConnectionParameters(host="localhost", port=1883)
-    node = Node(node_name='sensors.SRF05', connection_params=conn_params)
+    node = Node(node_name='sensors.SRF05', connection_params=conn_params, heartbeats=False)
     pub = node.create_publisher(msg_type=DistanceMessage, topic="my_raspi.sensor.distance.mysrf")
     node.run()
     msg = DistanceMessage()
