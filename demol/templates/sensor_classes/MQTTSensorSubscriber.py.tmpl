@@ -10,7 +10,7 @@ def on_message(msg):
 if __name__ == '__main__':
     conn_params = ConnectionParameters(host="{{host}}", port={{port}})
 
-    node = Node(node_name='node.{{sensor_type}}', connection_params=conn_params)
+    node = Node(node_name='node.{{sensor_type}}', connection_params=conn_params, heartbeats=False)
 
     node.create_subscriber(msg_type={{sensorMsg}}Message,
                            topic="{{topic}}",

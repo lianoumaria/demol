@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     print(attr_values)
     conn_params = ConnectionParameters(host="{{host}}", port={{port}})
-    node = Node(node_name='actuators.{{actuator_type}}', connection_params=conn_params)
+    node = Node(node_name='actuators.{{actuator_type}}', connection_params=conn_params, heartbeats=False)
     pub = node.create_publisher(msg_type={{actuatorMsg}}Message, topic="{{topic}}")
     node.run()
     msg = {{actuatorMsg}}Message()
