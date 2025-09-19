@@ -42,12 +42,14 @@ Entity {{peripheral["per_name"]}}
         - brightness: float = 0.5 
     {%- elif peripheral["per_msg_type"] == "ServoController" %} 
         - initial_angle: float = 0.0
-        - final_angle: float = 180.0
-        - angular_speed: float = 0.5 
-        - angular_step: float = 1.0   
+        - final_angle: float = 0.0
+        - angular_speed: float = 0.0
+        - angular_step: float = 0.0   
     {%- endif %}
     {%- if peripheral["per_type"] == "Sensor" and peripheral["per_frequency"] is defined and peripheral["per_frequency"] %}
     freq: {{ peripheral["per_frequency"] }}
+    {%- elif peripheral["per_type"] == "Sensor"%}
+    freq: 1
     {%- endif %}
 end    
 {% endfor %}

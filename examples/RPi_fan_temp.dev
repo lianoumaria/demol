@@ -17,13 +17,13 @@ Network
     passwd: "guest"
 end
 
-Broker<MQTT> MyBroker
-    host: "localhost"
-    port: 1883
-    ssl: False
+Broker<MQTT> locsys_broker
+    host: "locsys.issel.ee.auth.gr"
+    port: 8883
+    ssl: true
     auth:
-        username: "guest"
-        password: "guest"
+        username: "r4a"
+        password: "r4a123$"
 end
 
 Connection
@@ -58,7 +58,7 @@ Connection
         type: Subscriber
     settings:
         - channel : int = 2
-        - initial_angle : float = -180.0
-        - final_angle : float = 180.0
-        - angular_speed : float = 360.0
+        - initial_angle : float = 0.0
+        - final_angle : float = 0.0
+        - angular_speed : float = 0.0
 end

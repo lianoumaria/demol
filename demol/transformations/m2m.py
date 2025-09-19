@@ -93,7 +93,7 @@ def get_peripherals_info(device_model):
 def demol2smauto(output_dir):
     template = env.get_template("BrokerAndEntity.tmpl")
     rt = template.render(**broker_data, peripherals=peripherals_data)
-    filepath = os.path.join(output_dir, f"{device_name}SmAutoModel.txt")
+    filepath = os.path.join(output_dir, f"{device_name}SmAutoModel.auto")
     ofh = codecs.open(filepath, "w", encoding="utf-8")
     ofh.write(rt)
     ofh.close()
@@ -113,4 +113,4 @@ def main(dev_model,output_dir):
     demol2smauto(output_dir = output)
 
 if __name__ == "__main__":
-    main("RPi_ADC.dev", "output_m2m")
+    main("RPi_fan_temp.dev", "output_m2m")

@@ -16,6 +16,7 @@ Entity TempSensor
         - pressure : float 
         - humidity : float
         - gas_resistance : float
+    freq: 1
 end    
 
 Entity FanController
@@ -24,7 +25,7 @@ Entity FanController
     broker: locsys_broker
     attributes: 
         - initial_angle: float = 0.0
-        - final_angle: float = 180.0
-        - angular_speed: float = 0.5 
-        - angular_step: float = 1.0
+        - final_angle: float = 0.0
+        - angular_speed: float = 0.0
+        - angular_step: float = 0.0
 end    
