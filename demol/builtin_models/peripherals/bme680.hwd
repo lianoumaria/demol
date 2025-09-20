@@ -24,7 +24,7 @@ Sensor BME680
         -pressure_oversample : int = 4
         -temperature_oversample : int = 8
         -filter_size : int = 3
-        -gas_status : str = "ENABLE_GAS_MEAS"//Maybe inside the constructor there will be some enumerations
+        -gas_status : str = "ENABLE_GAS_MEAS"
         -heater_temp : int = 320
         -heater_duration : int = 150
         -heater_profile : int = 0   
