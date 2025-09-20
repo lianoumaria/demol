@@ -18,12 +18,12 @@ Network
 end
 
 Broker<MQTT> MyBroker
-    host: "localhost"
+    host: "locsys.issel.ee.auth.gr"
     port: 1883
     ssl: False
     auth:
-        username: "guest"
-        password: "guest"
+        username: "sensors"
+        password: "issel.sensors"
 end
 
 Connection

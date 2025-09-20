@@ -4,6 +4,7 @@ from demol.lang import utils
 from demol.transformations import m2t_riot_old, device_to_plantuml
 import jinja2
 import codecs
+import warnings
 
 fsloader = jinja2.FileSystemLoader(CLASS_TEMPLATES)
 env = jinja2.Environment(loader=fsloader)
@@ -16,6 +17,9 @@ template = []
 topic = []
 host = ""
 port = 0
+ssl = False
+username = ""
+password = ""
 constraints = {}
 peripheralMsg = []
 
@@ -34,11 +38,27 @@ def get_info(device_model):
     device_to_plantuml.device_to_plantuml(device_model)
     board_name = device_model.components.board.name
 
-    global host, port 
+    global host, port, ssl, username, password
 
     if str(device_model.broker.__class__.__name__) == "MQTTBroker":
         host = device_model.broker.host
         port = device_model.broker.port
+        if hasattr(device_model.broker, 'ssl'):
+            ssl = device_model.broker.ssl
+        #Check if it is the supported auth method for commlib-py
+        if device_model.broker.auth.__class__.__name__ == "AuthPlain":
+            if hasattr(device_model.broker.auth, 'username'):
+                username = device_model.broker.auth.username
+            if hasattr(device_model.broker.auth, 'password'):
+                password = device_model.broker.auth.password
+        #Raise type error if not supported
+        elif device_model.broker.auth.__class__.__name__ == "AuthCert" or device_model.broker.auth.__class__.__name__ == "AuthApiKey":
+            raise TypeError("This transformation uses commlib-py library and only supports plain authentication for MQTTBroker.")
+        #Prompt user to add username and password if not given and remote broker is used
+        else:
+            if (host != "localhost") and ((not hasattr(device_model.broker.auth, 'username')) or (not hasattr(device_model.broker.auth, 'password'))):
+                warnings.warn("You are using a remote broker without authentication. This is not secure. Add username and password to your .dev file.")
+
     else:
         raise TypeError("This transformation does not support other Broker types than MQTTBroker.")
 
@@ -177,7 +197,10 @@ def generate_process(out_dir):
                 "sensorMsg": peripheralMsg[i],
                 "topic": topic[i],
                 "host": host,
-                "port": port
+                "port": port,
+                "ssl": ssl,
+                "username": username,
+                "password": password
             } | attr[i]
                   
             template = env.get_template("MQTTSensorPublisher.py.tmpl")
@@ -203,7 +226,10 @@ def generate_process(out_dir):
                 "actuatorMsg": peripheralMsg[i],
                 "topic": topic[i],
                 "host": host,
-                "port": port
+                "port": port,
+                "ssl": ssl,
+                "username": username,
+                "password": password
             } | attr[i]         
                 
             template = env.get_template("MQTTActuatorPublisher.py.tmpl")
@@ -262,6 +288,9 @@ def main(dev_model, output_dir):
     print(topic)
     print(host)
     print(port)
+    print(ssl)
+    print(username)
+    print(password)
 
 
 if __name__ == "__main__":

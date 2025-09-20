@@ -23,7 +23,7 @@ def on_message(msg):
 if __name__ == '__main__':
     actuator = WS2812()
     try:
-        conn_params = ConnectionParameters(host="localhost", port=1883)
+        conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False)
 
         node = Node(node_name='actuators.WS2812', connection_params=conn_params, heartbeats=False)
 

@@ -30,7 +30,7 @@ def sample(msg):
             sensor.disconnect()
     
 if __name__ == "__main__":
-    conn_params = ConnectionParameters(host="localhost", port=1883)
+    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False)
     node = Node(node_name='sensors.SRF05', connection_params=conn_params, heartbeats=False)
     pub = node.create_publisher(msg_type=DistanceMessage, topic="my_raspi.sensor.distance.mysrf")
     node.run()
