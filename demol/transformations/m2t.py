@@ -294,4 +294,4 @@ def main(dev_model, output_dir):
 
 
 if __name__ == "__main__":
-    main("ThesisExample.dev", "output_m2t")
+    main("EntranceLEDs.dev", "SmartRoomFiles")

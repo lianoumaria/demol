@@ -8,15 +8,15 @@ import board
 from adafruit_motor import servo
 from adafruit_pca9685 import PCA9685 as PCA
 
-FREQUENCY = {{frequency | default(50)}}  # Frequency for the PCA9685
-CHANNEL = {{channel | default(0)}} 
-INITIAL_ANGLE = {{initial_angle | default(0)}}  # Initial angle for the servo
-FINAL_ANGLE = {{final_angle | default(180)}}  # Final angle for the servo
-ANGULAR_SPEED = {{angular_speed | default(0.1)}}  # Speed of the servo movement in degrees per second
-ANGULAR_STEP = {{angular_step | default(1)}}  # Step size for the servo movement in degrees
-MAX_FREQUENCY = {{max_frequency | default(1000)}}
-MIN_PULSE = {{min_pulse | default(500)}}
-MAX_PULSE = {{max_pulse | default(2500)}}
+FREQUENCY = 50  # Frequency for the PCA9685
+CHANNEL = 7 
+INITIAL_ANGLE = 0.0  # Initial angle for the servo
+FINAL_ANGLE = 0.0  # Final angle for the servo
+ANGULAR_SPEED = 9.0  # Speed of the servo movement in degrees per second
+ANGULAR_STEP = 1.0  # Step size for the servo movement in degrees
+MAX_FREQUENCY = 1000
+MIN_PULSE = 500
+MAX_PULSE = 2500
 
 class ServoControllerClass:
     def __init__(self):

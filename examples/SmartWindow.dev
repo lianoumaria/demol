@@ -1,0 +1,65 @@
+Metadata
+    name: "SmartWindow"
+    description: "My RaspberryPi 5 with a BME680 and a ServoMotor to open and close a window"
+    author: "maria"
+    os: Raspbian
+end
+
+Components
+    board: RaspberryPi_5_16GB
+    peripherals:
+        - BME680(TempSensor)
+        - PCA9685(WindowController)
+end
+
+Network
+    ssid: "Wifi_2.4GHz"
+    passwd: "guest"
+end
+
+Broker<MQTT> locsys_broker
+    host: "locsys.issel.ee.auth.gr"
+    port: 1883
+    ssl: false
+    auth:
+        username: "sensors"
+        password: "issel.sensors"
+end
+
+Connection
+    peripheral: TempSensor
+    powerConnections:
+        - GND_1 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: i2c
+          name: env_data
+          slave_address: 0x76
+          pins:
+            sda: GPIO2 -- sda
+            scl: GPIO3 -- scl
+    endpoint:
+        type: Publisher 
+end
+
+Connection
+    peripheral: WindowController
+    powerConnections:
+        - GND_2 -- GND_1
+        - power_5v_b -- VCC_1
+    ioConnections:
+        - type: i2c
+          name: pca_control
+          slave_address: 0x64
+          pins:
+            sda: GPIO2 -- SDA_1
+            scl: GPIO3 -- SCL_1
+    endpoint:
+        type: Subscriber
+    settings:
+        - channel : int = 7
+        - initial_angle : float = 0.0
+        - final_angle : float = 0.0
+        - angular_speed : float = 9.0
+        - angular_step : float = 1.0
+end

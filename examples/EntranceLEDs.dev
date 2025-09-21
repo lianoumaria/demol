@@ -1,0 +1,60 @@
+Metadata
+    name: "EntranceLEDs"
+    description: "Embedded device with SRF and LEDs"
+    author: "maria"
+    os: Raspbian
+end
+
+Components
+    board: RaspberryPi_5_16GB
+    peripherals:
+        - SRF05(EntranceSRF)
+        - WS2812(RoomLights)
+end
+
+Network
+    ssid: "Wifi_2.4GHz"
+    passwd: "guest"
+end
+
+Broker<MQTT> locsys_broker
+    host: "locsys.issel.ee.auth.gr"
+    port: 1883
+    ssl: False
+    auth:
+        username: "sensors"
+        password: "issel.sensors"
+end
+
+Connection
+    peripheral: EntranceSRF
+    powerConnections:
+        - GND_1 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: gpio
+          name: echo
+          pin:
+              GPIO24 -- echo
+        - type: gpio
+          name: trigger
+          pin:
+              GPIO23 -- trigger
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: RoomLights
+    powerConnections:
+        - GND_2 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: LedControl
+          pin: GPIO10 -- DIN
+    endpoint:
+        type: Subscriber
+    settings:
+        - colors: list = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']
+end

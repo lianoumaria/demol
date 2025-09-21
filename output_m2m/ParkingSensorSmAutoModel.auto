@@ -1,0 +1,20 @@
+Broker<MQTT> MyBroker
+    host: "locsys.issel.ee.auth.gr"
+    port: 1883
+    auth:
+        username: "sensors"
+        password: "issel.sensors"
+end
+
+
+Entity ParkingDistance
+    type: sensor
+    topic: "parkingsensor.sensor.distance.parkingdistance"
+    broker: MyBroker
+    attributes:
+        - distance: float
+        - unit: str 
+        - max_distance : float
+        - min_distance : float
+    freq: 20.0
+end    

@@ -1,0 +1,41 @@
+Metadata
+    name: "ParkingLeds"
+    description: "Device with warning lights"
+    author: "maria"
+    os: Raspbian
+end
+
+Components
+    board: RaspberryPi_5_16GB
+    peripherals:
+        - WS2812(WarningLights)
+end
+
+Network
+    ssid: "Wifi_2.4GHz"
+    passwd: "guest"
+end
+
+Broker<MQTT> locsys_broker
+    host: "locsys.issel.ee.auth.gr"
+    port: 1883
+    ssl: False
+    auth:
+        username: "sensors"
+        password: "issel.sensors"
+end
+
+Connection
+    peripheral: WarningLights
+    powerConnections:
+        - GND_2 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: LedControl
+          pin: GPIO10 -- DIN
+    endpoint:
+        type: Subscriber
+    settings:
+        - colors: list = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']
+end

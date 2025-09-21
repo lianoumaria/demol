@@ -113,4 +113,4 @@ def main(dev_model,output_dir):
     demol2smauto(output_dir = output)
 
 if __name__ == "__main__":
-    main("RPi_fan_temp.dev", "output_m2m")
+    main("ParkingSensor.dev", "ParkingFiles")
