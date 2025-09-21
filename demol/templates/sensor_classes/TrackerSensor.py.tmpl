@@ -9,12 +9,6 @@ class TrackerSensor:
     def __init__(self):
         self.sensor = DInD(GPIO_PIN)
         self.max_frequency = MAX_FREQUENCY
-
-    def get_color(self):
-        return "White" if self.sensor.value == 1 else "Black"
-    
-    def get_color_existence(self):
-        return self.sensor.value
  
     def read_data(self):
         value = self.sensor.value

@@ -8,7 +8,7 @@ def on_message(msg):
     print(f'Received data: {msg}')
 
 if __name__ == '__main__':
-    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False)
+    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
 
     node = Node(node_name='node.SRF05', connection_params=conn_params, heartbeats=False)
 

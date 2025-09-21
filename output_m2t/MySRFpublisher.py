@@ -20,7 +20,6 @@ def sample(msg):
     try:
         while True:
             pub.publish(msg)
-            #msg.data = sensor.read_data()
             data = sensor.read_data()
             for key,value in data.items():
                 key = key.strip('""')
@@ -30,7 +29,7 @@ def sample(msg):
             sensor.disconnect()
     
 if __name__ == "__main__":
-    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False)
+    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
     node = Node(node_name='sensors.SRF05', connection_params=conn_params, heartbeats=False)
     pub = node.create_publisher(msg_type=DistanceMessage, topic="my_raspi.sensor.distance.mysrf")
     node.run()

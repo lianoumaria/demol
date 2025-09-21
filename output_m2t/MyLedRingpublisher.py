@@ -41,7 +41,7 @@ if __name__ == "__main__":
                         attr_values[attr_name] = parsed_val
 
     print(attr_values)
-    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False)
+    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
     node = Node(node_name='actuators.WS2812', connection_params=conn_params, heartbeats=False)
     pub = node.create_publisher(msg_type=LedArrayMessage, topic="my_raspi.actuator.ledarray.myledring")
     node.run()

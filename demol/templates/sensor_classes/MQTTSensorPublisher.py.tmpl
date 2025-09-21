@@ -20,7 +20,6 @@ def sample(msg):
     try:
         while True:
             pub.publish(msg)
-            #msg.data = sensor.read_data()
             data = sensor.read_data()
             for key,value in data.items():
                 key = key.strip('""')

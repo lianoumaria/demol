@@ -33,7 +33,7 @@ class Distance_sensor:
         }
         return data
     
-    def get_max_freq(self):
+    def get_max_frequency(self):
         return self.max_frequency
 
 
