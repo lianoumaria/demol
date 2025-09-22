@@ -43,3 +43,6 @@ class LEDArray:
 
     def disconnect(self):
         self.pixels.fill(0)
+
+class WS2812(LEDArray):
+    pass
