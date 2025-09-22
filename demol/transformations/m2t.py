@@ -35,7 +35,7 @@ def convert_DictAttribute_to_dict(attribute):
 def get_info(device_model):
     # device_model is the .dev (parsed file) 
     # component_models is a list of all the board and peripherals used
-    device_to_plantuml.device_to_plantuml(device_model)
+    #device_to_plantuml.device_to_plantuml(device_model)
     board_name = device_model.components.board.name
 
     global host, port, ssl, username, password
@@ -138,13 +138,8 @@ def get_info(device_model):
                     attr[i][setting.name] = setting.default
                 else:
                     attr[i] = attr[i] | {setting.name: setting.default}
+                 
 
-        # Εδώ στα attributes για απλότητα θα μπορούσα να κάνω έλεγχο για κατάληψη ίδιων pins από
-        # διαφορετικούς αισθητήρες. Υπενθύμιση ότι στα i2c επιτρέπεται αλλά εκεί πρέπει να γίνει 
-        # έλεγχος για ίδια slave_addresses
-                   
-
-#Add try/except to create template if not found
 # This method produces both actuator and sensor classes  from corresponding templates
 def create_classes(out_dir):
     i = 0
@@ -248,12 +243,12 @@ def generate_process(out_dir):
             
             i += 1  
 
-            template = env.get_template("MQTTMessages.py.tmpl")
-            rt = template.render()
-            filepath = os.path.join(out_dir, f"MQTTMessages.py")
-            ofh = codecs.open(filepath, "w", encoding="utf-8")
-            ofh.write(rt)
-            ofh.close()  
+    template = env.get_template("MQTTMessages.py.tmpl")
+    rt = template.render()
+    filepath = os.path.join(out_dir, f"MQTTMessages.py")
+    ofh = codecs.open(filepath, "w", encoding="utf-8")
+    ofh.write(rt)
+    ofh.close()  
 
 def main(dev_model, output_dir):
     # collect .dev models
@@ -266,32 +261,19 @@ def main(dev_model, output_dir):
 
     print("Collecting info...")
     get_info(rpi5_device) 
-    print("pins")
-    print(pins)
-    print("peripheral_ref_name")
-    print(peripheral_ref_name)
-    print("peripheral_real_name")
-    print(peripheral_real_name)
-    print("peripheral_type")
-    print(peripheral_type)
-    print("Attributes")
-    print(attr)
-    print("Constarints")
-    print(constraints)
-    print("MESSAGES")
-    print(peripheralMsg)
+    print(f"pins : {pins}") 
+    print(f"peripheral_ref_name : {peripheral_ref_name}") 
+    print(f"peripheral_real_name : {peripheral_real_name}")
+    print(f"peripheral_type : {peripheral_type}")
+    print(f"Attributes : {attr}")
+    print(f"Constraints : {constraints}")
+    print(f"MESSAGES : {peripheralMsg}")
     print("Creating classes...")
     create_classes(out_dir=output)
-    print("/n")
     print("Generating processes")
     generate_process(out_dir=output)
-    print(topic)
-    print(host)
-    print(port)
-    print(ssl)
-    print(username)
-    print(password)
+    print(f"topic: {topic}, host: {host}, port: {port}, ssl: {ssl}, username: {username}, password: {password}")
 
 
 if __name__ == "__main__":
-    main("EntranceLEDs.dev", "SmartRoomFiles")
+    main("LoCScenario2.dev", "scenario2out\\8per")

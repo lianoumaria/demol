@@ -1,0 +1,207 @@
+Metadata
+    name: "Scenario1"
+    description: "My RaspberryPi 5 with increasing number of TCRT5000 tracker sensors."
+    author: "maria"
+    os: Raspbian
+end
+
+Components
+    board: RaspberryPi_5_16GB
+    peripherals:
+        - TCRT5000(Tracker1)
+        - TCRT5000(Tracker2)
+        - TCRT5000(Tracker3)
+        - TCRT5000(Tracker4)
+        - TCRT5000(Tracker5)
+        - TCRT5000(Tracker6)
+        - TCRT5000(Tracker7)
+        - TCRT5000(Tracker8)
+        /*
+        - TCRT5000(Tracker9)
+        - TCRT5000(Tracker10)
+        - TCRT5000(Tracker11)
+        - TCRT5000(Tracker12)*/
+end
+
+Network
+    ssid: "Wifi_2.4GHz"
+    passwd: "guest"
+end
+
+Broker<MQTT> locsys_broker
+    host: "locsys.issel.ee.auth.gr"
+    port: 1883
+    ssl: False
+    auth:
+        username: "sensors"
+        password: "issel.sensors"
+end
+
+Connection
+    peripheral: Tracker1
+    powerConnections:
+        - GND_1 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO4 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker2
+    powerConnections:
+        - GND_1 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO17 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker3
+    powerConnections:
+        - GND_2 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO27 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker4
+    powerConnections:
+        - GND_2 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO22 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker5
+    powerConnections:
+        - GND_3 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO5 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker6
+    powerConnections:
+        - GND_3 -- GND
+        - power_5v_a -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO6 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker7
+    powerConnections:
+        - GND_4 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO13 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker8
+    powerConnections:
+        - GND_4 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO26 -- D0
+    endpoint:
+        type: Publisher
+end
+/*
+Connection
+    peripheral: Tracker9
+    powerConnections:
+        - GND_5 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO23 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker10
+    powerConnections:
+        - GND_5 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO24 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker11
+    powerConnections:
+        - GND_6 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO25 -- D0
+    endpoint:
+        type: Publisher
+end
+
+Connection
+    peripheral: Tracker12
+    powerConnections:
+        - GND_6 -- GND
+        - power_5v_b -- VCC
+    ioConnections:
+        - type: gpio
+          name: digitalIN
+          pin:
+              GPIO12 -- D0
+    endpoint:
+        type: Publisher
+end
+*/
