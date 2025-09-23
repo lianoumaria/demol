@@ -9,13 +9,13 @@ Components
     board: RaspberryPi_5_16GB
     peripherals:
         - VL53L1X(MyToF)
-        - TCRT5000(MyTracker)
+        /*- TCRT5000(MyTracker)
         - TFMini(MyTFMini)
         - BME680(MyBME)
         - SRF05(MySRF)
         - ADCDifferentialPi(MyADC)
         - WS2812(MyLedRing)
-        - PCA9685(MyServoController)
+        - PCA9685(MyServoController)*/
 end
 
 Network
@@ -47,7 +47,7 @@ Connection
     endpoint:
         type: Publisher 
 end
-
+/*
 Connection
     peripheral: MyTracker
     powerConnections:
@@ -167,3 +167,4 @@ Connection
         - final_angle : float = 180.0
         - angular_speed : float = 10.0
 end
+*/

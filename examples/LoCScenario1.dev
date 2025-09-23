@@ -9,14 +9,13 @@ Components
     board: RaspberryPi_5_16GB
     peripherals:
         - TCRT5000(Tracker1)
-        - TCRT5000(Tracker2)
+        /*- TCRT5000(Tracker2)
         - TCRT5000(Tracker3)
         - TCRT5000(Tracker4)
         - TCRT5000(Tracker5)
         - TCRT5000(Tracker6)
         - TCRT5000(Tracker7)
         - TCRT5000(Tracker8)
-        /*
         - TCRT5000(Tracker9)
         - TCRT5000(Tracker10)
         - TCRT5000(Tracker11)
@@ -50,7 +49,7 @@ Connection
     endpoint:
         type: Publisher
 end
-
+/*
 Connection
     peripheral: Tracker2
     powerConnections:
@@ -148,7 +147,7 @@ Connection
     endpoint:
         type: Publisher
 end
-/*
+
 Connection
     peripheral: Tracker9
     powerConnections:

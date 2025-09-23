@@ -113,4 +113,4 @@ def main(dev_model,output_dir):
     demol2smauto(output_dir = output)
 
 if __name__ == "__main__":
-    main("ParkingSensor.dev", "ParkingFiles")
+    main("LoCScenario2.dev", "output_m2m\\Scenario2\\per1")

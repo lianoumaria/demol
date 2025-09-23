@@ -17,7 +17,7 @@ Network
     passwd: "guest"
 end
 
-Broker<MQTT> MyBroker
+Broker<MQTT> locsys_broker
     host: "locsys.issel.ee.auth.gr"
     port: 1883
     ssl: False

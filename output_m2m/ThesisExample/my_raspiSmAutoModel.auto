@@ -1,0 +1,30 @@
+Broker<MQTT> locsys_broker
+    host: "locsys.issel.ee.auth.gr"
+    port: 1883
+    auth:
+        username: "sensors"
+        password: "issel.sensors"
+end
+
+
+Entity MySRF
+    type: sensor
+    topic: "my_raspi.sensor.distance.mysrf"
+    broker: locsys_broker
+    attributes:
+        - distance: float
+        - unit: str 
+        - max_distance : float
+        - min_distance : float
+    freq: 10.0
+end    
+
+Entity MyLedRing
+    type: actuator
+    topic: "my_raspi.actuator.ledarray.myledring"
+    broker: locsys_broker
+    attributes:
+        - colors : list 
+        - delay: float = 0.1 
+        - brightness: float = 0.5
+end    
