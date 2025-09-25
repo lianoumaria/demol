@@ -1,16 +1,17 @@
-Board RaspberryPi_5_16GB
+Board RaspberryPi_3B_Plus
     vcc: 3V3
     memory:
         flash: 16 gb
-        ram: 8 gb
+        ram: 1 gb
     cpu:
         cpu_family: PiArmCortex
-        max_freq: 2400 mhz
+        max_freq: 1400 mhz
         fpu: true
     networking:
     - wifi:
-        name: wifi_5
-    bluetooth: BT5
+        name: wifi_1
+        freq: 5 ghz
+    bluetooth: BT4
     pins:
     - power:
         name: power_3v3_a
@@ -53,11 +54,11 @@ Board RaspberryPi_5_16GB
         name: GPIO15
         number: 10
     - io_pin:
-        functions: gpio
+        functions: gpio, cs-1
         name: GPIO17
         number: 11
     - io_pin:
-        functions: gpio
+        functions: gpio, pwm-0, cs-0
         name: GPIO18
         number: 12
     - io_pin:
@@ -106,7 +107,7 @@ Board RaspberryPi_5_16GB
         number: 23
     - io_pin:
         functions: gpio, cs-0
-        name: GPIO7
+        name: GPIO8
         number: 24
     - power:
         name: GND_5
@@ -114,20 +115,20 @@ Board RaspberryPi_5_16GB
         type: GND
     - io_pin:
         functions: gpio, cs-1
-        name: GPIO8
-        number:26
+        name: GPIO7
+        number: 26
     - io_pin:
-        functions: gpio
+        functions: gpio, sda-1
         name: ID_SD
-        number:27
+        number: 27
     - io_pin:
-        functions: gpio
+        functions: gpio, scl-1
         name: ID_SC
-        number:28
+        number: 28
     - io_pin:
         functions: gpio
         name: GPIO5
-        number:29
+        number: 29
     - power:
         name: GND_6
         number: 30
@@ -135,41 +136,41 @@ Board RaspberryPi_5_16GB
     - io_pin:
         functions: gpio
         name: GPIO6
-        number:31
+        number: 31
     - io_pin:
-        functions: gpio
+        functions: gpio, pwm-0
         name: GPIO12
-        number:32
+        number: 32
     - io_pin:
-        functions: gpio
+        functions: gpio, pwm-1
         name: GPIO13
-        number:33
+        number: 33
     - power:
         name: GND_7
         number: 34
         type: GND
     - io_pin:
-        functions: gpio, fs
+        functions: gpio, pwm-1, miso-1
         name: GPIO19
-        number:35
+        number: 35
     - io_pin:
-        functions: gpio
+        functions: gpio, cs-2
         name: GPIO16
-        number:36
+        number: 36
     - io_pin:
         functions: gpio
         name: GPIO26
-        number:37
+        number: 37
     - io_pin:
-        functions: gpio, din
+        functions: gpio, miso-1
         name: GPIO20
-        number:38
+        number: 38
     - power:
         name: GND_8
         number: 39
         type: GND 
     - io_pin:
-        functions: gpio, dout
+        functions: gpio, sck-1
         name: GPIO21
-        number:40
+        number: 40
 end

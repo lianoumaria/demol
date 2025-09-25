@@ -1,5 +1,3 @@
-// RIOT Configuration for all WEMOS LOLIN D1 mini boards (V2 / V3 / Lite / Pro)
-
 Board RaspberryPi_4B_4GB
     vcc: 3V3
     memory:
