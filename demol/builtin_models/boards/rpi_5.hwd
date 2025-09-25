@@ -1,4 +1,4 @@
-Board RaspberryPi_5_16GB
+Board RaspberryPi_5_8GB
     vcc: 3V3
     memory:
         flash: 16 gb

@@ -6,7 +6,7 @@ Metadata
 end
 
 Components
-    board: RaspberryPi_5_16GB
+    board: RaspberryPi_5_8GB
     peripherals:
         - TCRT5000(Tracker1)
         /*- TCRT5000(Tracker2)

@@ -6,7 +6,7 @@ Metadata
 end
 
 Components
-    board: RaspberryPi_5_16GB
+    board: RaspberryPi_5_8GB
     peripherals:
         - VL53L1X(MyToF)
         /*- TCRT5000(MyTracker)
