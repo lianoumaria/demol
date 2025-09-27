@@ -87,7 +87,7 @@ Download this repository and either use the CLI and the API of the DSL directly 
 1. Pull this repository locally
 
 ```sh
-git clone git@github.com:robotics-4-all/demol.git
+git clone https://github.com/lianoumaria/demol.git
 ```
 
 2. Create a Virtual environment (Optional Step)
@@ -204,7 +204,7 @@ Network
     passwd: "guest"
 end
 
-Communication<MQTT>
+Broker<MQTT> MyBroker
     host: "node.mqtt.local"
     port: 1885
     auth:
