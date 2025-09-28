@@ -276,4 +276,4 @@ def main(dev_model, output_dir):
 
 
 if __name__ == "__main__":
-    main("LoCScenario2.dev", "scenario2out\\8per")
+    main("ThesisExample.dev", "rpi5_out")

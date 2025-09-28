@@ -129,6 +129,6 @@ Sensor ADCDifferentialPi
     constraints:
         -max_frequency: 240 hz
     powerConsumption: 25 mW
-    piTpl: "adc_differential_pi.tmpl"
+    piTpl: "ADCDifferentialPi.py.tmpl"
     ioVcc: 3V3
 end
