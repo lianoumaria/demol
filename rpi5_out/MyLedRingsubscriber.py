@@ -23,12 +23,12 @@ def on_message(msg):
 if __name__ == '__main__':
     actuator = WS2812()
     try:
-        conn_params = ConnectionParameters()
+        conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
 
-        node = Node(node_name='actuators.WS2812', connection_params=conn_params)
+        node = Node(node_name='actuators.WS2812', connection_params=conn_params, heartbeats=False)
 
         node.create_subscriber(msg_type=LedArrayMessage,
-                               topic="rpicomplete.actuator.ledarray.myledring",
+                               topic="my_raspi.actuator.ledarray.myledring",
                                on_message=on_message)  # Define a callback function
   
         node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz
