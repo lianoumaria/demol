@@ -22,6 +22,7 @@ username = ""
 password = ""
 constraints = {}
 peripheralMsg = []
+piTpl = {}
 
 def convert_DictAttribute_to_dict(attribute):
     temp_dict = {}
@@ -34,7 +35,7 @@ def convert_DictAttribute_to_dict(attribute):
 
 def get_info(device_model):
     # device_model is the .dev (parsed file) 
-    # component_models is a list of all the board and peripherals used
+    # Uncomment the following line to see the plantuml diagram of the device
     #device_to_plantuml.device_to_plantuml(device_model)
     board_name = device_model.components.board.name
 
@@ -68,6 +69,8 @@ def get_info(device_model):
         peripheral_real_name[peripheral_ref_name[i]] = device_model.connections[i].peripheral.ref.name
         peripheral_type[peripheral_real_name[peripheral_ref_name[i]]] = type(device_model.connections[i].peripheral.ref).__name__
         pins[i] = {}
+        if hasattr(device_model.connections[i].peripheral.ref, 'piTpl') and device_model.connections[i].peripheral.ref.piTpl is not '':
+            piTpl[i] = device_model.connections[i].peripheral.ref.piTpl
         for ioConn in device_model.connections[i].ioConns:
             if ioConn.type == 'gpio':
                 if ioConn.name == "trigger":
@@ -145,25 +148,27 @@ def create_classes(out_dir):
     i = 0
     for per_name, per_type in peripheral_real_name.items():
         peripheral_attr = {}
-        if per_type == "SRF05" or per_type == "HC_SR04":
-            template = env.get_template('DistanceSensor.py.tmpl')
-        elif per_type == "VL53L1X":
-            template = env.get_template('ToFSensor.py.tmpl')
-        elif per_type == "HW006" or per_type == "TCRT5000":
-            template = env.get_template('TrackerSensor.py.tmpl')
-        elif per_type == "BME680":
-            template = env.get_template('EnvSensor.py.tmpl')
-        elif per_type == "TFMini":
-            template = env.get_template('TFMiniSensor.py.tmpl')
-        elif per_type == "ADCDifferentialPi":
-            template = env.get_template('ADCDifferentialPi.py.tmpl')
-        elif per_type == "WS2812":
-            template = env.get_template('WS2812.py.tmpl')
-        elif per_type == "PCA9685":
-            template = env.get_template('PCA9685.py.tmpl')
+        if i in piTpl.keys():
+            template = env.get_template(piTpl[i])
         else:
-            print("Not a prebuilt sensor or actuator. Add your template")
-
+            if per_type == "SRF05" or per_type == "HC_SR04":
+                template = env.get_template('DistanceSensor.py.tmpl')
+            elif per_type == "VL53L1X":
+                template = env.get_template('ToFSensor.py.tmpl')
+            elif per_type == "HW006" or per_type == "TCRT5000":
+                template = env.get_template('TrackerSensor.py.tmpl')
+            elif per_type == "BME680":
+                template = env.get_template('EnvSensor.py.tmpl')
+            elif per_type == "TFMini":
+                template = env.get_template('TFMiniSensor.py.tmpl')
+            elif per_type == "ADCDifferentialPi":
+                template = env.get_template('ADCDifferentialPi.py.tmpl')
+            elif per_type == "WS2812":
+                template = env.get_template('WS2812.py.tmpl')
+            elif per_type == "PCA9685":
+                template = env.get_template('PCA9685.py.tmpl')
+            else:
+                print("Not a prebuilt sensor or actuator. Add your template")
         if peripheral_type[per_type] == "Sensor":
             peripheral_attr = {"sensor_type": per_type}
         else:
@@ -268,6 +273,7 @@ def main(dev_model, output_dir):
     print(f"Attributes : {attr}")
     print(f"Constraints : {constraints}")
     print(f"MESSAGES : {peripheralMsg}")
+    print(f"piTpl : {piTpl}")
     print("Creating classes...")
     create_classes(out_dir=output)
     print("Generating processes")

@@ -16,15 +16,13 @@ Network
     passwd: "guest"
 end
 
-Broker<AMQP> MyBroker
+Broker<MQTT> MyBroker
     host: "node.mqtt.local"
     port: 1883
-    vhost: "host"
-    topicExchange: "Thistopic"
     ssl: False
     auth:
-        username: "guest"
-        password: "guest"
+        username: "sensors"
+        password: "sensors"
 end
 
 Connection
