@@ -69,7 +69,7 @@ def get_info(device_model):
         peripheral_real_name[peripheral_ref_name[i]] = device_model.connections[i].peripheral.ref.name
         peripheral_type[peripheral_real_name[peripheral_ref_name[i]]] = type(device_model.connections[i].peripheral.ref).__name__
         pins[i] = {}
-        if hasattr(device_model.connections[i].peripheral.ref, 'piTpl') and device_model.connections[i].peripheral.ref.piTpl is not '':
+        if (hasattr(device_model.connections[i].peripheral.ref, 'piTpl')) and (device_model.connections[i].peripheral.ref.piTpl != ''):
             piTpl[i] = device_model.connections[i].peripheral.ref.piTpl
         for ioConn in device_model.connections[i].ioConns:
             if ioConn.type == 'gpio':
@@ -151,7 +151,7 @@ def create_classes(out_dir):
         if i in piTpl.keys():
             template = env.get_template(piTpl[i])
         else:
-            if per_type == "SRF05" or per_type == "HC_SR04":
+            if per_type == "SRF05" or per_type == "HCSR04":
                 template = env.get_template('DistanceSensor.py.tmpl')
             elif per_type == "VL53L1X":
                 template = env.get_template('ToFSensor.py.tmpl')

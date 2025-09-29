@@ -31,7 +31,7 @@ if __name__ == '__main__':
                                topic="my_raspi.actuator.ledarray.myledring",
                                on_message=on_message)  # Define a callback function
   
-        node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz
-        
+        node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz    
     except KeyboardInterrupt:
         print("\nReceived interrupt signal. Shutting down...")
+        actuator.disconnect()
