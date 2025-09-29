@@ -282,4 +282,4 @@ def main(dev_model, output_dir):
 
 
 if __name__ == "__main__":
-    main("ThesisExample.dev", "rpi5_out")
+    main("ThesisExamples\\ThesisExample.dev", "rpi5_out\\ThesisExample")

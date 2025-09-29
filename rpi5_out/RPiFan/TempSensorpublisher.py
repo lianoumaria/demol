@@ -1,16 +1,16 @@
 import time
 
-from MyTFMini import TFMini
+from TempSensor import BME680
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
 #from commlib.msg import MessageHeader, PubSubMessage
-from MQTTMessages import DistanceMessage 
+from MQTTMessages import EnvMessage 
 
 FREQUENCY = 1
 
 def sample(msg):
     global FREQUENCY
-    sensor = TFMini()
+    sensor = BME680()
     if FREQUENCY == 0:
         raise ValueError("Frequency zero is not valid")
     elif FREQUENCY > sensor.get_max_frequency():
@@ -20,7 +20,6 @@ def sample(msg):
     try:
         while True:
             pub.publish(msg)
-            #msg.data = sensor.read_data()
             data = sensor.read_data()
             for key,value in data.items():
                 key = key.strip('""')
@@ -30,9 +29,9 @@ def sample(msg):
             sensor.disconnect()
     
 if __name__ == "__main__":
-    conn_params = ConnectionParameters(host="localhost", port=1883)
-    node = Node(node_name='sensors.TFMini', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=DistanceMessage, topic="my_raspi.sensors.tfmini")
+    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
+    node = Node(node_name='sensors.BME680', connection_params=conn_params, heartbeats=False)
+    pub = node.create_publisher(msg_type=EnvMessage, topic="rpifan.sensor.env.tempsensor")
     node.run()
-    msg = DistanceMessage()
+    msg = EnvMessage()
     sample(msg = msg)

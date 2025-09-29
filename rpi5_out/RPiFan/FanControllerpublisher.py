@@ -41,9 +41,9 @@ if __name__ == "__main__":
                         attr_values[attr_name] = parsed_val
 
     print(attr_values)
-    conn_params = ConnectionParameters(host="localhost", port=1883)
-    node = Node(node_name='actuators.PCA9685', connection_params=conn_params)
-    pub = node.create_publisher(msg_type=ServoControllerMessage, topic="rpicomplete.actuator.servocontroller.myservocontroller")
+    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
+    node = Node(node_name='actuators.PCA9685', connection_params=conn_params, heartbeats=False)
+    pub = node.create_publisher(msg_type=ServoControllerMessage, topic="rpifan.actuator.servocontroller.fancontroller")
     node.run()
     msg = ServoControllerMessage()
 

@@ -2,18 +2,18 @@ import time
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
 #from commlib.msg import MessageHeader, PubSubMessage
-from MQTTMessages import DistanceMessage
+from MQTTMessages import EnvMessage
 
 def on_message(msg):
     print(f'Received data: {msg}')
 
 if __name__ == '__main__':
-    conn_params = ConnectionParameters(host="localhost", port=1883)
+    conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
 
-    node = Node(node_name='node.VL53L1X', connection_params=conn_params)
+    node = Node(node_name='node.BME680', connection_params=conn_params, heartbeats=False)
 
-    node.create_subscriber(msg_type=DistanceMessage,
-                           topic="my_raspi.sensors.tof.vl53l1x",
+    node.create_subscriber(msg_type=EnvMessage,
+                           topic="rpifan.sensor.env.tempsensor",
                            on_message=on_message)  # Define a callback function
 
     node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz

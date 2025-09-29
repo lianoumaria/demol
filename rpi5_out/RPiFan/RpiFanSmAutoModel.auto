@@ -1,9 +1,9 @@
 Broker<MQTT> locsys_broker
     host: "locsys.issel.ee.auth.gr"
-    port: 8883
+    port: 1883
     auth:
-        username: "r4a"
-        password: "r4a123$"
+        username: "sensors"
+        password: "issel.sensors"
 end
 
 

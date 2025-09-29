@@ -52,7 +52,7 @@ class BME680:
         except KeyboardInterrupt:
             pass
 
-    def get_max_freq(self):
+    def get_max_frequency(self):
         return self.max_frequency    
     
     def disconnect(self):

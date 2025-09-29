@@ -113,4 +113,4 @@ def main(dev_model,output_dir):
     demol2smauto(output_dir = output)
 
 if __name__ == "__main__":
-    main("LoCScenario2.dev", "output_m2m\\Scenario2\\per1")
+    main("ThesisExamples\\ThesisExample.dev", "rpi5_out\\ThesisExample")

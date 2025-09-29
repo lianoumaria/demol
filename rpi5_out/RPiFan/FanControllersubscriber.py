@@ -1,13 +1,13 @@
 import time
 from commlib.node import Node
 from commlib.transports.mqtt import ConnectionParameters
-from MQTTMessages import LedArrayMessage
-from MyLedRing import WS2812
+from MQTTMessages import ServoControllerMessage
+from FanController import PCA9685
 
 def on_message(msg):
     try:
         # Create parameters dictionary from the message
-        attr_names = list(LedArrayMessage.__annotations__.keys())
+        attr_names = list(ServoControllerMessage.__annotations__.keys())
         attr_names = [name for name in attr_names if name != "header"]
 
         params = {}
@@ -21,17 +21,17 @@ def on_message(msg):
         print(f"Error controlling actuator: {e}")
 
 if __name__ == '__main__':
-    actuator = WS2812()
+    actuator = PCA9685()
     try:
         conn_params = ConnectionParameters(host="locsys.issel.ee.auth.gr", port=1883, ssl=False, username="sensors", password="issel.sensors")
 
-        node = Node(node_name='actuators.WS2812', connection_params=conn_params, heartbeats=False)
+        node = Node(node_name='actuators.PCA9685', connection_params=conn_params, heartbeats=False)
 
-        node.create_subscriber(msg_type=LedArrayMessage,
-                               topic="my_raspi.actuator.ledarray.myledring",
+        node.create_subscriber(msg_type=ServoControllerMessage,
+                               topic="rpifan.actuator.servocontroller.fancontroller",
                                on_message=on_message)  # Define a callback function
   
-        node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz
-        
+        node.run_forever(sleep_rate=1)  # Define a process-level sleep rate in hz    
     except KeyboardInterrupt:
         print("\nReceived interrupt signal. Shutting down...")
+        actuator.disconnect()
