@@ -1,5 +1,5 @@
 Board RaspberryPi_5_8GB
-    vcc: 3V3
+    vcc: 5V
     memory:
         flash: 16 gb
         ram: 8 gb
