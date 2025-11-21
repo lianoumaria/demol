@@ -43,6 +43,7 @@
       - [Example model of an ESP32 board](#example-model-of-an-esp32-board)
       - [Example model of a peripheral sensor](#example-model-of-a-peripheral-sensor)
       - [Example Device model](#example-device-model)
+    - [Run m2m and m2t transformations for RaspberryPis](#run-m2t-m2m)
     - [CLI](#cli)
     - [REST API](#rest-api)
   - [📜 License](#-license)
@@ -244,6 +245,28 @@ Connection Bme680Esp32
 	frequency: 2 hz
 end
 ```
+#### Run m2m m2t
+
+1. Save your .dev file in examples directory.
+
+2. Create an output directory.
+
+3. Move to demol/transformations directory.
+
+4. Start python .
+
+```sh
+python
+```
+
+5. Import m2t and/or m2m transformation files.
+
+```sh 
+import m2t, m2m
+```
+
+6. Run the transformations as m2t.main(model,directory) and/or m2m.main(model,directory). The first argument should be the path to the .dev file starting from examples directory. The second argument should be the name of (or path to) the output directory.
+
 
 ### CLI
 
