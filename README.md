@@ -265,7 +265,7 @@ python
 import m2t, m2m
 ```
 
-6. Run the transformations as m2t.main(model,directory) and/or m2m.main(model,directory).
+6. Run the transformations as m2t.main(model,directory) and m2m.main(model,directory).
 The first argument should be the path to the .dev file starting from examples directory. 
 The second argument should be the name of (or path to) the output directory.
 
