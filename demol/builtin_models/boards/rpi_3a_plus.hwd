@@ -1,5 +1,5 @@
 Board RaspberryPi_3A_Plus
-    vcc: 3V3
+    vcc: 5V
     memory:
         flash: 16 gb
         ram: 512 mb
