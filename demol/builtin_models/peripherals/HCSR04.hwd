@@ -1,0 +1,28 @@
+Sensor HCSR04
+    vcc: 5V //Νομίζω στο 3.3 το συνδέσαμε αλλά λέει 5.. Αν συνδεθεί στα 5 θέλει level shifter
+    msg: Distance
+    pins:
+    -power:
+        name: GND
+        number: 1
+        type: GND
+    -io_pin:
+        functions: gpio
+        name: echo
+        number: 2
+    -io_pin:
+        functions: gpio
+        name: trigger
+        number: 3
+    -power:
+        name: VCC
+        number: 4
+        type: 5V
+    attributes:
+        -frequency : float = 10
+    constraints:
+        -max_distance : 4 m
+        -min_distance : 2 cm
+        -max_frequency : 16 hz
+    powerConsumption: 10 mW
+end

@@ -9,7 +9,6 @@ Component:
     Board | Peripheral
 ;
 
-
 Board:
     'Board' name=ID
 	(
@@ -33,6 +32,8 @@ Actuator:
 	  ("msg:" msg=ActuatorMsgType)
 	  ("pins" ":" "-" pins*=Pin["-"])
 	  ("attributes" ":" "-" attributes*=Attribute["-"])?
+	  ("constraints" ":" "-" constraints*=Constraint["-"])?
+	  ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
 	  ("riotTpl" ":" riotTpl=STRING)?
 	  ("piTpl" ":" piTpl=STRING)?
 	  ("ioVcc" ":" ioVcc=PowerType)?
@@ -43,10 +44,12 @@ Actuator:
 Sensor:
     'Sensor' name=ID
 	(
-	  ("vcc" ":" vcc=PowerType)
+	  ("vcc" ":" vcc=PowerType) //This should may become a range  
 	  ("msg:" msg=SensorMsgType)
 	  ("pins" ":" "-" pins*=Pin["-"])
 	  ("attributes" ":" "-" attributes*=Attribute["-"])?
+	  ("constraints" ":" "-" constraints*=Constraint["-"])?
+	  ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
 	  ("riotTpl" ":" riotTpl=STRING)?
 	  ("piTpl" ":" piTpl=STRING)?
 	  ("ioVcc" ":" ioVcc=PowerType)?
@@ -71,7 +74,12 @@ PowerType:
 	"GND"   |
     "5V"    |
     "3V3"   |
-    "12V"
+    "12V"   |
+    Custom
+;
+
+Custom:
+    /[0-9]+(\.[0-9]+)?V/
 ;
 
 IOPin:
@@ -87,7 +95,7 @@ IOPin:
 ;
 
 PinFunction:
-	GPIO | I2C | SPI | UART | PWM | ADC | DAC
+	GPIO | I2C | SPI | UART | PWM | ADC | DAC | PCM
 ;
 
 GPIO:
@@ -130,6 +138,13 @@ DAC:
 	ptype="dac"
 ;
 
+PCM:
+    ptype=PCMType
+;
+
+PCMType:
+    "fs" | "din" | "dout"
+;
 
 CPU:
 	(
@@ -152,10 +167,6 @@ Memory:
     )#
 ;
 
-UNITS:
-    ("kb" | "mb" | "gb" | "b")
-;
-
 NetworkInterface:
     WifiInterface   |
     EthernetInterface
@@ -167,10 +178,6 @@ WifiInterface:
         ("name:" name=ID)
 	    ("freq:" freq=NUMBER unit=FrequencyUnit)?
     )#
-;
-
-FrequencyUnit:
-	"ghz" | "mhz" | "hz"
 ;
 
 EthernetInterface:
@@ -185,13 +192,6 @@ Bluetooth:
     'BT5'
 ;
 
-/*
-MessageType:
-	SensorMsgType | ActuatorMsgType
-;
-*/
-
-// Τα templates γράφονται με ωάση τα MsgType που υποστηρίζει η DSL
 SensorMsgType:
 	"Distance"      |
     "Temperature"   |
@@ -200,7 +200,9 @@ SensorMsgType:
     "Pressure"      |
     "Env"           |
     "Acceleration"  |
-    "IMU"
+    "IMU"           |
+    "Tracker"	    |
+    "ADC"
 ;
 
 ActuatorMsgType:
@@ -208,7 +210,6 @@ ActuatorMsgType:
     "ServoController"   |
     "LedArray"
 ;
-
 
 Attribute:
     NumericAttribute    |
@@ -245,3 +246,30 @@ ListAttribute:
 DictAttribute:
     name=ID ':' type='dict' ('=' '{' items*=Attribute[','] '}')?
 ;
+
+Constraint:
+	name = "max_frequency" ":" value=NUMBER unit=FrequencyUnit |
+	name = "min_distance" ":" value=NUMBER unit=DistanceUnit |
+	name = "max_distance" ":" value=NUMBER unit=DistanceUnit
+;	
+
+UNITS:
+    ("kb" | "mb" | "gb" | "b")
+;
+
+FrequencyUnit:
+	"ghz" | "mhz" | "khz" | "hz"
+;
+
+DistanceUnit:
+	"m" | "cm" | "mm"
+;
+
+PowerUnit:
+	"W" | "mW" | "uW"
+;
+
+OBJECT: 
+	INT | STRING | FLOAT | BOOL 
+;
+

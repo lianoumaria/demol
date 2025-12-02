@@ -1,0 +1,18 @@
+Broker<MQTT> locsys_broker
+    host: "locsys.issel.ee.auth.gr"
+    port: 1883
+    auth:
+        username: "sensors"
+        password: "issel.sensors"
+end
+
+
+Entity WarningLights
+    type: actuator
+    topic: "parkingleds.actuator.ledarray.warninglights"
+    broker: locsys_broker
+    attributes:
+        - colors : list 
+        - delay: float = 0.1 
+        - brightness: float = 0.5
+end    

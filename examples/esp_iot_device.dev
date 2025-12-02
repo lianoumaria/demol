@@ -10,7 +10,7 @@ Network
     passwd: "guest"
 end
 
-Broker<MQTT>
+Broker<MQTT> MyMqttBroker
     host: "node.mqtt.local"
     port: 1885
     auth:

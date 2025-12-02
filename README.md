@@ -43,6 +43,7 @@
       - [Example model of an ESP32 board](#example-model-of-an-esp32-board)
       - [Example model of a peripheral sensor](#example-model-of-a-peripheral-sensor)
       - [Example Device model](#example-device-model)
+    - [Run m2m and m2t transformations for RaspberryPis](#run-m2t-and-m2m-transformations)
     - [CLI](#cli)
     - [REST API](#rest-api)
   - [📜 License](#-license)
@@ -87,7 +88,7 @@ Download this repository and either use the CLI and the API of the DSL directly 
 1. Pull this repository locally
 
 ```sh
-git clone git@github.com:robotics-4-all/demol.git
+git clone https://github.com/lianoumaria/demol.git
 ```
 
 2. Create a Virtual environment (Optional Step)
@@ -204,7 +205,7 @@ Network
     passwd: "guest"
 end
 
-Communication<MQTT>
+Broker<MQTT> MyBroker
     host: "node.mqtt.local"
     port: 1885
     auth:
@@ -244,6 +245,36 @@ Connection Bme680Esp32
 	frequency: 2 hz
 end
 ```
+#### Run m2t and m2m transformations
+
+1. Save your .dev file in examples directory.
+
+2. Create an output directory.
+
+3. Move to demol/transformations directory.
+
+4. Start python.
+
+```sh
+python
+```
+
+5. Import m2t and/or m2m transformation files.
+
+```sh 
+import m2t, m2m
+```
+
+6. Run the transformations as m2t.main(model,directory) and m2m.main(model,directory).
+The first argument should be the path to the .dev file starting from examples directory. 
+The second argument should be the name of (or the path to) the output directory.
+
+For example to run the transformations for ThesisExample.dev which is saved in examples/ThesisExamples directory you should run
+```sh
+m2t.main("ThesisExamples/ThesisExample.dev", "rpi5_out/ThesisExample")
+m2m.main("ThesisExamples/ThesisExample.dev", "rpi5_out/ThesisExample")
+```
+And the results will be stored in rpi5_out/ThesisExample directory.
 
 ### CLI
 

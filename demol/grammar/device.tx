@@ -1,4 +1,4 @@
-// Grammar for a system. A system consists a board (ESP32/ESP8266)
+// Grammar for a system. A system consists a board
 // and one or more peripherals (sensors/actuators).
 
 import component
@@ -22,7 +22,7 @@ Metadata:
         ('name:' name=STRING)
         ('description:' description=STRING)
         ('author:' author=STRING)
-        ('os:' os=OperatingSystem)
+        ('os:' os=OperatingSystem)?
     )#
     'end'
 ;
@@ -58,6 +58,7 @@ Connection:
 	    ("powerConnections:" '-' powerConns*=PowerConnection['-'])
 	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
 	    ("endpoint:" endpoint=Endpoint)?
+        ("settings" ":" "-" settings*=Settings["-"])?
     )#
     'end'
 ;
@@ -125,7 +126,7 @@ UARTConnection:
 
 Endpoint:
 	(
-        ("topic:" topic=STRING)
+        ("topic:" topic=STRING)?
         ("type:" type=EndpointType)?
     )#
 ;
@@ -140,4 +141,44 @@ EndpointType:
 OperatingSystem:
     'Raspbian' |
     'RiotOS'
+;
+
+Settings:
+    NumericSetting    |
+    BoolSetting       |
+    StringSetting     |
+    ListSetting       |
+    DictSetting
+;
+
+NumericSetting:
+    IntSetting | FloatSetting
+;
+
+IntSetting:
+    name=ID ':' type='int' ('=' default=INT)?
+;
+
+FloatSetting:
+    name=ID ':' type='float' ('=' default=FLOAT)?
+;
+
+StringSetting:
+    name=ID ':' type='str' ('=' default=STRING)?
+;
+
+BoolSetting:
+    name=ID ':' type='bool' ('=' default=BOOL)?
+;
+
+ListSetting:
+    name=ID ':' type='list' ('=' '[' default*=OBJECT[','] ']')?
+;
+
+DictSetting:
+    name=ID ':' type='dict' ('=' '{' items*=Settings[','] '}')?
+;
+
+OBJECT: 
+	INT | STRING | FLOAT | BOOL 
 ;

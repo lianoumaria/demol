@@ -9,7 +9,7 @@ Network
     passwd: "guest"
 end
 
-Broker<MQTT>
+Broker<MQTT> MyMqttBroker
     host: "node.mqtt.local"
     port: 1883
     auth:
@@ -26,7 +26,7 @@ end
 Connection
     peripheral: BME
     powerConnections:
-        - gnd_1 -- gnd
+        - gnd -- gnd
         - power_5v -- vcc
     ioConnections:
         - type: i2c
