@@ -39,12 +39,19 @@
     - [🔖 Prerequisites](#-prerequisites)
     - [🛠️ Installation](#️-installation)
       - [Install from source](#install-from-source)
-    - [🧪 Modeling Devices](#-modeling-devices)
-      - [Example model of an ESP32 board](#example-model-of-an-esp32-board)
-      - [Example model of a peripheral sensor](#example-model-of-a-peripheral-sensor)
-      - [Example Device model](#example-device-model)
-    - [Run m2m and m2t transformations for RaspberryPis](#run-m2t-and-m2m-transformations)
+  - [📚 Language Reference](#-language-reference)
+    - [Grammar Structure](#grammar-structure)
+    - [Core Concepts](#core-concepts)
+    - [Device Model Structure](#device-model-structure)
+    - [Hardware Components](#hardware-components)
+    - [Connections](#connections)
+    - [Message Brokers](#message-brokers)
+    - [Complete Example](#complete-example)
+  - [📐 Formal Semantics](#-formal-semantics)
+  - [🔧 Usage](#-usage)
     - [CLI](#cli)
+    - [Model Validation](#model-validation)
+    - [Code Generation](#code-generation)
     - [REST API](#rest-api)
   - [📜 License](#-license)
   - [🎩 Acknowledgments](#-acknowledgments)
@@ -60,12 +67,12 @@ Enables automated source code generation currently for RaspberryPi and RiotOS.
 
 ## 👾 Features
 
-|      | Feature         | Summary       |
-| :--- | :---:           | :---          |
-| ⚙️  | **Protocol-Agnostic**  | <ul><li>Protocol/Transport-level abstraction</li><li>Currently supports Redis, AMQP and MQTT</li></ul> |
-| 📄 | **Documentation** | <ul><li>Rich documentation in various formats (YAML, TOML, Markdown)</li><li>Includes detailed installation commands for different package managers</li><li>Utilizes MkDocs for generating documentation</li></ul> |
-| 🧩 | **Modularity**    | <ul><li>Well-structured codebase with clear separation of concerns</li><li>Encourages code reusability and maintainability</li></ul> |
-| 📦 | **Dependencies**  | <ul><li>Manages dependencies with Poetry and dependency lock files</li><li>Includes a variety of libraries for different functionalities</li><li>Dependency management with conda for environment setup</li><li>Dynamic imports of underlying transport libraries</li></ul> |
+|      |        Feature        | Summary                                                                                                                                                                                                                                                                     |
+| :--- | :-------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ⚙️    | **Protocol-Agnostic** | <ul><li>Protocol/Transport-level abstraction</li><li>Currently supports Redis, AMQP and MQTT</li></ul>                                                                                                                                                                      |
+| 📄    |   **Documentation**   | <ul><li>Rich documentation in various formats (YAML, TOML, Markdown)</li><li>Includes detailed installation commands for different package managers</li><li>Utilizes MkDocs for generating documentation</li></ul>                                                          |
+| 🧩    |    **Modularity**     | <ul><li>Well-structured codebase with clear separation of concerns</li><li>Encourages code reusability and maintainability</li></ul>                                                                                                                                        |
+| 📦    |   **Dependencies**    | <ul><li>Manages dependencies with Poetry and dependency lock files</li><li>Includes a variety of libraries for different functionalities</li><li>Dependency management with conda for environment setup</li><li>Dynamic imports of underlying transport libraries</li></ul> |
 
 ---
 
@@ -104,148 +111,539 @@ python setup.py develop
 ```
 
 
-### 🧪 Modeling Devices
+## 📚 Language Reference
 
-The implementation of the grammar of the language can be found [here]().
+The DeMoL DSL is built using the [textX](http://textx.github.io/textX/) framework and provides a declarative approach to modeling IoT devices.
 
-The core Concepts of the language are:
+### Grammar Structure
 
-- **Device**
-- **Board**
-- **Peripheral**
-- **Synthesis**
-- **Connection**
-- **CommunicationTransport**
+The grammar is modular and split into **5 interconnected files** located in `demol/grammar/`:
 
-The language allows multi-file model imports and also uses a global local
-repository for loading and referencing existing Board, Peripheral and Synthesis models.
+| File               | Purpose                           | Key Concepts                        |
+| ------------------ | --------------------------------- | ----------------------------------- |
+| `device.tx`        | Main device model definition      | DeviceModel, Connection, Settings   |
+| `component.tx`     | Board & peripheral hardware specs | Board, Sensor, Actuator, Pins       |
+| `communication.tx` | Message broker configurations     | AMQPBroker, MQTTBroker, RedisBroker |
+| `common.tx`        | Common utilities                  | FQN, Import, Comments               |
+| `utils.tx`         | Additional utilities              | FQN handling, Keywords              |
+
+### Core Concepts
+
+The language is built around these fundamental concepts:
+
+- **Device** - Complete IoT device definition with metadata and configuration
+- **Board** - Microcontroller/SBC hardware (ESP32, Raspberry Pi, etc.)
+- **Peripheral** - External sensors and actuators (BME680, SRF04, etc.)
+- **Connection** - Defines how peripherals connect to boards (power + IO)
+- **MessageBroker** - Communication infrastructure (MQTT, AMQP, Redis)
+- **Network** - WiFi configuration
+
+**File Extensions:**
+- `.dev` - Device models (complete IoT device definitions)
+- `.hwd` - Hardware component models (boards and peripherals)
+
+### Device Model Structure
+
+Every `.dev` file follows this structure:
 
 ```
-import srf04.hwd
-import esp32_wroom_32.hwd
+Metadata
+    name: "DeviceName"
+    description: "Device description"
+    author: "author_name"
+    os: Raspbian  // or RiotOS
+end
 
-Connection SonarESP32
-    board: ESP32Wroom32
-    peripheral: SonarSRF04
+Network
+    ssid: "WiFi_SSID"
+    passwd: "password"
+    address: 192.168.1.100  // optional
+    channel: "6"  // optional
+end
+
+Broker<MQTT> BrokerName
+    host: "mqtt.example.com"
+    port: 1883
+    ssl: False
+    auth:
+        username: "user"
+        password: "pass"
+end
+
+Components
+    board: BoardModelName
+    peripherals:
+        - PeripheralModel(InstanceName1)
+        - PeripheralModel(InstanceName2)
+end
+
+Connection
+    peripheral: InstanceName1
     powerConnections:
-    - ESP32Wroom32.gnd_1 -- SonarSRF04.gnd
-    - ESP32Wroom32.power_5v -- SonarSRF04.vcc
-    ...
+        - board_pin -- peripheral_pin
+    ioConnections:
+        - type: gpio
+          pin: board_pin -- peripheral_pin
+    endpoint:
+        topic: "device/sensor/topic"
+        type: Publisher
+    settings:
+        - setting_name: type = value
 end
 ```
 
-#### Example model of an ESP32 board
+#### Metadata Block
+
+Describes the device and target platform:
+
+```
+Metadata
+    name: "SmartSensor"
+    description: "Environmental monitoring sensor"
+    author: "developer_name"
+    os: Raspbian  // Raspbian or RiotOS
+end
+```
+
+**Target Operating Systems:**
+- `Raspbian` - For Raspberry Pi devices
+- `RiotOS` - For embedded systems (ESP32, ESP8266, etc.)
+
+#### Network Configuration
+
+WiFi network settings:
+
+```
+Network
+    ssid: "IoT_Network"
+    passwd: "secure_password"
+    address: 192.168.1.50  // optional static IP
+    channel: "11"  // optional WiFi channel
+end
+```
+
+#### Components
+
+Specifies the hardware composition:
+
+```
+Components
+    board: RaspberryPi_4B_4GB
+    peripherals:
+        - BME680(EnvSensor)
+        - SonarSRF04(DistanceSensor)
+        - WS2812(StatusLED)
+end
+```
+
+**Features:**
+- Board references are resolved from the global repository in `demol/builtin_models/boards/`
+- Peripheral models are loaded from `demol/builtin_models/peripherals/`
+- Supports multi-file imports using FQN (Fully Qualified Names)
+- Named peripheral instances for easy reference in connections
+
+### Hardware Components
+
+#### Board Models
+
+Boards are defined in `.hwd` files and describe microcontroller/SBC specifications:
 
 ```
 Board ESP32Wroom32
-    vcc: 3.3
-    operating_voltage: 3.3
+    vcc: 3V3
     memory:
-    flash: 4 mb
+        flash: 4 mb
+        ram: 520 kb  // optional
+        rom: 448 kb  // optional
     cpu:
-        cpu_family: ESP32
+        cpu_family: ESP32  // ESP32, ESP8266, PiArmCortex
         max_freq: 240 mhz
         fpu: false
-    network:
+    networking:
     - wifi:
-	name: wifi_1
-	freq: 2.5 ghz
-	bluetooth:
-        version: 4.2
+        name: wifi_1
+        freq: 2.5 ghz
+    - ethernet:  // optional
+        name: eth0
+    bluetooth: BT4  // BT3, BT4, BT5, NA
+    ioVcc: 3V3  // optional IO voltage
     pins:
     - power:
         name: power_3v3
         number: 1
-        type: 3v3
+        type: 3V3
     - io_pin:
-        functions:
-        name: en_rst
-        number: 2
-    - io_pin:
-        functions: gpio, adc
-        name: svp
-        number: 3
-    ...
+        functions: gpio, adc, pwm-1
+        name: p_32
+        number: 7
+        vmin: 0  // optional
+        vmax: 3.3  // optional
+        signalLevel: 3.3  // optional
 end
 ```
 
-#### Example model of a peripheral sensor
+**Pin Functions:** `gpio`, `adc`, `dac`, `pwm-<channel>`, `sda-<bus>`, `scl-<bus>`, `mosi-<bus>`, `miso-<bus>`, `sck-<bus>`, `cs-<bus>`, `tx-<bus>`, `rx-<bus>`, `fs`, `din`, `dout`
+
+**Power Types:** `GND`, `3V3`, `5V`, `12V`, or custom (e.g., `2.5V`, `1.8V`)
+
+#### Peripheral Models (Sensors)
 
 ```
-Peripheral SonarSRF04
-    type: Sensor
-    riot_name: "srf04"
-    operating_voltage: 5
-    vcc: 5
+Sensor BME680
+    vcc: 5V
+    msg: Env  // Message type: Distance, Temperature, Humidity, Gas, Pressure, Env, Acceleration, IMU, Tracker, ADC
+    piTpl: "bme680"  // optional - RaspberryPi template
+    riotTpl: "bme680"  // optional - RiotOS template
+    ioVcc: 3V3  // optional
     pins:
-    - power:
-        name: vcc
-        number: 1
-        type: 5v
-    - power:
-        name: gnd
-        number: 4
-        type: gnd
-    - io_pin:
-        functions: gpio
-        name: trigger
-        number: 2
-    - io_pin:
-        functions: gpio
-        name: echo
-        number: 3
+        - power:
+            name: VCC
+            number: 1
+            type: 5V
+        - power:
+            name: GND
+            number: 5
+            type: GND
+        - io_pin:
+            functions: sda-0
+            name: sda
+            number: 2
+        - io_pin:
+            functions: scl-0
+            name: scl
+            number: 3
+    attributes:
+        - poll_period: int = 10
+        - humidity_oversample: int = 2
+        - temperature_oversample: int = 8
+    constraints:
+        - max_frequency: 20 hz
+        - min_distance: 2 cm  // for distance sensors
+        - max_distance: 400 cm  // for distance sensors
+    powerConsumption: 3 mW  // optional
 end
 ```
 
-#### Example Device model
+#### Peripheral Models (Actuators)
 
 ```
-Network
-    ssid: "Guest_Network_2.4GHz"
-    passwd: "guest"
+Actuator ServoMotor
+    vcc: 5V
+    msg: ServoController  // MotorController, ServoController, LedArray
+    pins:
+        - power:
+            name: VCC
+            number: 1
+            type: 5V
+        - power:
+            name: GND
+            number: 2
+            type: GND
+        - io_pin:
+            functions: pwm-0
+            name: control
+            number: 3
+    attributes:
+        - min_angle: int = 0
+        - max_angle: int = 180
+    powerConsumption: 500 mW
 end
+```
 
-Broker<MQTT> MyBroker
-    host: "node.mqtt.local"
-    port: 1885
+**Units:**
+- **Memory:** `b`, `kb`, `mb`, `gb`
+- **Frequency:** `hz`, `khz`, `mhz`, `ghz`
+- **Distance:** `mm`, `cm`, `m`
+- **Power:** `uW`, `mW`, `W`
+
+### Connections
+
+Connections define how peripherals connect to the board through power and IO pins:
+
+#### GPIO Connection
+
+```
+Connection
+    peripheral: DistanceSensor
+    powerConnections:
+        - gnd_1 -- gnd
+        - power_5v -- vcc
+    ioConnections:
+        - type: gpio
+          name: trigger  // optional
+          pin: p_13 -- trigger
+          input: False  // optional mode
+          output: True
+          pullup: False
+          pulldown: False
+          open_drain: False
+        - type: gpio
+          name: echo
+          pin: p_14 -- echo
+    endpoint:
+        topic: "sensors/distance"
+        type: Publisher
+end
+```
+
+#### I2C Connection
+
+```
+Connection
+    peripheral: EnvSensor
+    powerConnections:
+        - gnd_1 -- GND
+        - power_5v -- VCC
+    ioConnections:
+        - type: i2c
+          name: env_i2c  // optional
+          slave_address: 0x76
+          pins:
+              sda: p_21 -- sda
+              scl: p_22 -- scl
+    endpoint:
+        topic: "sensors/environment"
+        type: Publisher
+    settings:
+        - poll_period: int = 5
+        - enable_gas: bool = True
+end
+```
+
+#### SPI Connection
+
+```
+Connection
+    peripheral: DisplayModule
+    powerConnections:
+        - gnd_1 -- GND
+        - power_3v3 -- VCC
+    ioConnections:
+        - type: spi
+          name: display_spi  // optional
+          pins:
+              mosi: p_23 -- mosi
+              miso: p_19 -- miso
+              sck: p_18 -- sck
+              cs: p_5 -- cs
+    endpoint:
+        type: Subscriber
+end
+```
+
+#### UART Connection
+
+```
+Connection
+    peripheral: GPSModule
+    powerConnections:
+        - gnd_1 -- GND
+        - power_5v -- VCC
+    ioConnections:
+        - type: uart
+          name: gps_uart  // optional
+          pins:
+              tx: p_1 -- tx
+              rx: p_3 -- rx
+              baudrate: 115200
+    endpoint:
+        topic: "sensors/gps"
+        type: Publisher
+end
+```
+
+#### Endpoint Types
+
+```
+endpoint:
+    topic: "device/sensor/data"  // optional, auto-generated if omitted
+    type: Publisher  // Publisher, Subscriber, RPC, Action
+```
+
+**Auto-generated Topics:** If topic is omitted, it's generated as `<device_name>.<peripheral_type>.<peripheral_msg>.<instance_name>` (e.g., `mydevice.sensor.env.mysensor`)
+
+#### Connection Settings
+
+Define peripheral-specific runtime configurations:
+
+```
+settings:
+    - poll_rate: int = 10
+    - threshold: float = 25.5
+    - sensor_name: str = "BME680"
+    - enable_filter: bool = True
+    - thresholds: list = [10, 20, 30, 40]
+    - config: dict = {
+        timeout: int = 5000,
+        retry: bool = True,
+        max_attempts: int = 3
+      }
+end
+```
+
+**Setting Types:** `int`, `float`, `str`, `bool`, `list`, `dict`
+
+### Message Brokers
+
+DeMoL supports three message broker types:
+
+#### MQTT Broker
+
+```
+Broker<MQTT> MyMqttBroker
+    host: "mqtt.example.com"
+    port: 1883
+    ssl: False
+    basePath: "/mqtt"  // optional
+    webPath: "/ws"  // optional
+    webPort: 8080  // optional
+    auth:
+        username: "sensor_client"
+        password: "secure_pass"
+end
+```
+
+#### AMQP Broker
+
+```
+Broker<AMQP> MyAmqpBroker
+    host: "rabbitmq.example.com"
+    port: 5672
+    vhost: "/"  // optional
+    topicExchange: "amq.topic"  // optional
+    rpcExchange: "amq.rpc"  // optional
+    ssl: False
     auth:
         username: "guest"
         password: "guest"
 end
+```
 
-Connection SonarESP32
-    board: ESP32Wroom32
-    peripheral: SonarSRF04
-    powerConnections:
-    - ESP32Wroom32.gnd_1 -- SonarSRF04.gnd
-    - ESP32Wroom32.power_5v -- SonarSRF04.vcc
-    ioConnections:
-    - gpio: ESP32Wroom32.p_13 -- SonarSRF04.trigger
-    - gpio: ESP32Wroom32.p_14 -- SonarSRF04.echo
-    endpoint:
-	topic: "my_esp.sensors.srf04"
-	msg: Distance
-	frequency: 5 hz
-end
+#### Redis Broker
 
-Connection Bme680Esp32
-    board: ESP32Wroom32
-    peripheral: BME680
-    powerConnections:
-    - ESP32Wroom32.gnd_1 -- BME680.gnd
-    - ESP32Wroom32.power_5v -- BME680.vcc
-    ioConnections:
-    - i2c:
-        sda: ESP32Wroom32.p_21 -- BME680.sda
-        scl: ESP32Wroom32.p_22 -- BME680.scl
-        slave_address: 0x76
-    endpoint:
-	topic: "my_esp.sensors.bme680"
-	msg: Env
-	frequency: 2 hz
+```
+Broker<Redis> MyRedisBroker
+    host: "redis.example.com"
+    port: 6379
+    db: 0  // optional
+    ssl: False
+    auth:
+        username: "default"
+        password: "redis_pass"
 end
 ```
-#### Run m2t and m2m transformations
+
+**Authentication Methods:**
+- **Username/Password:** `auth: username: "user" password: "pass"`
+- **API Key:** `auth: key: "api_key_value"`
+- **Certificate:** `auth: cert: "cert_string"` or `certPath: "/path/to/cert"`
+
+### Complete Example
+
+Here's a complete device model demonstrating all features:
+
+```
+Metadata
+    name: "SmartEnvironmentMonitor"
+    description: "Multi-sensor environmental monitoring device"
+    author: "john_doe"
+    os: Raspbian
+end
+
+Network
+    ssid: "IoT_Network"
+    passwd: "secure_password"
+end
+
+Broker<MQTT> SmartHomeBroker
+    host: "mqtt.smarthome.local"
+    port: 1883
+    ssl: True
+    auth:
+        username: "sensor_node"
+        password: "node_pass"
+end
+
+Components
+    board: RaspberryPi_4B_4GB
+    peripherals:
+        - BME680(EnvSensor)
+        - SonarSRF04(DistanceSensor)
+        - WS2812(StatusLED)
+end
+
+Connection
+    peripheral: EnvSensor
+    powerConnections:
+        - gnd_1 -- GND
+        - power_5v -- VCC
+    ioConnections:
+        - type: i2c
+          slave_address: 0x76
+          pins:
+              sda: p_21 -- sda
+              scl: p_22 -- scl
+    endpoint:
+        topic: "home/environment/living_room"
+        type: Publisher
+    settings:
+        - poll_period: int = 5
+        - humidity_oversample: int = 2
+        - pressure_oversample: int = 4
+        - temperature_oversample: int = 8
+end
+
+Connection
+    peripheral: DistanceSensor
+    powerConnections:
+        - gnd_2 -- gnd
+        - power_5v -- vcc
+    ioConnections:
+        - type: gpio
+          name: trigger
+          pin: p_23 -- trigger
+        - type: gpio
+          name: echo
+          pin: p_24 -- echo
+    endpoint:
+        topic: "home/distance/entrance"
+        type: Publisher
+end
+
+Connection
+    peripheral: StatusLED
+    powerConnections:
+        - gnd_3 -- GND
+        - power_5v -- VCC
+    ioConnections:
+        - type: gpio
+          name: LedControl
+          pin: GPIO10 -- DIN
+    endpoint:
+        type: Subscriber
+    settings:
+        - colors: list = ['0xFF0000', '0x00FF00', '0x0000FF']
+        - brightness: int = 128
+        - num_leds: int = 12
+end
+```
+
+
+## 📐 Formal Semantics
+
+For a complete formal specification of the DeMoL language, see **[SEMANTICS.md](SEMANTICS.md)**, which provides:
+
+- **Abstract Syntax**: Mathematical representation of DeMoL constructs using syntactic domains and abstract syntax trees
+- **Formal Grammar**: Complete EBNF specification of the concrete syntax
+- **Static Semantics**: Well-formedness rules, type checking, and validation using inference rules
+- **Operational Semantics**: Runtime behavior defined via small-step transition systems covering device initialization, broker connections, GPIO/I2C/SPI/UART operations, and message passing
+- **Axiomatic Semantics**: Hoare logic specifications with pre/post conditions and invariants for device operations
+- **Type System**: Complete type judgments, typing rules, and subtyping relations
+- **Verification Conditions**: Safety properties (no short-circuits, voltage limits), liveness properties (message delivery, sensor readings), and correctness conditions
+
+This formal foundation enables rigorous reasoning about device models, verified code generation, and static analysis tools.
+
+## 🔧 Usage
 
 1. Save your .dev file in examples directory.
 

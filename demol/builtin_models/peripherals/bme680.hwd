@@ -3,11 +3,11 @@ Sensor BME680
     msg: Env
     pins:
         - power:
-            name: VCC
+            name: vcc
             number: 1
             type: 5V
         - power:
-            name: GND
+            name: gnd
             number: 5
             type: GND
         - io_pin:

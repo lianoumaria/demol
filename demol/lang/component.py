@@ -21,7 +21,7 @@ def class_provider(name):
 
 def get_component_mm(global_repo: bool = False):
     # Get meta-model from language description
-    mm= metamodel_from_file(
+    mm = metamodel_from_file(
         os.path.join(METAMODEL_REPO_PATH, 'component.tx'),
         classes=class_provider,
         auto_init_attributes=True,

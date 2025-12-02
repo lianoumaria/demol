@@ -29,121 +29,252 @@ def raise_validation_error(obj, msg):
 
 
 def model_proc(model, metamodel):
+    """
+    Enhanced model processor with comprehensive validation based on formal semantics.
+    
+    Implements validation rules from SEMANTICS.md:
+    - Section 4.1: Well-formedness rules
+    - Section 6.7: Invariants
+    - Section 8.1: Safety properties
+    - Section 8.4: Well-formedness conditions
+    """
+    from demol.validators import (
+        raise_validation_error,
+        validate_power_connection,
+        validate_gpio_connection,
+        validate_i2c_connection,
+        validate_spi_connection,
+        validate_uart_connection,
+        validate_no_pin_conflicts,
+        validate_i2c_address_uniqueness,
+        validate_voltage_limits,
+        validate_all_peripherals_connected,
+        validate_broker_requirements,
+    )
+    
     device_name = model.metadata.name.strip('"')
+    
+    # ========================================================================
+    # Well-Formedness: All peripherals must be connected
+    # ========================================================================
+    validate_all_peripherals_connected(model)
+    
+    # ========================================================================
+    # Well-Formedness: Broker requirement check
+    # ========================================================================
+    validate_broker_requirements(model)
+    
+    # ========================================================================
+    # Process each connection
+    # ========================================================================
     for c in model.connections:
         board = model.components.board
-        # It is useful to set the board for the connection instances to easily
-        # navigate later on in M2M and M2T transformations.
+        # Set the board for easy navigation in M2M and M2T transformations
         setattr(c, 'board', model.components.board)
         peripheral = c.peripheral.ref
-        board_pins = [p.name for p in board.pins]
-        per_pins = [p.name for p in peripheral.pins]
-        # if c.peripheral not in model.components.peripherals:
-        #     raise TextXSemanticError(
-        #         f'Peripheral {c.peripheral.name} not defined in Bag of components!'
-        #     )
-        # if c.board != model.components.board:
-        #     raise TextXSemanticError(
-        #         f'Board {c.board.name} not defined in Bag of components!'
-        #     )
+        
+        # Get pin mappings
+        board_pins_map = {p.name: p for p in board.pins}
+        peripheral_pins_map = {p.name: p for p in peripheral.pins}
+        board_pin_names = set(board_pins_map.keys())
+        peripheral_pin_names = set(peripheral_pins_map.keys())
+        
+        # ====================================================================
+        # Validate Power Connections
+        # ====================================================================
         for pconn in c.powerConns:
             print(
                 f'PowerPinConnection:\n'
                 f'  {pconn.boardPin} -> {pconn.peripheralPin}'
             )
-            if pconn.boardPin not in board_pins:
+            
+            # Check if pins exist
+            if pconn.boardPin not in board_pin_names:
                 raise_validation_error(
                     pconn,
-                    f'Board {board.name} does not have a pin '
-                    f'named {pconn.boardPin}'
+                    f'Board {board.name} does not have a pin named {pconn.boardPin}'
                 )
-            if pconn.peripheralPin not in per_pins:
+            if pconn.peripheralPin not in peripheral_pin_names:
                 raise_validation_error(
                     pconn,
-                    f'Peripheral {c.peripheral.name} does not have a '
-                    f'pin named {pconn.peripheralPin}'
+                    f'Peripheral {c.peripheral.name} does not have a pin named {pconn.peripheralPin}'
                 )
-
+            
+            # Enhanced validation: Check power compatibility
+            board_pin = board_pins_map[pconn.boardPin]
+            peripheral_pin = peripheral_pins_map[pconn.peripheralPin]
+            
+            # Only validate if both are power pins
+            if (hasattr(board_pin, 'ptype') and hasattr(peripheral_pin, 'ptype')):
+                validate_power_connection(board_pin, peripheral_pin, pconn)
+        
+        # ====================================================================
+        # Validate IO Connections
+        # ====================================================================
         for ioconn in c.ioConns:
-            if ioconn.__class__.__name__ == 'GPIOConnection':
+            conn_type = ioconn.__class__.__name__
+            
+            if conn_type == 'GPIOConnection':
                 pin_conn = ioconn.pinConn
                 print(
                     f'GPIO-Connection:\n'
                     f'  {pin_conn.boardPin} -> {pin_conn.peripheralPin}'
                 )
-                if pin_conn.boardPin not in board_pins:
+                
+                # Check if pins exist
+                if pin_conn.boardPin not in board_pin_names:
                     raise_validation_error(
                         pin_conn,
-                        f'Board {board.name} does not have a pin '
-                        f'named {pin_conn.boardPin}'
+                        f'Board {board.name} does not have a pin named {pin_conn.boardPin}'
                     )
-                if pin_conn.peripheralPin not in per_pins:
+                if pin_conn.peripheralPin not in peripheral_pin_names:
                     raise_validation_error(
                         pin_conn,
-                        f'Peripheral {peripheral.name} does not have a '
-                        f'pin named {pin_conn.peripheralPin}'
+                        f'Peripheral {peripheral.name} does not have a pin named {pin_conn.peripheralPin}'
                     )
-            elif ioconn.__class__.__name__ == 'SPIConnection':
-                miso = ioconn.miso
-                mosi = ioconn.mosi
-                sck = ioconn.sck
-                cs = ioconn.cs
-                print(
-                    f'SPI-Connection: \n'
-                    f'  {miso.boardPin} -> {miso.peripheralPin}\n'
-                    f'  {mosi.boardPin} -> {mosi.peripheralPin}\n'
-                    f'  {sck.boardPin} -> {sck.peripheralPin}\n'
-                    f'  {cs.boardPin} -> {cs.peripheralPin}'
-                )
-                pin_conns = [miso, mosi, sck, cs]
-                for pc in pin_conns:
-                    if pc.boardPin not in board_pins:
-                        raise_validation_error(
-                            pc,
-                            f'Board {board.name} does not have a pin '
-                            f'named {pc.boardPin}',
-                        )
-                    if pc.peripheralPin not in per_pins:
-                        raise_validation_error(
-                            pc,
-                            f'Peripheral {peripheral.name} does not have a '
-                            f'pin named {pc.peripheralPin}'
-                        )
-            elif ioconn.__class__.__name__ == 'I2CConnection':
+                
+                # Enhanced validation: Check GPIO functionality
+                board_pin = board_pins_map[pin_conn.boardPin]
+                peripheral_pin = peripheral_pins_map[pin_conn.peripheralPin]
+                validate_gpio_connection(board_pin, peripheral_pin, ioconn)
+                
+            elif conn_type == 'I2CConnection':
                 sda = ioconn.sda
                 scl = ioconn.scl
                 print(
                     f'I2C-Connection:\n'
                     f'  SDA: {sda.boardPin} -> {sda.peripheralPin}\n'
-                    f'  SCL: {scl.boardPin} -> {scl.peripheralPin}'
+                    f'  SCL: {scl.boardPin} -> {scl.peripheralPin}\n'
+                    f'  Address: 0x{ioconn.slaveAddr:02X}'
                 )
+                
+                # Check if pins exist
                 pin_conns = [sda, scl]
                 for pc in pin_conns:
-                    if pc.boardPin not in board_pins:
+                    if pc.boardPin not in board_pin_names:
                         raise_validation_error(
                             pc,
-                            f'Board {board.name} does not have a pin '
-                            f'named {pc.boardPin}',
+                            f'Board {board.name} does not have a pin named {pc.boardPin}'
                         )
-                    if pc.peripheralPin not in per_pins:
+                    if pc.peripheralPin not in peripheral_pin_names:
                         raise_validation_error(
                             pc,
-                            f'Peripheral {peripheral.name} does not have a '
-                            f'pin named {pc.peripheralPin}'
+                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
                         )
-
-        # Topic generator
+                
+                # Enhanced validation: Check I2C functionality and address range
+                board_sda = board_pins_map[sda.boardPin]
+                board_scl = board_pins_map[scl.boardPin]
+                peripheral_sda = peripheral_pins_map[sda.peripheralPin]
+                peripheral_scl = peripheral_pins_map[scl.peripheralPin]
+                validate_i2c_connection(
+                    board_sda, board_scl, peripheral_sda, peripheral_scl,
+                    ioconn.slaveAddr, ioconn
+                )
+                
+            elif conn_type == 'SPIConnection':
+                miso = ioconn.miso
+                mosi = ioconn.mosi
+                sck = ioconn.sck
+                cs = ioconn.cs
+                print(
+                    f'SPI-Connection:\n'
+                    f'  MISO: {miso.boardPin} -> {miso.peripheralPin}\n'
+                    f'  MOSI: {mosi.boardPin} -> {mosi.peripheralPin}\n'
+                    f'  SCK: {sck.boardPin} -> {sck.peripheralPin}\n'
+                    f'  CS: {cs.boardPin} -> {cs.peripheralPin}'
+                )
+                
+                # Check if pins exist
+                pin_conns = [miso, mosi, sck, cs]
+                for pc in pin_conns:
+                    if pc.boardPin not in board_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Board {board.name} does not have a pin named {pc.boardPin}'
+                        )
+                    if pc.peripheralPin not in peripheral_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
+                        )
+                
+                # Enhanced validation: Check SPI functionality
+                board_spi_pins = {
+                    'mosi': board_pins_map[mosi.boardPin],
+                    'miso': board_pins_map[miso.boardPin],
+                    'sck': board_pins_map[sck.boardPin],
+                    'cs': board_pins_map[cs.boardPin]
+                }
+                peripheral_spi_pins = {
+                    'mosi': peripheral_pins_map[mosi.peripheralPin],
+                    'miso': peripheral_pins_map[miso.peripheralPin],
+                    'sck': peripheral_pins_map[sck.peripheralPin],
+                    'cs': peripheral_pins_map[cs.peripheralPin]
+                }
+                validate_spi_connection(board_spi_pins, peripheral_spi_pins, ioconn)
+                
+            elif conn_type == 'UARTConnection':
+                tx = ioconn.tx
+                rx = ioconn.rx
+                print(
+                    f'UART-Connection:\n'
+                    f'  TX: {tx.boardPin} -> {tx.peripheralPin}\n'
+                    f'  RX: {rx.boardPin} -> {rx.peripheralPin}\n'
+                    f'  Baudrate: {ioconn.baudrate}'
+                )
+                
+                # Check if pins exist
+                pin_conns = [tx, rx]
+                for pc in pin_conns:
+                    if pc.boardPin not in board_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Board {board.name} does not have a pin named {pc.boardPin}'
+                        )
+                    if pc.peripheralPin not in peripheral_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
+                        )
+                
+                # Enhanced validation: Check UART functionality and baudrate
+                board_tx = board_pins_map[tx.boardPin]
+                board_rx = board_pins_map[rx.boardPin]
+                peripheral_tx = peripheral_pins_map[tx.peripheralPin]
+                peripheral_rx = peripheral_pins_map[rx.peripheralPin]
+                validate_uart_connection(
+                    board_tx, board_rx, peripheral_tx, peripheral_rx,
+                    ioconn.baudrate, ioconn
+                )
+        
+        # ====================================================================
+        # Auto-generate topic if not specified
+        # ====================================================================
         if c.endpoint and not c.endpoint.topic:
-            peripheral_def = c.peripheral #Name defined in device
-            peripheral_ref = peripheral_def.ref #Actual peripheral instance to find out the type and message
-            peripheral_def_name = peripheral_def.name #Peripheral's reference name
-
-            peripheral_type = type(peripheral_ref).__name__ #Sensor/Actuator
-
-            peripheral_msg = peripheral_ref.msg #Peripheral's message
-
+            peripheral_def = c.peripheral
+            peripheral_ref = peripheral_def.ref
+            peripheral_def_name = peripheral_def.name
+            peripheral_type = type(peripheral_ref).__name__
+            peripheral_msg = peripheral_ref.msg
+            
             default_topic = f'"{device_name}.{peripheral_type}.{peripheral_msg}.{peripheral_def_name}"'
             c.endpoint.topic = default_topic.lower().strip('""')
+    
+    # ========================================================================
+    # Global Safety Validations
+    # ========================================================================
+    
+    # Safety: No pin conflicts (unique pins per connection)
+    validate_no_pin_conflicts(model.connections)
+    
+    # Safety: I2C addresses must be unique on the same bus
+    validate_i2c_address_uniqueness(model.connections)
+    
+    # Safety: Voltage limits must not be exceeded
+    validate_voltage_limits(model)
+    
+    print("\n[✓] All validation checks passed!")
 
 
 def get_device_mm(debug: bool = False, global_repo: bool = False):
