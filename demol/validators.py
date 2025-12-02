@@ -279,7 +279,7 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
             "UARTBaudrateWarning"
         )
     
-    # Check TX pins
+    # Check TX connection (Board TX -> Peripheral RX)
     board_tx_funcs = get_pin_functions(board_tx)
     if not any('tx' in str(f).lower() for f in board_tx_funcs):
         raise_validation_error(
@@ -289,14 +289,15 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
         )
     
     peripheral_tx_funcs = get_pin_functions(peripheral_tx)
-    if not any('tx' in str(f).lower() for f in peripheral_tx_funcs):
+    if not any('rx' in str(f).lower() for f in peripheral_tx_funcs):
         raise_validation_error(
             connection,
-            f"Peripheral pin {peripheral_tx.name} does not have TX (UART) functionality",
+            f"Peripheral pin {peripheral_tx.name} does not have RX (UART) functionality. "
+            f"UART requires connecting Board TX to Peripheral RX.",
             "UARTFunctionError"
         )
     
-    # Check RX pins
+    # Check RX connection (Board RX <- Peripheral TX)
     board_rx_funcs = get_pin_functions(board_rx)
     if not any('rx' in str(f).lower() for f in board_rx_funcs):
         raise_validation_error(
@@ -306,10 +307,11 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
         )
     
     peripheral_rx_funcs = get_pin_functions(peripheral_rx)
-    if not any('rx' in str(f).lower() for f in peripheral_rx_funcs):
+    if not any('tx' in str(f).lower() for f in peripheral_rx_funcs):
         raise_validation_error(
             connection,
-            f"Peripheral pin {peripheral_rx.name} does not have RX (UART) functionality",
+            f"Peripheral pin {peripheral_rx.name} does not have TX (UART) functionality. "
+            f"UART requires connecting Board RX to Peripheral TX.",
             "UARTFunctionError"
         )
 
@@ -324,47 +326,82 @@ def validate_no_pin_conflicts(connections: List) -> None:
     
     From SEMANTICS.md Section 6.7:
         Inv-Unique-Pins: ∀k₁, k₂ ∈ connections, k₁ ≠ k₂. usedPins(k₁) ∩ usedPins(k₂) = ∅
+        
+    EXCEPTION: 
+    - I2C pins (SDA, SCL) can be shared (bus architecture).
+    - Power pins (GND, VCC) can be shared (physically common nets).
     """
-    board_pin_usage: Dict[str, List[str]] = {}
+    # Map: pin_name -> List[Tuple[peripheral_name, usage_type]]
+    board_pin_usage: Dict[str, List[Tuple[str, str]]] = {}
     
     for connection in connections:
         peripheral_name = connection.peripheral.name
         
-        # Collect all board pins used in this connection
-        used_pins = []
+        # Collect all board pins used in this connection with their usage type
+        # List of (pin_name, usage_type)
+        used_pins: List[Tuple[str, str]] = []
         
         # Power connections
         for pconn in connection.powerConns:
-            used_pins.append(pconn.boardPin)
+            # Determine if it's GND or VCC based on pin name or type
+            # We assume the board model has correct types, but here we just need a label
+            # We can try to infer from the pin name or look up the board pin definition
+            # For simplicity, we'll label it 'POWER' effectively allowing sharing
+            # or better, check if it's GND.
+            
+            # To do this correctly, we should look up the pin on the board.
+            # But we don't have easy access to the board object here without traversing.
+            # However, validate_power_connection already checks types.
+            # Let's assume 'GND' sharing is always allowed.
+            # And 'VCC' sharing is allowed (parallel power).
+            used_pins.append((pconn.boardPin, 'POWER'))
         
         # IO connections
         for ioconn in connection.ioConns:
             if ioconn.__class__.__name__ == 'GPIOConnection':
-                used_pins.append(ioconn.pinConn.boardPin)
+                used_pins.append((ioconn.pinConn.boardPin, 'GPIO'))
             elif ioconn.__class__.__name__ == 'I2CConnection':
-                used_pins.append(ioconn.sda.boardPin)
-                used_pins.append(ioconn.scl.boardPin)
+                used_pins.append((ioconn.sda.boardPin, 'I2C-SDA'))
+                used_pins.append((ioconn.scl.boardPin, 'I2C-SCL'))
             elif ioconn.__class__.__name__ == 'SPIConnection':
-                used_pins.append(ioconn.mosi.boardPin)
-                used_pins.append(ioconn.miso.boardPin)
-                used_pins.append(ioconn.sck.boardPin)
-                used_pins.append(ioconn.cs.boardPin)
+                used_pins.append((ioconn.mosi.boardPin, 'SPI-MOSI'))
+                used_pins.append((ioconn.miso.boardPin, 'SPI-MISO'))
+                used_pins.append((ioconn.sck.boardPin, 'SPI-SCK'))
+                used_pins.append((ioconn.cs.boardPin, 'SPI-CS'))
             elif ioconn.__class__.__name__ == 'UARTConnection':
-                used_pins.append(ioconn.tx.boardPin)
-                used_pins.append(ioconn.rx.boardPin)
+                used_pins.append((ioconn.tx.boardPin, 'UART-TX'))
+                used_pins.append((ioconn.rx.boardPin, 'UART-RX'))
         
         # Check for conflicts
-        for pin in used_pins:
+        for pin, usage in used_pins:
             if pin in board_pin_usage:
-                raise_validation_error(
-                    connection,
-                    f"Pin conflict detected: Board pin '{pin}' is already used by "
-                    f"peripheral(s): {', '.join(board_pin_usage[pin])}. "
-                    f"Cannot reuse for peripheral '{peripheral_name}'.",
-                    "PinConflictError"
-                )
+                # Check if sharing is allowed
+                existing_usages = board_pin_usage[pin]
+                
+                for existing_peripheral, existing_usage in existing_usages:
+                    # Allow sharing if:
+                    # 1. Both are POWER (GND/VCC)
+                    # 2. Both are I2C and same function (SDA=SDA, SCL=SCL)
+                    
+                    allowed = False
+                    if usage == 'POWER' and existing_usage == 'POWER':
+                        allowed = True
+                    elif usage == existing_usage and usage.startswith('I2C-'):
+                        allowed = True
+                    
+                    if not allowed:
+                        raise_validation_error(
+                            connection,
+                            f"Pin conflict detected: Board pin '{pin}' is already used by "
+                            f"peripheral '{existing_peripheral}' as '{existing_usage}'. "
+                            f"Cannot reuse for peripheral '{peripheral_name}' as '{usage}'.",
+                            "PinConflictError"
+                        )
+                
+                # If we get here, sharing is allowed with all existing users
+                board_pin_usage[pin].append((peripheral_name, usage))
             else:
-                board_pin_usage.setdefault(pin, []).append(peripheral_name)
+                board_pin_usage[pin] = [(peripheral_name, usage)]
 
 
 def validate_i2c_address_uniqueness(connections: List) -> None:

@@ -36,7 +36,7 @@ Connection
     peripheral: MyToF
     powerConnections:
         - GND_3 -- GND
-        - power_5v_a -- VIN
+        - power_3v3_a -- VIN
     ioConnections:
         - type: i2c
           name: data

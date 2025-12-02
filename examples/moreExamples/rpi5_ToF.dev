@@ -33,7 +33,7 @@ Connection
     peripheral: MyToF
     powerConnections:
         - GND_3 -- GND
-        - power_5v_a -- VIN
+        - power_3v3_a -- VIN
     ioConnections:
         - type: i2c
           name: data
@@ -70,8 +70,8 @@ Connection
         - type: uart
           name: data
           pins:
-            tx: GPIO15 -- TXD //Here i assigned to tx the sensor's tx
-            rx: GPIO14 -- RXD //Respectively
+            tx: GPIO14 -- RXD
+            rx: GPIO15 -- TXD
             baudrate: 115200
     endpoint:
         topic: "my_raspi.sensors.tfmini"
@@ -81,8 +81,8 @@ end
 Connection
     peripheral: MyBME
     powerConnections:
-        - GND_3 -- GND
-        - power_5v_a -- VCC
+        - GND_3 -- gnd
+        - power_5v_a -- vcc
     ioConnections:
         - type: i2c
           name: env_data

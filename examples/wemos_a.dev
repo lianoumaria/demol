@@ -45,11 +45,8 @@ Connection
         - gnd -- gnd
         - power_5v -- vcc
     ioConnections:
-        - type: i2c
-          slave_address: 0x78
-          pins:
-              sda: d2 -- data_in
-              scl: d1 -- data_out
+        - type: gpio
+          pin: d2 -- data_in
     endpoint:
         topic: "my_wemos.actuators.visual.ledstrip"
 end

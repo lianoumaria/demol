@@ -51,12 +51,15 @@ v ∈ Value ::= Int(ℤ) | Float(ℝ) | String(Σ*) | Bool(𝔹) | List([Value])
 
 ```
 DeviceModel ::= Device(
+    imports: List[Import],
     meta: Metadata,
     network: Network,
     components: Components,
     broker: Option[Broker],
     connections: List[Connection]
 )
+
+Import ::= Imp(uri: FQN, alias: Option[ID])
 ```
 
 #### Metadata
@@ -199,7 +202,7 @@ PCMType ::= FS | DIN | DOUT
 ```
 Connection ::= Conn(
     peripheral: PeripheralDef,
-    board: BoardRef,
+    board: BoardRef,  // Implicit in grammar, explicit in resolved model
     powerConns: List[PowerConnection],
     ioConns: List[IOConnection],
     endpoint: Option[Endpoint],
