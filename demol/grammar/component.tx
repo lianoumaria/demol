@@ -9,9 +9,16 @@ Component:
     Board | Peripheral
 ;
 
+BoardType:
+    'RPI' |
+	'ESP' |
+	'ARDUINO'
+;
+
 Board:
     'Board' name=ID
 	(
+        ("type" ":" type=BoardType)?
 	    ("cpu" ":" cpu=CPU)
         ("memory" ":" memory=Memory)
         ("vcc" ":" vcc=PowerType)
@@ -250,7 +257,8 @@ DictAttribute:
 Constraint:
 	name = "max_frequency" ":" value=NUMBER unit=FrequencyUnit |
 	name = "min_distance" ":" value=NUMBER unit=DistanceUnit |
-	name = "max_distance" ":" value=NUMBER unit=DistanceUnit
+	name = "max_distance" ":" value=NUMBER unit=DistanceUnit |
+    name = "max_latency" ":" value=NUMBER unit=TimeUnit
 ;	
 
 UNITS:
@@ -263,6 +271,10 @@ FrequencyUnit:
 
 DistanceUnit:
 	"m" | "cm" | "mm"
+;
+
+TimeUnit:
+    "h" | "min" | "s" | "ms" | "us" | "ns"
 ;
 
 PowerUnit:

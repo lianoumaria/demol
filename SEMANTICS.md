@@ -111,6 +111,7 @@ PeripheralRef ::= Ref(name: FQN, model: Peripheral)
 ```
 Board ::= BoardDef(
     name: ID,
+    type: Option[BoardType],
     vcc: PowerType,
     cpu: CPU,
     memory: Memory,
@@ -127,6 +128,8 @@ CPU ::= CPUSpec(
 )
 
 CPUFamily ::= ESP32 | ESP8266 | PiArmCortex
+
+BoardType ::= RPI | ESP | ARDUINO
 
 Memory ::= MemSpec(
     ram: Option[Size],
@@ -296,6 +299,9 @@ Attribute ::= IntAttr(name: ID, default: Option[ℤ])
 Constraint ::= MaxFrequency(value: ℝ, unit: FreqUnit)
              | MinDistance(value: ℝ, unit: DistUnit)
              | MaxDistance(value: ℝ, unit: DistUnit)
+             | MaxLatency(value: ℝ, unit: TimeUnit)
+
+TimeUnit ::= H | Min | S | MS | US | NS
 ```
 
 ---
@@ -344,6 +350,7 @@ PeripheralDef ::= FQN '(' ID ')'
 
 (* Board *)
 Board ::= 'Board' ID
+          ('type:' BoardType)?
           'cpu:' CPU
           'memory:' Memory
           'vcc:' PowerType
@@ -358,6 +365,8 @@ CPU ::= 'cpu_family:' CPUFamily
         'fpu:' BOOL
 
 CPUFamily ::= 'ESP32' | 'ESP8266' | 'PiArmCortex'
+
+BoardType ::= 'RPI' | 'ESP' | 'ARDUINO'
 
 Memory ::= ('ram:' Number MemUnit)?
            ('rom:' Number MemUnit)?
@@ -549,6 +558,9 @@ Dict ::= '{' (ID ':' Setting) (',' ID ':' Setting)* '}'
 Constraint ::= 'max_frequency:' Number FreqUnit
              | 'min_distance:' Number DistUnit
              | 'max_distance:' Number DistUnit
+             | 'max_latency:' Number TimeUnit
+
+TimeUnit ::= 'h' | 'min' | 's' | 'ms' | 'us' | 'ns'
 
 DistUnit ::= 'm' | 'cm' | 'mm'
 

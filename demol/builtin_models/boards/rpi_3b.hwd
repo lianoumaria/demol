@@ -12,6 +12,7 @@ Board RaspberryPi_3B
         name: wifi_1
         freq: 2.4 ghz
     bluetooth: BT4
+    ioVcc: 3V3
     pins:
     - power:
         name: power_3v3_a

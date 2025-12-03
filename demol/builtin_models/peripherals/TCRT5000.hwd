@@ -2,6 +2,7 @@ Sensor TCRT5000
     vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα.. 
     //ίσως αλλάξω τις προδιαγραφές ώτα να δέχονται για input range
     msg: Tracker
+    ioVcc: 5V
     pins:
     -power:
         name: VCC

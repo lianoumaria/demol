@@ -1,6 +1,7 @@
 Sensor BME680
     vcc: 5V
     msg: Env
+    ioVcc: 3V3
     pins:
         - power:
             name: vcc

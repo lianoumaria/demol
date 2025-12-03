@@ -1,6 +1,7 @@
 Actuator PCA9685
     vcc: 5V
     msg: ServoController
+    ioVcc: 5V
     pins: 
         -power:
             name: GND_1

@@ -1,6 +1,7 @@
 Sensor VL53L1X
     vcc: 3V3 //According to the datasheet it is 2.6-5.5V
     msg: Distance
+    ioVcc: 3V3
     pins :
     -power://Maybe gpio
         name: VDD

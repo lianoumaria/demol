@@ -50,9 +50,12 @@ def model_proc(model, metamodel):
         validate_voltage_limits,
         validate_all_peripherals_connected,
         validate_broker_requirements,
+        validate_io_voltage_compatibility,
     )
     
     device_name = model.metadata.name.strip('"')
+
+    print(f'[*] Processing model: {model._tx_filename}')
     
     # ========================================================================
     # Well-Formedness: All peripherals must be connected
@@ -83,11 +86,6 @@ def model_proc(model, metamodel):
         # Validate Power Connections
         # ====================================================================
         for pconn in c.powerConns:
-            print(
-                f'PowerPinConnection:\n'
-                f'  {pconn.boardPin} -> {pconn.peripheralPin}'
-            )
-            
             # Check if pins exist
             if pconn.boardPin not in board_pin_names:
                 raise_validation_error(
@@ -116,10 +114,6 @@ def model_proc(model, metamodel):
             
             if conn_type == 'GPIOConnection':
                 pin_conn = ioconn.pinConn
-                print(
-                    f'GPIO-Connection:\n'
-                    f'  {pin_conn.boardPin} -> {pin_conn.peripheralPin}'
-                )
                 
                 # Check if pins exist
                 if pin_conn.boardPin not in board_pin_names:
@@ -141,12 +135,6 @@ def model_proc(model, metamodel):
             elif conn_type == 'I2CConnection':
                 sda = ioconn.sda
                 scl = ioconn.scl
-                print(
-                    f'I2C-Connection:\n'
-                    f'  SDA: {sda.boardPin} -> {sda.peripheralPin}\n'
-                    f'  SCL: {scl.boardPin} -> {scl.peripheralPin}\n'
-                    f'  Address: 0x{ioconn.slaveAddr:02X}'
-                )
                 
                 # Check if pins exist
                 pin_conns = [sda, scl]
@@ -177,13 +165,6 @@ def model_proc(model, metamodel):
                 mosi = ioconn.mosi
                 sck = ioconn.sck
                 cs = ioconn.cs
-                print(
-                    f'SPI-Connection:\n'
-                    f'  MISO: {miso.boardPin} -> {miso.peripheralPin}\n'
-                    f'  MOSI: {mosi.boardPin} -> {mosi.peripheralPin}\n'
-                    f'  SCK: {sck.boardPin} -> {sck.peripheralPin}\n'
-                    f'  CS: {cs.boardPin} -> {cs.peripheralPin}'
-                )
                 
                 # Check if pins exist
                 pin_conns = [miso, mosi, sck, cs]
@@ -217,12 +198,6 @@ def model_proc(model, metamodel):
             elif conn_type == 'UARTConnection':
                 tx = ioconn.tx
                 rx = ioconn.rx
-                print(
-                    f'UART-Connection:\n'
-                    f'  TX: {tx.boardPin} -> {tx.peripheralPin}\n'
-                    f'  RX: {rx.boardPin} -> {rx.peripheralPin}\n'
-                    f'  Baudrate: {ioconn.baudrate}'
-                )
                 
                 # Check if pins exist
                 pin_conns = [tx, rx]
@@ -274,7 +249,10 @@ def model_proc(model, metamodel):
     # Safety: Voltage limits must not be exceeded
     validate_voltage_limits(model)
     
-    print("\n[✓] All validation checks passed!")
+    # Safety: IO Voltage compatibility
+    validate_io_voltage_compatibility(model)
+    
+    print("[✓] All validation checks passed!")
 
 
 def get_device_mm(debug: bool = False, global_repo: bool = False):

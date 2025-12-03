@@ -1,7 +1,6 @@
 import os, sys
 from demol.definitions import *
 from demol.lang import utils
-from demol.transformations import m2t_riot_old, device_to_plantuml
 import jinja2
 import codecs
 import warnings
@@ -11,6 +10,7 @@ env = jinja2.Environment(loader=fsloader)
 broker_data = {}
 device_name = ""
 peripherals_data = []
+
 
 def get_broker_info(device_model):
     #Device name to name the output file
@@ -56,6 +56,7 @@ def get_broker_info(device_model):
     print(f"Broker username: {broker_data['broker_username']}")
     print(f"Broker password: {broker_data['broker_password']}")
 
+
 def get_peripherals_info(device_model):
     global peripherals_data
 
@@ -98,7 +99,8 @@ def demol2smauto(output_dir):
     ofh.write(rt)
     ofh.close()
 
-def main(dev_model,output_dir):
+
+def main(dev_model, output_dir):
     rpi5_device_path = os.path.join(REPO_PATH, "examples", dev_model)
     rpi5_device = utils.build_model(rpi5_device_path)
 

@@ -461,6 +461,58 @@ def validate_voltage_limits(model) -> None:
                         "VoltageLimitError"
                     )
 
+
+def validate_io_voltage_compatibility(model) -> None:
+    """
+    Validate IO Voltage Compatibility.
+    
+    Ensures that the board's IO voltage matches the peripheral's IO voltage
+    to prevent communication errors or hardware damage.
+    
+    NOTE: This validation emits warnings rather than errors to allow
+    validation to continue. Users should carefully review these warnings.
+    
+    Logic:
+    - Board IO Voltage = board.ioVcc if set, else board.vcc
+    - Peripheral IO Voltage = peripheral.ioVcc if set, else peripheral.vcc
+    - Voltages must be compatible (within tolerance).
+    """
+    import warnings
+    
+    board = model.components.board
+    
+    # Determine Board IO Voltage
+    board_io_vcc_str = board.iovcc if hasattr(board, 'iovcc') and board.iovcc else board.vcc
+    board_io_v = parse_voltage(board_io_vcc_str)
+    
+    if board_io_v is None:
+        # Should be caught by other validations, but safe to skip or warn
+        return
+
+    for connection in model.connections:
+        peripheral = connection.peripheral.ref
+        
+        # Determine Peripheral IO Voltage
+        # Peripherals might not have ioVcc defined in all cases, fallback to vcc
+        periph_io_vcc_str = peripheral.ioVcc if hasattr(peripheral, 'ioVcc') and peripheral.ioVcc else peripheral.vcc
+        periph_io_v = parse_voltage(periph_io_vcc_str)
+        
+        if periph_io_v is None:
+            continue
+            
+        # Check compatibility
+        if not are_voltages_compatible(board_io_v, periph_io_v):
+            # Emit warning instead of raising error
+            location = get_location(connection)
+            warning_msg = (
+                f"[IOVoltageIncompatibilityWarning] IO Voltage Incompatibility at "
+                f"{location.get('filename', 'unknown')}:{location.get('line', '?')}: "
+                f"Board '{board.name}' operates at {board_io_v}V (IO), "
+                f"but peripheral '{peripheral.name}' operates at {periph_io_v}V (IO). "
+                f"This may cause communication errors or damage."
+            )
+            warnings.warn(warning_msg, category=UserWarning)
+
 # ============================================================================
 # Well-Formedness Validation
 # ============================================================================

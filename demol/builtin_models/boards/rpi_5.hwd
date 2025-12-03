@@ -11,6 +11,7 @@ Board RaspberryPi_5_8GB
     - wifi:
         name: wifi_5
     bluetooth: BT5
+    ioVcc: 3V3
     pins:
     - power:
         name: power_3v3_a
