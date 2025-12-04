@@ -51,6 +51,7 @@ def model_proc(model, metamodel):
         validate_all_peripherals_connected,
         validate_broker_requirements,
         validate_io_voltage_compatibility,
+        validate_common_ground,
     )
     
     device_name = model.metadata.name.strip('"')
@@ -63,10 +64,16 @@ def model_proc(model, metamodel):
     validate_all_peripherals_connected(model)
     
     # ========================================================================
-    # Well-Formedness: Broker requirement check
+    # Well-Formedness: Broker requirements
     # ========================================================================
     validate_broker_requirements(model)
     
+    # ========================================================================
+    # Well-Formedness: Common ground check
+    # ========================================================================
+    validate_common_ground(model)
+    
+    board_name = model.components.board.name
     # ========================================================================
     # Process each connection
     # ========================================================================
@@ -251,6 +258,9 @@ def model_proc(model, metamodel):
     
     # Safety: IO Voltage compatibility
     validate_io_voltage_compatibility(model)
+    
+    # Safety: Common ground connection
+    validate_common_ground(model)
     
     print("[✓] All validation checks passed!")
 

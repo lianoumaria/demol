@@ -26,6 +26,7 @@ Board:
 	    ('networking' ':' '-' networking*=NetworkInterface['-'])?
 	    ('bluetooth' ':' bluetooth=Bluetooth)?
         ("ioVcc" ":" iovcc=PowerType)?
+        ("riotName" ":" riotName=STRING)?
      )#
     'end'
 ;

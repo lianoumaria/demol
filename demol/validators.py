@@ -513,6 +513,69 @@ def validate_io_voltage_compatibility(model) -> None:
             )
             warnings.warn(warning_msg, category=UserWarning)
 
+
+def validate_common_ground(model) -> None:
+    """
+    Validate that peripheral and board share a common ground connection.
+    
+    Safety Property:
+        Each peripheral should have at least one GND connection to the board
+        to ensure proper electrical reference and circuit closure.
+
+        When peripherals don't share a common ground with the board,
+        which is important for electrical safety and signal integrity.
+    
+    This validation emits warnings rather than errors, as some peripherals
+    may have alternative grounding through other means (e.g., USB connections).
+    """
+    import warnings
+    
+    for connection in model.connections:
+        peripheral = connection.peripheral.ref
+        peripheral_name = connection.peripheral.name
+        
+        # Check if there are any power connections
+        if not hasattr(connection, 'powerConns') or not connection.powerConns:
+            # No power connections defined - emit warning
+            location = get_location(connection)
+            warning_msg = (
+                f"[NoGroundConnectionWarning] No power connections defined at "
+                f"{location.get('filename', 'unknown')}:{location.get('line', '?')}: "
+                f"Peripheral '{peripheral_name}' (type: {peripheral.name}) has no power "
+                f"connections to the board. Ensure proper grounding through external means "
+                f"or add a GND power connection for electrical safety."
+            )
+            warnings.warn(warning_msg, category=UserWarning)
+            continue
+        
+        # Check if any power connection is GND
+        has_ground = False
+        for pconn in connection.powerConns:
+            # Get the board pin
+            board_pin = next(
+                (p for p in model.components.board.pins if p.name == pconn.boardPin),
+                None
+            )
+            
+            if board_pin and hasattr(board_pin, 'ptype'):
+                board_voltage = parse_voltage(board_pin.ptype)
+                if board_voltage == 0.0:  # GND connection
+                    has_ground = True
+                    break
+        
+        # If no ground connection found, emit warning
+        if not has_ground:
+            location = get_location(connection)
+            warning_msg = (
+                f"[NoGroundConnectionWarning] Missing ground connection at "
+                f"{location.get('filename', 'unknown')}:{location.get('line', '?')}: "
+                f"Peripheral '{peripheral_name}' (type: {peripheral.name}) does not have "
+                f"a GND (ground) power connection to the board. This may cause electrical "
+                f"issues, signal integrity problems, or device malfunction. "
+                f"Please add a GND power connection between the board and peripheral."
+            )
+            warnings.warn(warning_msg, category=UserWarning)
+
 # ============================================================================
 # Well-Formedness Validation
 # ============================================================================

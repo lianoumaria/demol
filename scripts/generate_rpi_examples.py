@@ -26,25 +26,25 @@ logger = logging.getLogger(__name__)
 
 # RPI device examples identified from the examples directory
 RPI_EXAMPLES = [
-    # SmAutoExamples
-    ("SmAutoExamples/EntranceLEDs.dev", "rpi_out/SmAutoExamples/EntranceLEDs"),
-    ("SmAutoExamples/ParkingLeds.dev", "rpi_out/SmAutoExamples/ParkingLeds"),
-    ("SmAutoExamples/ParkingSensor.dev", "rpi_out/SmAutoExamples/ParkingSensor"),
-    ("SmAutoExamples/RPiFan.dev", "rpi_out/SmAutoExamples/RPiFan"),
-    ("SmAutoExamples/SmartWindow.dev", "rpi_out/SmAutoExamples/SmartWindow"),
+    # smauto (Smart Automation examples with RPI)
+    ("smauto/EntranceLEDs.dev", "rpi_out/smauto/EntranceLEDs"),
+    ("smauto/ParkingLeds.dev", "rpi_out/smauto/ParkingLeds"),
+    ("smauto/ParkingSensor.dev", "rpi_out/smauto/ParkingSensor"),
+    ("smauto/RPiFan.dev", "rpi_out/smauto/RPiFan"),
+    ("smauto/SmartWindow.dev", "rpi_out/smauto/SmartWindow"),
     
-    # ThesisExamples
-    ("ThesisExamples/LoCScenario1.dev", "rpi_out/ThesisExamples/LoCScenario1"),
-    ("ThesisExamples/LoCScenario2.dev", "rpi_out/ThesisExamples/LoCScenario2"),
-    ("ThesisExamples/ThesisExample.dev", "rpi_out/ThesisExamples/ThesisExample"),
+    # test (Test/Thesis examples)
+    ("test/LoCScenario1.dev", "rpi_out/test/LoCScenario1"),
+    ("test/LoCScenario2.dev", "rpi_out/test/LoCScenario2"),
+    ("test/ThesisExample.dev", "rpi_out/test/ThesisExample"),
     
-    # moreExamples
-    ("moreExamples/RPi_ADC.dev", "rpi_out/moreExamples/RPi_ADC"),
-    ("moreExamples/RPi_gas_led.dev", "rpi_out/moreExamples/RPi_gas_led"),
-    ("moreExamples/rpi5_ToF.dev", "rpi_out/moreExamples/rpi5_ToF"),
-    ("moreExamples/rpi_5_TCRT.dev", "rpi_out/moreExamples/rpi_5_TCRT"),
-    ("moreExamples/rpi_constraint_bme.dev", "rpi_out/moreExamples/rpi_constraint_bme"),
-    ("moreExamples/rpi_iot_device.dev", "rpi_out/moreExamples/rpi_iot_device"),
+    # rpi (Raspberry Pi examples)
+    ("rpi/RPi_ADC.dev", "rpi_out/rpi/RPi_ADC"),
+    ("rpi/RPi_gas_led.dev", "rpi_out/rpi/RPi_gas_led"),
+    ("rpi/rpi5_ToF.dev", "rpi_out/rpi/rpi5_ToF"),
+    ("rpi/rpi_5_TCRT.dev", "rpi_out/rpi/rpi_5_TCRT"),
+    ("rpi/rpi_constraint_bme.dev", "rpi_out/rpi/rpi_constraint_bme"),
+    ("rpi/rpi_iot_device.dev", "rpi_out/rpi/rpi_iot_device"),
 ]
 
 
