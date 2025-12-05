@@ -170,8 +170,6 @@ Bluetooth:
 
 
 SensorType:
-	"Distance"      |
-SensorType:
     // Environmental Sensors
     "Temperature"   |
     "Humidity"      |
