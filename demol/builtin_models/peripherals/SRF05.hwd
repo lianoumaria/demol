@@ -1,8 +1,6 @@
-Sensor SRF05
+Sensor[Distance] SRF05
     operational
-    vcc: 5V //Νομίζω στο 3.3 το συνδέσαμε αλλά λέει 5.. Αν συνδεθεί στα 5 θέλει level shifter
-    msg: Distance
-    ioVcc: 5V
+        vcc: 5V        ioVcc: 5V
     end
     pins
         PPIN VCC[5V] @ 1;

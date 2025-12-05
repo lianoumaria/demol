@@ -1,8 +1,6 @@
-Sensor TFMini
+Sensor[Distance] TFMini
     operational
-    vcc: 5V
-    msg: Distance
-    end
+        vcc: 5V    end
     pins
         PPIN GND[GND] @ 1;
         PPIN VCC[5V] @ 2;

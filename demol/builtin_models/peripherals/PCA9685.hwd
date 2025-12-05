@@ -1,8 +1,6 @@
-Actuator PCA9685
+Actuator[ServoController] PCA9685
     operational
-    vcc: 5V
-    msg: ServoController
-    ioVcc: 5V
+    vcc: 5V    ioVcc: 5V
     end
     pins
         PPIN GND_1[GND] @ 1;

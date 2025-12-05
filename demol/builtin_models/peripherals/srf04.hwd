@@ -1,9 +1,8 @@
 // RIOT Configuration for SRF04 (HC-SR04) ultra sonic range finder
 
-Sensor SonarSRF04
+Sensor[Distance] SonarSRF04
     operational
     vcc: 5V
-    msg: Distance
     ioVcc: 5V
     piTpl: "srf04"
     riotTpl: "srf04"

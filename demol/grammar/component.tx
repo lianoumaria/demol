@@ -27,7 +27,7 @@ Board:
 Peripheral: Sensor | Actuator;
 
 Actuator:
-    'Actuator' name=ID
+    'Actuator' '[' type=ActuatorType ']' name=ID
 	(
 	  ('operational' operational=OperationalActuator 'end')
 	  ('pins' pins*=Pin 'end')
@@ -37,7 +37,7 @@ Actuator:
 ;
 
 Sensor:
-    'Sensor' name=ID
+    'Sensor' '[' type=SensorType ']' name=ID
 	(
 	  ('operational' operational=OperationalSensor 'end')
 	  ('pins' pins*=Pin 'end')
@@ -169,7 +169,7 @@ Bluetooth:
 ;
 
 
-SensorMsgType:
+SensorType:
 	"Distance"      |
     "Temperature"   |
     "Humidity"      |
@@ -179,10 +179,12 @@ SensorMsgType:
     "Acceleration"  |
     "IMU"           |
     "Tracker"	    |
-    "ADC"
+    "ADC"           |
+    "Proximity"     |
+    "NeoPixel"
 ;
 
-ActuatorMsgType:
+ActuatorType:
 	"MotorController"   |
     "ServoController"   |
     "LedArray"
@@ -241,7 +243,6 @@ OperationalBoard:
 OperationalSensor:
     (
         ("vcc" ":" vcc=PowerType)
-        ("msg" ":" msg=SensorMsgType)
         ("ioVcc" ":" iovcc=PowerType)?
         ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
         ("riotTpl" ":" riotTpl=STRING)?
@@ -252,7 +253,6 @@ OperationalSensor:
 OperationalActuator:
     (
         ("vcc" ":" vcc=PowerType)
-        ("msg" ":" msg=ActuatorMsgType)
         ("ioVcc" ":" iovcc=PowerType)?
         ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
         ("riotTpl" ":" riotTpl=STRING)?

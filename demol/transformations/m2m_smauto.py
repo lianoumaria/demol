@@ -69,7 +69,7 @@ def get_peripherals_info(device_model):
         per_type =  type(device_model.connections[i].peripheral.ref).__name__
         per_topic = device_model.connections[i].endpoint.topic
         per_broker = broker_data["broker_name"]
-        per_msg_type = device_model.connections[i].peripheral.ref.operational.msg
+        per_msg_type = device_model.connections[i].peripheral.ref.type
         peripheral_data = {"per_name": per_dev_name, "per_real_name": per_real_name, "per_type": per_type, "per_topic": per_topic, "per_broker": per_broker, "per_msg_type": per_msg_type}
 
         for attribute in device_model.connections[i].peripheral.ref.attributes:

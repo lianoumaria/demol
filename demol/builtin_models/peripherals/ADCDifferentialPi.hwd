@@ -1,8 +1,6 @@
-Sensor ADCDifferentialPi
+Sensor[ADC] ADCDifferentialPi
     operational
-    vcc: 5V
-    msg: ADC
-    end
+    vcc: 5V    end
     pins
         PPIN VCC[5V] @ 1;
         PPIN GND[GND] @ 2;

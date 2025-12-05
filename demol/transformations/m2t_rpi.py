@@ -151,7 +151,7 @@ class DeviceModelExtractor:
                 "pins": self._extract_pins(conn.ioConns),
                 "attributes": self._extract_attributes(conn.peripheral.ref.attributes),
                 "topic": conn.endpoint.topic,
-                "message": conn.peripheral.ref.operational.msg,
+                "message": conn.peripheral.ref.type,
                 "custom_template": getattr(conn.peripheral.ref, "piTpl", None) or None,
             }
             

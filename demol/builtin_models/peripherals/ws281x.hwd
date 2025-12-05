@@ -1,9 +1,8 @@
 // RIOT Configuration for ws2812 neopixel led strip
 
-Actuator WS281X
+Actuator[LedArray] WS281X
     operational
-    vcc: 5V
-    msg: LedArray
+        vcc: 5V
     end
     pins
         PPIN vcc[5V] @ 1;

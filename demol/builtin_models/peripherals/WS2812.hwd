@@ -1,8 +1,7 @@
 // Model of NeoPixel_Ring_12
-Actuator WS2812
+Actuator[LedArray] WS2812
     operational
-    vcc: 5V
-    msg: LedArray
+        vcc: 5V
     end
     pins
         PPIN VCC[5V] @ 1;

@@ -1,9 +1,6 @@
-Sensor TCRT5000
-    //ίσως αλλάξω τις προδιαγραφές ώτα να δέχονται για input range
+Sensor[Proximity] TCRT5000
     operational
-    vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα.. 
-    msg: Tracker
-    ioVcc: 5V
+        vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα..        ioVcc: 5V
     end
     pins
         PPIN VCC[5V] @ 1;

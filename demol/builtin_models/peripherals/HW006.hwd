@@ -1,8 +1,7 @@
-Sensor HW006
+Sensor[Proximity] HW006
     //ίσως αλλάξω τις προδιαγραφές ώτα να δέχονται για input range
     operational
-    vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα.. 
-    msg: Tracker
+        vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα..
     end
     pins
         DPIN OUT[gpio] @ 1;

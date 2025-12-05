@@ -225,7 +225,7 @@ def model_proc(model, metamodel):
             peripheral_ref = peripheral_def.ref
             peripheral_def_name = peripheral_def.name
             peripheral_type = type(peripheral_ref).__name__
-            peripheral_msg = peripheral_ref.operational.msg
+            peripheral_msg = peripheral_ref.type
             
             default_topic = f'"{device_name}.{peripheral_type}.{peripheral_msg}.{peripheral_def_name}"'
             c.endpoint.topic = default_topic.lower().strip('""')

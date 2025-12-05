@@ -39,7 +39,7 @@ def peripheral2dict(peripheral):
     _d = {
         'name': peripheral.name,
         'pins': pins2dict(peripheral.pins),
-        'msg': peripheral.operational.msg,
+        'msg': peripheral.type,
         'attributes': peripheral.attributes if hasattr(peripheral, 'attributes') else [],
         'riotTpl': peripheral.operational.riotTpl if hasattr(peripheral.operational, 'riotTpl') else None,
         'piTpl': peripheral.operational.piTpl if hasattr(peripheral.operational, 'piTpl') else None,
