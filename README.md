@@ -47,6 +47,7 @@
     - [Connections](#connections)
     - [Message Brokers](#message-brokers)
     - [Complete Example](#complete-example)
+  - [🔌 Supported Sensors \u0026 Actuators](#-supported-sensors--actuators)
   - [📐 Formal Semantics](#-formal-semantics)
   - [🔧 Usage](#-usage)
     - [CLI](#cli)
@@ -246,109 +247,101 @@ end
 
 #### Board Models
 
-Boards are defined in `.hwd` files and describe microcontroller/SBC specifications:
+Boards are defined in `.hwd` files and describe microcontroller/SBC specifications using the `Board[Type] name` syntax:
 
 ```
-Board ESP32Wroom32
-    vcc: 3V3
-    memory:
-        flash: 4 mb
-        ram: 520 kb  // optional
-        rom: 448 kb  // optional
-    cpu:
-        cpu_family: ESP32  // ESP32, ESP8266, PiArmCortex
-        max_freq: 240 mhz
-        fpu: false
-    networking:
-    - wifi:
-        name: wifi_1
-        freq: 2.5 ghz
-    - ethernet:  // optional
-        name: eth0
-    bluetooth: BT4  // BT3, BT4, BT5, NA
-    ioVcc: 3V3  // optional IO voltage
-    pins:
-    - power:
-        name: power_3v3
-        number: 1
-        type: 3V3
-    - io_pin:
-        functions: gpio, adc, pwm-1
-        name: p_32
-        number: 7
-        vmin: 0  // optional
-        vmax: 3.3  // optional
-        signalLevel: 3.3  // optional
+Board[RPI] RaspberryPi_4B_4GB
+    operational
+        vcc: 5V
+        memory:
+            flash: 16 gb
+            ram: 4 gb
+        cpu:
+            cpu_family: PiArmCortex
+            max_freq: 1500 mhz
+            fpu: true
+        wifi:
+            name: wifi_0
+            freq: 2.4 ghz
+        bluetooth: BT5
+        ioVcc: 3V3
+    end
+    pins
+        PPIN power_5v[5V] @ 2;
+        PPIN gnd_1[GND] @ 6;
+        DPIN p_21[gpio,sda-1] @ 40;
+        DPIN p_22[gpio,scl-1] @ 38;
+    end
 end
 ```
 
-**Pin Functions:** `gpio`, `adc`, `dac`, `pwm-<channel>`, `sda-<bus>`, `scl-<bus>`, `mosi-<bus>`, `miso-<bus>`, `sck-<bus>`, `cs-<bus>`, `tx-<bus>`, `rx-<bus>`, `fs`, `din`, `dout`
+**Board Types:** `RPI` (Raspberry Pi), `ESP` (ESP32/ESP8266), `ARDUINO`
 
-**Power Types:** `GND`, `3V3`, `5V`, `12V`, or custom (e.g., `2.5V`, `1.8V`)
+**Pin Syntax:**
+- `PPIN` - Power pins (VCC, GND)
+- `DPIN` - Digital/IO pins with functions
+
+**Pin Functions:** `gpio`, `adc`, `dac`, `pwm-<channel>`, `sda-<bus>`, `scl-<bus>`, `mosi-<bus>`, `miso-<bus>`, `sck-<bus>`, `cs-<bus>`, `tx-<bus>`, `rx-<bus>`
+
+**Power Types:** `GND`, `3V3`, `5V`, `12V`
 
 #### Peripheral Models (Sensors)
 
+Sensors use the `Sensor[Type] name` syntax where Type indicates the sensor category and its message schema:
+
 ```
-Sensor BME680
-    vcc: 5V
-    msg: Env  // Message type: Distance, Temperature, Humidity, Gas, Pressure, Env, Acceleration, IMU, Tracker, ADC
-    piTpl: "bme680"  // optional - RaspberryPi template
-    riotTpl: "bme680"  // optional - RiotOS template
-    ioVcc: 3V3  // optional
-    pins:
-        - power:
-            name: VCC
-            number: 1
-            type: 5V
-        - power:
-            name: GND
-            number: 5
-            type: GND
-        - io_pin:
-            functions: sda-0
-            name: sda
-            number: 2
-        - io_pin:
-            functions: scl-0
-            name: scl
-            number: 3
-    attributes:
-        - poll_period: int = 10
-        - humidity_oversample: int = 2
-        - temperature_oversample: int = 8
-    constraints:
-        - max_frequency: 20 hz
-        - min_distance: 2 cm  // for distance sensors
-        - max_distance: 400 cm  // for distance sensors
-    powerConsumption: 3 mW  // optional
+Sensor[Env] BME680
+    operational
+        vcc: 5V
+        ioVcc: 3V3
+        powerConsumption: 3 mW
+        piTpl: "bme680"  // optional - RaspberryPi template
+        riotTpl: "bme680"  // optional - RiotOS template
+    end
+    pins
+        PPIN vcc[5V] @ 1;
+        PPIN gnd[GND] @ 5;
+        DPIN sda[sda-0] @ 2;
+        DPIN scl[scl-0] @ 3;
+    end
+    attributes
+        ATTR poll_period[int] = 10;
+        ATTR humidity_oversample[int] = 2;
+        ATTR temperature_oversample[int] = 8;
+    end
 end
 ```
+
+**Available Sensor Types:** `Distance`, `Temperature`, `Humidity`, `Gas`, `Pressure`, `Env`, `AirQuality`, `Light`, `UV`, `Sound`, `Acceleration`, `Gyroscope`, `Magnetometer`, `IMU`, `Tracker`, `Proximity`, `Motion`, `Presence`, `ADC`, `Current`, `Voltage`, `Power`, `Flow`, `Level`, `Weight`, `Force`, `Vibration`, `Camera`, `RFID`, `Fingerprint`, `GPS`, `Color`
+
+For complete sensor type documentation and message schemas, see **[SENSORS_ACTUATORS.md](SENSORS_ACTUATORS.md)**.
 
 #### Peripheral Models (Actuators)
 
+Actuators use the `Actuator[Type] name` syntax:
+
 ```
-Actuator ServoMotor
-    vcc: 5V
-    msg: ServoController  // MotorController, ServoController, LedArray
-    pins:
-        - power:
-            name: VCC
-            number: 1
-            type: 5V
-        - power:
-            name: GND
-            number: 2
-            type: GND
-        - io_pin:
-            functions: pwm-0
-            name: control
-            number: 3
-    attributes:
-        - min_angle: int = 0
-        - max_angle: int = 180
-    powerConsumption: 500 mW
+Actuator[ServoController] PCA9685
+    operational
+        vcc: 5V
+        ioVcc: 5V
+    end
+    pins
+        PPIN GND_1[GND] @ 1;
+        DPIN SCL_1[scl-0] @ 2;
+        DPIN SDA_1[sda-0] @ 3;
+        PPIN VCC_1[5V] @ 4;
+    end
+    attributes
+        ATTR num_servos[int] = 16;
+        ATTR frequency[int] = 50;
+    end
 end
 ```
+
+**Available Actuator Types:** `MotorController`, `ServoController`, `Relay`, `Switch`, `Led`, `LedArray`, `NeoPixel`, `Display`, `LCD`, `OLED`, `Buzzer`, `Speaker`, `Stepper`, `DCMotor`, `Pump`, `Valve`, `Heater`, `Cooler`, `Fan`
+
+For complete actuator type documentation and command schemas, see **[SENSORS_ACTUATORS.md](SENSORS_ACTUATORS.md)**.
 
 **Units:**
 - **Memory:** `b`, `kb`, `mb`, `gb`
@@ -626,7 +619,55 @@ Connection
         - brightness: int = 128
         - num_leds: int = 12
 end
+
+
+## 🔌 Supported Sensors & Actuators
+
+DeMoL supports **35 sensor types** and **23 actuator types** covering a wide range of IoT applications:
+
+### Sensor Categories
+
+- **Environmental**: Temperature, Humidity, Pressure, Gas, Env, AirQuality, Light, UV, Sound
+- **Motion & Position**: Distance, Proximity, Motion, Presence, Acceleration, Gyroscope, Magnetometer, IMU, Tracker
+- **Specialized**: ADC, Current, Voltage, Power, Flow, Level, Weight, Force, Vibration
+- **Smart**: Camera, RFID, Fingerprint, GPS, Color
+
+### Actuator Categories
+
+- **Basic**: MotorController, ServoController, Relay, Switch
+- **Display & Light**: Led, LedArray, NeoPixel, Display, LCD, OLED
+- **Sound**: Buzzer, Speaker
+- **Advanced**: Stepper, DCMotor, Pump, Valve, Heater, Cooler, Fan
+
+### Message Schemas
+
+Each sensor and actuator type has a defined message schema for standardized communication:
+
+**Example Sensor Message (Environmental):**
+```json
+{
+  "temperature": 23.5,
+  "humidity": 65.2,
+  "pressure": 1013.25,
+  "gas": 450.0,
+  "timestamp": 1638360000000
+}
 ```
+
+**Example Actuator Command (NeoPixel):**
+```json
+{
+  "leds": [
+    {"index": 0, "r": 255, "g": 0, "b": 0},
+    {"index": 1, "r": 0, "g": 255, "b": 0}
+  ],
+  "brightness": 128,
+  "mode": "static",
+  "timestamp": 1638360000000
+}
+```
+
+For complete documentation of all sensor and actuator types with their message schemas, see **[SENSORS_ACTUATORS.md](SENSORS_ACTUATORS.md)**.
 
 
 ## 📐 Formal Semantics
@@ -645,36 +686,6 @@ This formal foundation enables rigorous reasoning about device models, verified 
 
 ## 🔧 Usage
 
-1. Save your .dev file in examples directory.
-
-2. Create an output directory.
-
-3. Move to demol/transformations directory.
-
-4. Start python.
-
-```sh
-python
-```
-
-5. Import m2t and/or m2m transformation files.
-
-```sh 
-import m2t, m2m
-```
-
-6. Run the transformations as m2t.main(model,directory) and m2m.main(model,directory).
-The first argument should be the path to the .dev file starting from examples directory. 
-The second argument should be the name of (or the path to) the output directory.
-
-For example to run the transformations for ThesisExample.dev which is saved in examples/ThesisExamples directory you should run
-```sh
-m2t.main("ThesisExamples/ThesisExample.dev", "rpi5_out/ThesisExample")
-m2m.main("ThesisExamples/ThesisExample.dev", "rpi5_out/ThesisExample")
-```
-And the results will be stored in rpi5_out/ThesisExample directory.
-
-### CLI
 
 The DSL provides a command-line interface (CLI) for operating on models.
 
@@ -719,6 +730,31 @@ Otherwise, the parser will raise an error:
 
 ```sh
 textx.exceptions.TextXSemanticError: rpi_iot_device.dev:29:17: Unknown object "MyBME2" of class "PeripheralDef"
+```
+
+### Development & Validation Scripts
+
+The repository includes several utility scripts in the `scripts/` directory for validation and code generation testing:
+
+#### Validate Builtin Models
+Validates all builtin board and peripheral models (`.hwd` files) to ensure they comply with the DeMoL grammar and semantics.
+
+```sh
+python scripts/validate_builtin_models.py
+```
+
+#### Generate RPI Examples
+Generates Raspberry Pi code for all example models in `examples/`, validating the code generation pipeline.
+
+```sh
+python scripts/generate_rpi_examples.py
+```
+
+#### Validate Examples
+Validates all example models in `examples/` against the grammar.
+
+```sh
+python scripts/validate_examples.py
 ```
 
 ### REST API

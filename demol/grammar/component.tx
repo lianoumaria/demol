@@ -171,12 +171,24 @@ Bluetooth:
 
 SensorType:
 	"Distance"      |
+SensorType:
+    // Environmental Sensors
     "Temperature"   |
     "Humidity"      |
     "Gas"           |
     "Pressure"      |
     "Env"           |
+    "AirQuality"    |
+    "Light"         |
+    "UV"            |
+    "Sound"         |
+    
+    // Motion & Position Sensors
+    "Distance"      |
+    "DistanceMatrix"|
     "Acceleration"  |
+    "Gyroscope"     |
+    "Magnetometer"  |
     "IMU"           |
     "Tracker"	    |
     "ADC"           |
@@ -187,7 +199,25 @@ SensorType:
 ActuatorType:
 	"MotorController"   |
     "ServoController"   |
-    "LedArray"
+    "Relay"             |
+    "Switch"            |
+    
+    // Display & Light Actuators
+    "LedArray"          |
+    "Led"
+    
+    // Sound Actuators
+    "Buzzer"            |
+    "Speaker"           |
+    
+    // Advanced Actuators
+    "Stepper"           |
+    "DCMotor"           |
+    "Pump"              |
+    "Valve"             |
+    "Heater"            |
+    "Cooler"            |
+    "Fan"
 ;
 
 Attribute:
