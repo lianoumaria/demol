@@ -1,6 +1,4 @@
-// RIOT Configuration for ESP32-WROOM-32 boards
-
-Board ESP32Wroom32
+Board[ESP] ESP32Wroom32
     operational
         vcc: 3V3
         memory:

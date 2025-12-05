@@ -1,4 +1,4 @@
-Board RaspberryPi_3B
+Board[RPI] RaspberryPi_3B
     operational
     vcc: 5V
     memory:

@@ -1,4 +1,4 @@
-Board RaspberryPi_4B_4GB
+Board[RPI] RaspberryPi_4B_4GB
     operational
     vcc: 5V
     memory:

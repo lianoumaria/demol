@@ -1,13 +1,13 @@
-Board RaspberryPi_5_8GB
+Board[RPI] RaspberryPi_5_8GB
     operational
-    vcc: 5V
-    memory:
-        flash: 16 gb
-        ram: 8 gb
-    cpu:
-        cpu_family: PiArmCortex
-        max_freq: 2400 mhz
-        fpu: true
+        vcc: 5V
+        memory:
+            flash: 16 gb
+            ram: 8 gb
+        cpu:
+            cpu_family: PiArmCortex
+            max_freq: 2400 mhz
+            fpu: true
     end
     pins
         PPIN power_3v3_a[3V3] @ 1;

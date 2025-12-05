@@ -16,7 +16,7 @@ BoardType:
 ;
 
 Board:
-    'Board' name=ID
+    'Board' '[' type=BoardType ']' name=ID
 	(
         ('operational' operational=OperationalBoard 'end')
 	    ('pins' pins*=Pin 'end')
@@ -227,7 +227,6 @@ DictAttribute:
 // Operational blocks
 OperationalBoard:
     (
-        ("type" ":" type=BoardType)?
         ("cpu" ":" cpu=CPU)
         ("memory" ":" memory=Memory)
         ("vcc" ":" vcc=PowerType)
