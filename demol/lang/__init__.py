@@ -1,4 +1,22 @@
 from .component import get_component_mm
 from .device import get_device_mm
+from .validation import (
+    ValidationStatus,
+    ValidationResult,
+    ValidationReporter,
+    validate_model_file,
+    validate_models,
+)
+from os.path import basename
 
-from .utils import build_model
+
+def build_model(model_fpath):
+    model_filename = basename(model_fpath)
+    if model_filename.endswith('.hwd'):
+        mm = get_component_mm()
+    elif model_filename.endswith('.dev'):
+        mm = get_device_mm()
+    else:
+        raise ValueError('Not a valid model extension.')
+    model = mm.model_from_file(model_fpath)
+    return model

@@ -1,169 +1,55 @@
-// RIOT Configuration for ESP32-WROOM-32 boards
-
-Board ESP32Wroom32
-    vcc: 3V3
-    memory:
-        flash: 4 mb
-    cpu:
-        cpu_family: ESP32
-        max_freq: 240 mhz
-        fpu: false
-    networking:
-    - wifi:
-        name: wifi_1
-        freq: 2.5 ghz
-    bluetooth: BT4
-    pins:
-    - power:
-        name: power_3v3
-        number: 1
-        type: 3V3
-    - io_pin:
-        functions:
-        name: en_rst
-        number: 2
-    - io_pin:
-        functions: gpio, adc
-        name: svp
-        number: 3
-    - io_pin:
-        functions: gpio, adc
-        name: svn
-        number: 4
-    - io_pin:
-        functions: gpio, adc
-        name: p_34
-        number: 5
-    - io_pin:
-        functions: gpio, adc
-        name: p_35
-        number: 6
-    - io_pin:
-        functions: gpio, pwm-1, adc
-        name: p_32
-        number: 7
-    - io_pin:
-        functions: gpio, pwm-1, adc
-        name: p_33
-        number: 8
-    - io_pin:
-        functions: gpio, dac, adc
-        name: p_25
-        number: 9
-    - io_pin:
-        functions: gpio, dac, adc
-        name: p_26
-        number: 10
-    - io_pin:
-        functions: gpio, pwm-1, adc
-        name: p_27
-        number: 11
-    - io_pin:
-        functions: gpio, sck-1, adc
-        name: p_14
-        number: 12
-    - io_pin:
-        functions: gpio, miso-1, adc
-        name: p_12
-        number: 13
-    - power:
-        name: gnd_1
-        number: 14
-        type: GND
-    - io_pin:
-        functions: gpio, mosi-1, adc
-        name: p_13
-        number: 15
-    - io_pin:
-        functions: gpio, rx-1
-        name: p_9
-        number: 16
-    - io_pin:
-        functions: gpio, tx-1
-        name: p_10
-        number: 17
-    - io_pin:
-        functions: gpio
-        name: p_11
-        number: 18
-    - power:
-        name: power_5v
-        number: 19
-        type: 5V
-    - power:
-        name: gnd_2
-        number: 20
-        type: GND
-    - io_pin:
-        functions: gpio, mosi-0
-        name: p_23
-        number: 21
-    - io_pin:
-        functions: gpio, scl-0
-        name: p_22
-        number: 22
-    - io_pin:
-        functions: gpio, tx-0
-        name: p_1
-        number: 23
-    - io_pin:
-        functions: gpio, rx-0
-        name: p_3
-        number: 24
-    - io_pin:
-        functions: gpio, sda-0
-        name: p_21
-        number: 25
-    - power:
-        name: gnd_3
-        number: 26
-        type: GND
-    - io_pin:
-        functions: gpio, miso-0
-        name: p_19
-        number: 27
-    - io_pin:
-        functions: gpio, sck-0
-        name: p_18
-        number: 28
-    - io_pin:
-        functions: gpio, cs-0
-        name: p_5
-        number: 29
-    - io_pin:
-        functions: gpio, pwm-0
-        name: p_17
-        number: 30
-    - io_pin:
-        functions: gpio, pwm-0
-        name: p_16
-        number: 31
-    - io_pin:
-        functions: gpio, pwm-0, adc
-        name: p_4
-        number: 32
-    - io_pin:
-        functions: gpio, pwm-0, adc
-        name: p_0
-        number: 33
-    - io_pin:
-        functions: gpio, pwm-0, adc
-        name: p_2
-        number: 34
-    - io_pin:
-        functions: gpio, cs-1, adc
-        name: p_15
-        number: 35
-    - io_pin:
-        functions: gpio
-        name: p_8
-        number: 36
-    - io_pin:
-        functions: gpio
-        name: p_7
-        number: 37
-    - io_pin:
-        functions: gpio
-        name: p_6
-        number: 38
+Board[ESP] ESP32Wroom32
+    operational
+        vcc: 3V3
+        memory:
+            flash: 4 mb
+        cpu:
+            cpu_family: ESP32
+            max_freq: 240 mhz
+            fpu: false
+        wifi:
+            name: wifi_1
+            freq: 2.5 ghz
+        bluetooth: BT4
+    end
+    pins
+        PPIN power_3v3[3V3] @ 1;
+        DPIN en_rst[gpio] @ 2;
+        DPIN svp[gpio,adc] @ 3;
+        DPIN svn[gpio,adc] @ 4;
+        DPIN p_34[gpio,adc] @ 5;
+        DPIN p_35[gpio,adc] @ 6;
+        DPIN p_32[gpio,pwm-1,adc] @ 7;
+        DPIN p_33[gpio,pwm-1,adc] @ 8;
+        DPIN p_25[gpio,dac,adc] @ 9;
+        DPIN p_26[gpio,dac,adc] @ 10;
+        DPIN p_27[gpio,pwm-1,adc] @ 11;
+        DPIN p_14[gpio,sck-1,adc] @ 12;
+        DPIN p_12[gpio,miso-1,adc] @ 13;
+        PPIN gnd_1[GND] @ 14;
+        DPIN p_13[gpio,mosi-1,adc] @ 15;
+        DPIN p_9[gpio,rx-1] @ 16;
+        DPIN p_10[gpio,tx-1] @ 17;
+        DPIN p_11[gpio] @ 18;
+        PPIN power_5v[5V] @ 19;
+        PPIN gnd_2[GND] @ 20;
+        DPIN p_23[gpio,mosi-0] @ 21;
+        DPIN p_22[gpio,scl-0] @ 22;
+        DPIN p_1[gpio,tx-0] @ 23;
+        DPIN p_3[gpio,rx-0] @ 24;
+        DPIN p_21[gpio,sda-0] @ 25;
+        PPIN gnd_3[GND] @ 26;
+        DPIN p_19[gpio,miso-0] @ 27;
+        DPIN p_18[gpio,sck-0] @ 28;
+        DPIN p_5[gpio,cs-0] @ 29;
+        DPIN p_17[gpio,pwm-0] @ 30;
+        DPIN p_16[gpio,pwm-0] @ 31;
+        DPIN p_4[gpio,pwm-0,adc] @ 32;
+        DPIN p_0[gpio,pwm-0,adc] @ 33;
+        DPIN p_2[gpio,pwm-0,adc] @ 34;
+        DPIN p_15[gpio,cs-1,adc] @ 35;
+        DPIN p_8[gpio] @ 36;
+        DPIN p_7[gpio] @ 37;
+        DPIN p_6[gpio] @ 38;
+    end
 end

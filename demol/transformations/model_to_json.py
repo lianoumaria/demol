@@ -29,7 +29,7 @@ def board2dict(board):
         'name': board.name,
         'cpu': board.cpu.to_dict(),
         'memory': board.memory.to_dict(),
-        'vcc': board.vcc,
+        'vcc': board.operational.vcc,
         'bluetooth': board.bluetooth,
         'pins': pins2dict(board.pins)
     }
@@ -39,10 +39,10 @@ def peripheral2dict(peripheral):
     _d = {
         'name': peripheral.name,
         'pins': pins2dict(peripheral.pins),
-        'msg': peripheral.msg,
-        'attributes': peripheral.attributes,
-        'riotTpl': peripheral.riotTpl,
-        'piTpl': peripheral.piTpl,
+        'msg': peripheral.type,
+        'attributes': peripheral.attributes if hasattr(peripheral, 'attributes') else [],
+        'riotTpl': peripheral.operational.riotTpl if hasattr(peripheral.operational, 'riotTpl') else None,
+        'piTpl': peripheral.operational.piTpl if hasattr(peripheral.operational, 'piTpl') else None,
     }
     return _d
 

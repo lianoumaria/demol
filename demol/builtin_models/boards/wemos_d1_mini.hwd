@@ -1,81 +1,30 @@
-// RIOT Configuration for all WEMOS LOLIN D1 mini boards (V2 / V3 / Lite / Pro)
 
-Board WemosD1Mini
-    vcc: 3V3
-    memory:
-		flash: 16 mb
-    cpu:
-		cpu_family: ESP8266
-		max_freq: 160 mhz
-		fpu: false
-    networking:
-		- wifi:
-			name: wifi_1
-			freq: 2.5 ghz
-	pins:
-    - io_pin:
-        functions:
-        name: rst
-        number: 1
-    - io_pin:
-        functions: adc
-        name: a0
-        number: 2
-        vmax: 3.2
-    - io_pin:
-        functions: gpio
-        name: d0
-        number: 3
-    - io_pin:
-        functions: gpio, sck-0
-        name: d5
-        number: 4
-    - io_pin:
-        functions: gpio, miso-0
-        name: d6
-        number: 5
-    - io_pin:
-        functions: gpio, mosi-0
-        name: d7
-        number: 6
-    - io_pin:
-        functions: gpio, cs-0
-        name: d8
-        number: 7
-    - power:
-        name: power_3v3
-        number: 8
-        type: 3V3
-    - io_pin:
-        functions: tx-0
-        name: tx
-        number: 9
-    - io_pin:
-        functions: rx-0
-        name: rx
-        number: 10
-    - io_pin:
-        functions: gpio, scl-0
-        name: d1
-        number: 11
-    - io_pin:
-        functions: gpio, sda-0
-        name: d2
-        number: 12
-    - io_pin:
-        functions: gpio
-        name: d3
-        number: 13
-    - io_pin:
-        functions: gpio
-        name: d4
-        number: 14
-    - power:
-        name: gnd
-        number: 15
-        type: GND
-    - power:
-        name: power_5v
-        number: 16
-        type: 5V
+Board[ESP] WemosD1Mini
+    operational
+      vcc: 3V3
+      memory:
+        flash: 16 mb
+      cpu:
+        cpu_family: ESP8266
+        max_freq: 160 mhz
+        fpu: false
+    end
+    pins
+        DPIN rst[] @ 1;
+        DPIN a0[adc] @ 2;
+        DPIN d0[gpio] @ 3;
+        DPIN d5[gpio,sck-0] @ 4;
+        DPIN d6[gpio,miso-0] @ 5;
+        DPIN d7[gpio,mosi-0] @ 6;
+        DPIN d8[gpio,cs-0] @ 7;
+        PPIN power_3v3[3V3] @ 8;
+        DPIN tx[tx-0] @ 9;
+        DPIN rx[rx-0] @ 10;
+        DPIN d1[gpio,scl-0] @ 11;
+        DPIN d2[gpio,sda-0] @ 12;
+        DPIN d3[gpio] @ 13;
+        DPIN d4[gpio] @ 14;
+        PPIN gnd[GND] @ 15;
+        PPIN power_5v[5V] @ 16;
+    end
 end
