@@ -1,26 +1,17 @@
 // RIOT Configuration for SRF04 (HC-SR04) ultra sonic range finder
 
 Sensor SonarSRF04
+    operational
     vcc: 5V
     msg: Distance
     ioVcc: 5V
     piTpl: "srf04"
     riotTpl: "srf04"
-    pins:
-    - power:
-        name: vcc
-        number: 1
-        type: 5V
-    - power:
-        name: gnd
-        number: 4
-        type: GND
-    - io_pin:
-        functions: gpio
-        name: trigger
-        number: 2
-    - io_pin:
-        functions: gpio
-        name: echo
-        number: 3
+    end
+    pins
+        PPIN vcc[5V] @ 1;
+        PPIN gnd[GND] @ 4;
+        DPIN trigger[gpio] @ 2;
+        DPIN echo[gpio] @ 3;
+    end
 end

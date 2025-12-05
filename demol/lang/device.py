@@ -4,21 +4,8 @@ import textx.scoping.providers as scoping_providers
 from textx import get_location, TextXSemanticError
 from demol.definitions import *
 
-from demol.mm_classes import (
-    Metadata, Network, AuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
-)
-
-CUSTOM_CLASSES = [
-    Metadata, Network, AuthPlain, AMQPBroker, MQTTBroker, RedisBroker,
-]
-
 
 GRAMMAR_BULTINS = {}
-
-
-def class_provider(name):
-    classes = dict(map(lambda x: (x.__name__, x), CUSTOM_CLASSES))
-    return classes.get(name)
 
 
 def raise_validation_error(obj, msg):
@@ -38,7 +25,7 @@ def model_proc(model, metamodel):
     - Section 8.1: Safety properties
     - Section 8.4: Well-formedness conditions
     """
-    from demol.validators import (
+    from demol.lang.semantics import (
         raise_validation_error,
         validate_power_connection,
         validate_gpio_connection,
@@ -238,7 +225,7 @@ def model_proc(model, metamodel):
             peripheral_ref = peripheral_def.ref
             peripheral_def_name = peripheral_def.name
             peripheral_type = type(peripheral_ref).__name__
-            peripheral_msg = peripheral_ref.msg
+            peripheral_msg = peripheral_ref.operational.msg
             
             default_topic = f'"{device_name}.{peripheral_type}.{peripheral_msg}.{peripheral_def_name}"'
             c.endpoint.topic = default_topic.lower().strip('""')
@@ -268,7 +255,6 @@ def model_proc(model, metamodel):
 def get_device_mm(debug: bool = False, global_repo: bool = False):
     mm = metamodel_from_file(
         os.path.join(METAMODEL_REPO_PATH, 'device.tx'),
-        classes=class_provider,
         auto_init_attributes=True,
         global_repository=global_repo,
         textx_tools_support=True,

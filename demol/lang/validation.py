@@ -53,50 +53,6 @@ class ValidationResult:
         return len(self.warnings) > 0 or len(self.errors) > 0
 
 
-def validate_model_file(file_path: str, metamodel) -> ValidationResult:
-    """
-    Validate a single model file.
-    
-    Args:
-        file_path: Path to the model file
-        metamodel: TextX metamodel to use for validation
-        
-    Returns:
-        ValidationResult with status and any warnings/errors
-    """
-    warnings_list = []
-    errors_list = []
-    status = ValidationStatus.PASS
-    
-    # Capture warnings during validation
-    with warnings.catch_warnings(record=True) as caught_warnings:
-        warnings.simplefilter("always")
-        
-        try:
-            metamodel.model_from_file(file_path)
-            
-            # Check if any warnings were captured
-            if caught_warnings:
-                for w in caught_warnings:
-                    warning_msg = str(w.message)
-                    warnings_list.append(warning_msg)
-                status = ValidationStatus.WARN
-            
-        except (TextXSemanticError, TextXSyntaxError) as e:
-            errors_list.append(str(e))
-            status = ValidationStatus.FAIL
-        except Exception as e:
-            errors_list.append(f"Unexpected error: {str(e)}")
-            status = ValidationStatus.FAIL
-    
-    return ValidationResult(
-        file_path=file_path,
-        status=status,
-        warnings=warnings_list,
-        errors=errors_list
-    )
-
-
 class ValidationReporter:
     """Reporter for validation results with rich output"""
     
@@ -251,6 +207,50 @@ class ValidationReporter:
             print(title)
             print("="*50)
 
+
+def validate_model_file(file_path: str, metamodel) -> ValidationResult:
+    """
+    Validate a single model file.
+    
+    Args:
+        file_path: Path to the model file
+        metamodel: TextX metamodel to use for validation
+        
+    Returns:
+        ValidationResult with status and any warnings/errors
+    """
+    warnings_list = []
+    errors_list = []
+    status = ValidationStatus.PASS
+    
+    # Capture warnings during validation
+    with warnings.catch_warnings(record=True) as caught_warnings:
+        warnings.simplefilter("always")
+        
+        try:
+            metamodel.model_from_file(file_path)
+            
+            # Check if any warnings were captured
+            if caught_warnings:
+                for w in caught_warnings:
+                    warning_msg = str(w.message)
+                    warnings_list.append(warning_msg)
+                status = ValidationStatus.WARN
+            
+        except (TextXSemanticError, TextXSyntaxError) as e:
+            errors_list.append(str(e))
+            status = ValidationStatus.FAIL
+        except Exception as e:
+            errors_list.append(f"Unexpected error: {str(e)}")
+            status = ValidationStatus.FAIL
+    
+    return ValidationResult(
+        file_path=file_path,
+        status=status,
+        warnings=warnings_list,
+        errors=errors_list
+    )
+    
 
 def validate_models(
     file_paths: List[str],

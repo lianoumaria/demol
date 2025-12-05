@@ -1,6 +1,6 @@
 import os, sys
 from demol.definitions import *
-from demol.lang import utils
+from demol.lang import build_model
 import jinja2
 import codecs
 import warnings
@@ -69,7 +69,7 @@ def get_peripherals_info(device_model):
         per_type =  type(device_model.connections[i].peripheral.ref).__name__
         per_topic = device_model.connections[i].endpoint.topic
         per_broker = broker_data["broker_name"]
-        per_msg_type = device_model.connections[i].peripheral.ref.msg
+        per_msg_type = device_model.connections[i].peripheral.ref.operational.msg
         peripheral_data = {"per_name": per_dev_name, "per_real_name": per_real_name, "per_type": per_type, "per_topic": per_topic, "per_broker": per_broker, "per_msg_type": per_msg_type}
 
         for attribute in device_model.connections[i].peripheral.ref.attributes:
@@ -102,7 +102,7 @@ def demol2smauto(output_dir):
 
 def main(dev_model, output_dir):
     rpi5_device_path = os.path.join(REPO_PATH, "examples", dev_model)
-    rpi5_device = utils.build_model(rpi5_device_path)
+    rpi5_device = build_model(rpi5_device_path)
 
     output = os.path.join(REPO_PATH, output_dir)
 

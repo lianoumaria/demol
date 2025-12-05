@@ -1,4 +1,5 @@
 Board RaspberryPi_3B
+    operational
     vcc: 5V
     memory:
         flash: 16 gb
@@ -7,171 +8,47 @@ Board RaspberryPi_3B
         cpu_family: PiArmCortex
         max_freq: 1400 mhz
         fpu: true
-    networking:
-    - wifi:
-        name: wifi_1
-        freq: 2.4 ghz
-    bluetooth: BT4
-    ioVcc: 3V3
-    pins:
-    - power:
-        name: power_3v3_a
-        number: 1
-        type: 3V3
-    - power:
-        name: power_5v_a
-        number: 2
-        type: 5V
-    - io_pin:
-        functions: gpio, sda-0
-        name: GPIO2 
-        number: 3
-    - power:
-        name: power_5v_b
-        number: 4
-        type: 5V
-    - io_pin:
-        functions: gpio, scl-0
-        name: GPIO3
-        number: 5
-    - power:
-        name: GND_1
-        number: 6
-        type: GND
-    - io_pin:
-        functions: gpio
-        name: GPIO4
-        number: 7
-    - io_pin:
-        functions: gpio, tx-0
-        name: GPIO14
-        number: 8
-    - power:
-        name: GND_2
-        number: 9
-        type: GND
-    - io_pin:
-        functions: gpio, rx-0
-        name: GPIO15
-        number: 10
-    - io_pin:
-        functions: gpio
-        name: GPIO17
-        number: 11
-    - io_pin:
-        functions: gpio, pwm-0
-        name: GPIO18
-        number: 12
-    - io_pin:
-        functions: gpio
-        name: GPIO27
-        number: 13
-    - power:
-        name: GND_3
-        number: 14
-        type: GND
-    - io_pin:
-        functions: gpio
-        name: GPIO22
-        number: 15
-    - io_pin:
-        functions: gpio
-        name: GPIO23
-        number: 16
-    - power:
-        name: power_3v3_b
-        number: 17
-        type: 3V3
-    - io_pin:
-        functions: gpio
-        name: GPIO24
-        number: 18
-    - io_pin:
-        functions: gpio, mosi-0
-        name: GPIO10
-        number: 19
-    - power:
-        name: GND_4
-        number: 20
-        type: GND
-    - io_pin:
-        functions: gpio, miso-0
-        name: GPIO9
-        number: 21
-    - io_pin:
-        functions: gpio
-        name: GPIO25
-        number: 22
-    - io_pin:
-        functions: gpio, sck-0
-        name: GPIO11
-        number: 23
-    - io_pin:
-        functions: gpio, cs-0
-        name: GPIO8
-        number: 24
-    - power:
-        name: GND_5
-        number: 25
-        type: GND
-    - io_pin:
-        functions: gpio, cs-1
-        name: GPIO7
-        number: 26
-    - io_pin:
-        functions: gpio
-        name: ID_SD
-        number: 27
-    - io_pin:
-        functions: gpio
-        name: ID_SC
-        number: 28
-    - io_pin:
-        functions: gpio
-        name: GPIO5
-        number: 29
-    - power:
-        name: GND_6
-        number: 30
-        type: GND
-    - io_pin:
-        functions: gpio
-        name: GPIO6
-        number: 31
-    - io_pin:
-        functions: gpio, pwm-0
-        name: GPIO12
-        number: 32
-    - io_pin:
-        functions: gpio, pwm-1
-        name: GPIO13
-        number: 33
-    - power:
-        name: GND_7
-        number: 34
-        type: GND
-    - io_pin:
-        functions: gpio, miso-1
-        name: GPIO19
-        number: 35
-    - io_pin:
-        functions: gpio
-        name: GPIO16
-        number: 36
-    - io_pin:
-        functions: gpio
-        name: GPIO26
-        number: 37
-    - io_pin:
-        functions: gpio, mosi-1
-        name: GPIO20
-        number: 38
-    - power:
-        name: GND_8
-        number: 39
-        type: GND 
-    - io_pin:
-        functions: gpio, sck-1
-        name: GPIO21
-        number: 40
+    end
+    pins
+        PPIN power_3v3_a[3V3] @ 1;
+        PPIN power_5v_a[5V] @ 2;
+        DPIN GPIO2[gpio,sda-0] @ 3;
+        PPIN power_5v_b[5V] @ 4;
+        DPIN GPIO3[gpio,scl-0] @ 5;
+        PPIN GND_1[GND] @ 6;
+        DPIN GPIO4[gpio] @ 7;
+        DPIN GPIO14[gpio,tx-0] @ 8;
+        PPIN GND_2[GND] @ 9;
+        DPIN GPIO15[gpio,rx-0] @ 10;
+        DPIN GPIO17[gpio] @ 11;
+        DPIN GPIO18[gpio,pwm-0] @ 12;
+        DPIN GPIO27[gpio] @ 13;
+        PPIN GND_3[GND] @ 14;
+        DPIN GPIO22[gpio] @ 15;
+        DPIN GPIO23[gpio] @ 16;
+        PPIN power_3v3_b[3V3] @ 17;
+        DPIN GPIO24[gpio] @ 18;
+        DPIN GPIO10[gpio,mosi-0] @ 19;
+        PPIN GND_4[GND] @ 20;
+        DPIN GPIO9[gpio,miso-0] @ 21;
+        DPIN GPIO25[gpio] @ 22;
+        DPIN GPIO11[gpio,sck-0] @ 23;
+        DPIN GPIO8[gpio,cs-0] @ 24;
+        PPIN GND_5[GND] @ 25;
+        DPIN GPIO7[gpio,cs-1] @ 26;
+        DPIN ID_SD[gpio] @ 27;
+        DPIN ID_SC[gpio] @ 28;
+        DPIN GPIO5[gpio] @ 29;
+        PPIN GND_6[GND] @ 30;
+        DPIN GPIO6[gpio] @ 31;
+        DPIN GPIO12[gpio,pwm-0] @ 32;
+        DPIN GPIO13[gpio,pwm-1] @ 33;
+        PPIN GND_7[GND] @ 34;
+        DPIN GPIO19[gpio,miso-1] @ 35;
+        DPIN GPIO16[gpio] @ 36;
+        DPIN GPIO26[gpio] @ 37;
+        DPIN GPIO20[gpio,mosi-1] @ 38;
+        PPIN GND_8[GND] @ 39;
+        DPIN GPIO21[gpio,sck-1] @ 40;
+    end
 end

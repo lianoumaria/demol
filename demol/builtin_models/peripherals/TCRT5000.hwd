@@ -1,28 +1,17 @@
 Sensor TCRT5000
-    vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα.. 
     //ίσως αλλάξω τις προδιαγραφές ώτα να δέχονται για input range
+    operational
+    vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα.. 
     msg: Tracker
     ioVcc: 5V
-    pins:
-    -power:
-        name: VCC
-        number: 1
-        type: 5V
-    -power:
-        name: GND
-        number: 2
-        type: GND
-    -io_pin:
-        functions: gpio
-        name: D0
-        number: 3
-    -io_pin:
-        functions: gpio
-        name: A0
-        number: 4
-    attributes:
-    -frequency: int = 100 //Hz
-    constraints:
-    -max_frequency : 3 khz
-    powerConsumption: 24 mW
+    end
+    pins
+        PPIN VCC[5V] @ 1;
+        PPIN GND[GND] @ 2;
+        DPIN D0[gpio] @ 3;
+        DPIN A0[gpio] @ 4;
+    end
+    attributes
+        ATTR frequency[int] = 100;
+    end
 end    

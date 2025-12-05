@@ -14,7 +14,7 @@ import logging
 import jinja2
 
 from demol.definitions import TEMPLATES_RPI, REPO_PATH
-from demol.lang import utils
+from demol.lang import build_model
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -150,9 +150,8 @@ class DeviceModelExtractor:
                 "type": type(conn.peripheral.ref).__name__,
                 "pins": self._extract_pins(conn.ioConns),
                 "attributes": self._extract_attributes(conn.peripheral.ref.attributes),
-                "constraints": self._extract_constraints(conn.peripheral.ref.constraints),
                 "topic": conn.endpoint.topic,
-                "message": conn.peripheral.ref.msg,
+                "message": conn.peripheral.ref.operational.msg,
                 "custom_template": getattr(conn.peripheral.ref, "piTpl", None) or None,
             }
             
@@ -310,7 +309,6 @@ class RPiCodeGenerator:
         }
         context.update(peripheral["pins"])
         context.update(peripheral["attributes"])
-        context.update(peripheral["constraints"])
         
         # Render and write
         output = template.render(**context)
@@ -459,7 +457,7 @@ def transform_device_model(device_model_path: str, output_dir: str) -> None:
     logger.info(f"Loading device model from: {model_path}")
     
     # Parse device model
-    device_model = utils.build_model(str(model_path))
+    device_model = build_model(str(model_path))
     
     # Extract information
     logger.info("Extracting device model information...")

@@ -18,15 +18,8 @@ BoardType:
 Board:
     'Board' name=ID
 	(
-        ("type" ":" type=BoardType)?
-	    ("cpu" ":" cpu=CPU)
-        ("memory" ":" memory=Memory)
-        ("vcc" ":" vcc=PowerType)
-	    ("pins" ":" "-" pins*=Pin["-"])
-	    ('networking' ':' '-' networking*=NetworkInterface['-'])?
-	    ('bluetooth' ':' bluetooth=Bluetooth)?
-        ("ioVcc" ":" iovcc=PowerType)?
-        ("riotName" ":" riotName=STRING)?
+        ('operational' operational=OperationalBoard 'end')
+	    ('pins' pins*=Pin 'end')
      )#
     'end'
 ;
@@ -36,15 +29,9 @@ Peripheral: Sensor | Actuator;
 Actuator:
     'Actuator' name=ID
 	(
-	  ("vcc" ":" vcc=PowerType)
-	  ("msg:" msg=ActuatorMsgType)
-	  ("pins" ":" "-" pins*=Pin["-"])
-	  ("attributes" ":" "-" attributes*=Attribute["-"])?
-	  ("constraints" ":" "-" constraints*=Constraint["-"])?
-	  ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
-	  ("riotTpl" ":" riotTpl=STRING)?
-	  ("piTpl" ":" piTpl=STRING)?
-	  ("ioVcc" ":" ioVcc=PowerType)?
+	  ('operational' operational=OperationalActuator 'end')
+	  ('pins' pins*=Pin 'end')
+	  ('attributes' attributes*=Attribute 'end')?
     )#
     'end'
 ;
@@ -52,15 +39,9 @@ Actuator:
 Sensor:
     'Sensor' name=ID
 	(
-	  ("vcc" ":" vcc=PowerType) //This should may become a range  
-	  ("msg:" msg=SensorMsgType)
-	  ("pins" ":" "-" pins*=Pin["-"])
-	  ("attributes" ":" "-" attributes*=Attribute["-"])?
-	  ("constraints" ":" "-" constraints*=Constraint["-"])?
-	  ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
-	  ("riotTpl" ":" riotTpl=STRING)?
-	  ("piTpl" ":" piTpl=STRING)?
-	  ("ioVcc" ":" ioVcc=PowerType)?
+	  ('operational' operational=OperationalSensor 'end')
+	  ('pins' pins*=Pin 'end')
+	  ('attributes' attributes*=Attribute 'end')?
     )#
     'end'
 ;
@@ -70,12 +51,7 @@ Pin:
 ;
 
 PowerPin:
-	"power:"
-	(
-        ("name:" name=ID)
-	    ("number:" number=INT)
-	    ("type:" ptype=PowerType)
-    )#
+	'PPIN' name=ID '[' ptype=PowerType ']' '@' number=INT ';'
 ;
 
 PowerType:
@@ -91,15 +67,7 @@ Custom:
 ;
 
 IOPin:
-	"io_pin:"
-	(
-        ("functions:" funcs*=PinFunction[","])
-        ("name:" name=ID)
-	    ("number:" number=INT)?
-	    ("vmin:" vmin=NUMBER)?
-	    ("vmax:" vmax=NUMBER)?
-	    ("signalLevel:" signalLevel=NUMBER)?
-    )#
+	'DPIN' name=ID '[' funcs*=PinFunction[","] ']' '@' number=INT ';'
 ;
 
 PinFunction:
@@ -181,7 +149,6 @@ NetworkInterface:
 ;
 
 WifiInterface:
-	"wifi:"
 	(
         ("name:" name=ID)
 	    ("freq:" freq=NUMBER unit=FrequencyUnit)?
@@ -189,8 +156,9 @@ WifiInterface:
 ;
 
 EthernetInterface:
-	"ethernet:"
-        "name:" name=ID
+	(
+        ("name:" name=ID)
+    )#
 ;
 
 Bluetooth:
@@ -199,6 +167,7 @@ Bluetooth:
     'BT4' |
     'BT5'
 ;
+
 
 SensorMsgType:
 	"Distance"      |
@@ -232,35 +201,66 @@ NumericAttribute:
 ;
 
 IntAttribute:
-    name=ID ':' type='int' ('=' default=INT)?
+    'ATTR' name=ID '[' type='int' ']' ('=' default=INT)? ';'
 ;
 
 FloatAttribute:
-    name=ID ':' type='float' ('=' default=FLOAT)?
+    'ATTR' name=ID '[' type='float' ']' ('=' default=FLOAT)? ';'
 ;
 
 StringAttribute:
-    name=ID ':' type='str' ('=' default=STRING)?
+    'ATTR' name=ID '[' type='str' ']' ('=' default=STRING)? ';'
 ;
 
 BoolAttribute:
-    name=ID ':' type='bool' ('=' default=BOOL)?
+    'ATTR' name=ID '[' type='bool' ']' ('=' default=BOOL)? ';'
 ;
 
 ListAttribute:
-    name=ID ':' type='list' ('=' '[' default*=OBJECT[','] ']')?
+    'ATTR' name=ID '[' type='list' ']' ('=' '[' default*=OBJECT[','] ']')? ';'
 ;
 
 DictAttribute:
-    name=ID ':' type='dict' ('=' '{' items*=Attribute[','] '}')?
+    'ATTR' name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')? ';'
 ;
 
-Constraint:
-	name = "max_frequency" ":" value=NUMBER unit=FrequencyUnit |
-	name = "min_distance" ":" value=NUMBER unit=DistanceUnit |
-	name = "max_distance" ":" value=NUMBER unit=DistanceUnit |
-    name = "max_latency" ":" value=NUMBER unit=TimeUnit
-;	
+// Operational blocks
+OperationalBoard:
+    (
+        ("type" ":" type=BoardType)?
+        ("cpu" ":" cpu=CPU)
+        ("memory" ":" memory=Memory)
+        ("vcc" ":" vcc=PowerType)
+        ("wifi" ":" wifi=WifiInterface)?
+        ("ethernet" ":" ethernet=EthernetInterface)?
+        ("bluetooth" ":" bluetooth=Bluetooth)?
+        ("ioVcc" ":" iovcc=PowerType)?
+        ("riotName" ":" riotName=STRING)?
+    )#
+;
+
+OperationalSensor:
+    (
+        ("vcc" ":" vcc=PowerType)
+        ("msg" ":" msg=SensorMsgType)
+        ("ioVcc" ":" iovcc=PowerType)?
+        ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
+        ("riotTpl" ":" riotTpl=STRING)?
+        ("piTpl" ":" piTpl=STRING)?
+    )#
+;
+
+OperationalActuator:
+    (
+        ("vcc" ":" vcc=PowerType)
+        ("msg" ":" msg=ActuatorMsgType)
+        ("ioVcc" ":" iovcc=PowerType)?
+        ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
+        ("riotTpl" ":" riotTpl=STRING)?
+        ("piTpl" ":" piTpl=STRING)?
+    )#
+;
+
 
 UNITS:
     ("kb" | "mb" | "gb" | "b")

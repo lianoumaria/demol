@@ -1,23 +1,14 @@
 // RIOT Configuration for ws2812 neopixel led strip
 
 Actuator WS281X
+    operational
     vcc: 5V
     msg: LedArray
-    pins:
-    - power:
-        name: vcc
-        number: 1
-        type: 5V
-    - power:
-        name: gnd
-        number: 2
-        type: GND
-    - io_pin:
-        functions: gpio
-        name: data_in
-        number: 3
-    - io_pin:
-        functions: gpio
-        name: data_out
-        number: 4
+    end
+    pins
+        PPIN vcc[5V] @ 1;
+        PPIN gnd[GND] @ 2;
+        DPIN data_in[gpio] @ 3;
+        DPIN data_out[gpio] @ 4;
+    end
 end

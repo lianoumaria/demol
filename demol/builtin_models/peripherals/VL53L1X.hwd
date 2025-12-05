@@ -1,37 +1,16 @@
 Sensor VL53L1X
+    operational
     vcc: 3V3 //According to the datasheet it is 2.6-5.5V
     msg: Distance
     ioVcc: 3V3
-    pins :
-    -power://Maybe gpio
-        name: VDD
-        number: 1
-        type: 2.8V 
-    -power:
-        name: VIN
-        number: 2
-        type: 3V3
-    -power:
-        name: GND
-        number: 3
-        type: GND
-    -io_pin:
-        functions: sda-0
-        name: SDA 
-        number: 4
-    -io_pin:
-        functions: scl-0
-        name: SCL 
-        number: 5
-    -io_pin:
-        functions: gpio
-        name: XSHUT
-        number: 6
-    -io_pin:
-        functions: gpio
-        name: GPIO1
-        number: 7
-    constraints:
-        -max_distance : 300.0 cm
-        -min_distance : 0.0 cm
+    end
+    pins
+        PPIN VDD[2.8V] @ 1;
+        PPIN VIN[3V3] @ 2;
+        PPIN GND[GND] @ 3;
+        DPIN SDA[sda-0] @ 4;
+        DPIN SCL[scl-0] @ 5;
+        DPIN XSHUT[gpio] @ 6;
+        DPIN GPIO1[gpio] @ 7;
+    end
 end
