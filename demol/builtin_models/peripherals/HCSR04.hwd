@@ -4,12 +4,12 @@ Sensor[Distance] HCSR04
         ioVcc: 5V
     end
     pins
-        GND[GND] @ 1;
-        echo[gpio] @ 2;
-        trigger[gpio] @ 3;
-        VCC[5V] @ 4;
+        GND[GND] @ 1,
+        echo[gpio] @ 2,
+        trigger[gpio] @ 3,
+        VCC[5V] @ 4
     end
     attributes
-        frequency[float] = 10;
+        frequency[float] = 10
     end
 end

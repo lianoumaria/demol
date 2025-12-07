@@ -4,11 +4,11 @@ Sensor[Proximity] HW006
         vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα..
     end
     pins
-        OUT[gpio] @ 1;
-        VCC[5V] @ 2;
-        GND[GND] @ 3;
+        OUT[gpio] @ 1,
+        VCC[5V] @ 2,
+        GND[GND] @ 3
     end
     attributes
-        frequency[int] = 100;
+        frequency[int] = 100
     end
 end    

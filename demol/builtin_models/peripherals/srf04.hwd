@@ -8,9 +8,9 @@ Sensor[Distance] SonarSRF04
         riotTpl: "srf04"
     end
     pins
-        vcc[5V] @ 1;
-        gnd[GND] @ 4;
-        trigger[gpio] @ 2;
-        echo[gpio] @ 3;
+        vcc[5V] @ 1,
+        gnd[GND] @ 4,
+        trigger[gpio] @ 2,
+        echo[gpio] @ 3
     end
 end

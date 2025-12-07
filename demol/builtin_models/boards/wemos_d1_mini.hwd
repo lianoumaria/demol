@@ -10,21 +10,21 @@ Board[ESP] WemosD1Mini
         fpu: false
     end
     pins
-        rst[] @ 1;
-        a0[adc] @ 2;
-        d0[gpio] @ 3;
-        d5[gpio,sck-0] @ 4;
-        d6[gpio,miso-0] @ 5;
-        d7[gpio,mosi-0] @ 6;
-        d8[gpio,cs-0] @ 7;
-        power_3v3[3V3] @ 8;
-        tx[tx-0] @ 9;
-        rx[rx-0] @ 10;
-        d1[gpio,scl-0] @ 11;
-        d2[gpio,sda-0] @ 12;
-        d3[gpio] @ 13;
-        d4[gpio] @ 14;
-        gnd[GND] @ 15;
-        power_5v[5V] @ 16;
+        rst[] @ 1,
+        a0[adc] @ 2,
+        d0[gpio] @ 3,
+        d5[gpio,sck-0] @ 4,
+        d6[gpio,miso-0] @ 5,
+        d7[gpio,mosi-0] @ 6,
+        d8[gpio,cs-0] @ 7,
+        power_3v3[3V3] @ 8,
+        tx[tx-0] @ 9,
+        rx[rx-0] @ 10,
+        d1[gpio,scl-0] @ 11,
+        d2[gpio,sda-0] @ 12,
+        d3[gpio] @ 13,
+        d4[gpio] @ 14,
+        gnd[GND] @ 15,
+        power_5v[5V] @ 16
     end
 end

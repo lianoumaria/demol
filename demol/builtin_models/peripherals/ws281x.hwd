@@ -5,9 +5,9 @@ Actuator[LedArray] WS281X
         vcc: 5V
     end
     pins
-        vcc[5V] @ 1;
-        gnd[GND] @ 2;
-        data_in[gpio] @ 3;
-        data_out[gpio] @ 4;
+        vcc[5V] @ 1,
+        gnd[GND] @ 2,
+        data_in[gpio] @ 3,
+        data_out[gpio] @ 4
     end
 end

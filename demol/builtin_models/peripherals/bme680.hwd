@@ -5,20 +5,20 @@ Sensor[Env] BME680
         powerConsumption: 3 mW
     end
     pins
-        vcc[5V] @ 1;
-        gnd[GND] @ 5;
-        sda[sda-0] @ 2;
-        scl[scl-0] @ 3;
+        vcc[5V] @ 1,
+        gnd[GND] @ 5,
+        sda[sda-0] @ 2,
+        scl[scl-0] @ 3
     end
     attributes
-        poll_period[int] = 10;
-        humidity_oversample[int] = 2;
-        pressure_oversample[int] = 4;
-        temperature_oversample[int] = 8;
-        filter_size[int] = 3;
-        gas_status[str] = "ENABLE_GAS_MEAS";
-        heater_temp[int] = 320;
-        heater_duration[int] = 150;
-        heater_profile[int] = 0;
+        poll_period[int] = 10,
+        humidity_oversample[int] = 2,
+        pressure_oversample[int] = 4,
+        temperature_oversample[int] = 8,
+        filter_size[int] = 3,
+        gas_status[str] = "ENABLE_GAS_MEAS",
+        heater_temp[int] = 320,
+        heater_duration[int] = 150,
+        heater_profile[int] = 0
     end
 end

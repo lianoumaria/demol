@@ -2,12 +2,12 @@ Sensor[Distance] TFMini
     operational
         vcc: 5V    end
     pins
-        GND[GND] @ 1;
-        VCC[5V] @ 2;
-        RXD[rx-0] @ 3;
-        TXD[tx-0] @ 4;
+        GND[GND] @ 1,
+        VCC[5V] @ 2,
+        RXD[rx-0] @ 3,
+        TXD[tx-0] @ 4
     end
     attributes
-        serial_port[str] = "/dev/ttyAMA0";
+        serial_port[str] = "/dev/ttyAMA0"
     end
 end

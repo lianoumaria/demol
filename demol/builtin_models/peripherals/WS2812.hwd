@@ -4,13 +4,13 @@ Actuator[LedArray] WS2812
         vcc: 5V
     end
     pins
-        VCC[5V] @ 1;
-        GND[GND] @ 2;
-        DIN[gpio,mosi-0] @ 3;
+        VCC[5V] @ 1,
+        GND[GND] @ 2,
+        DIN[gpio,mosi-0] @ 3
     end
     attributes
-        num_leds[int] = 12;
-        color_format[str] = "GRB";
-        brightness[float] = 0.5;
+        num_leds[int] = 12,
+        color_format[str] = "GRB",
+        brightness[float] = 0.5
     end
 end
