@@ -19,7 +19,7 @@ class ValidationError(TextXSemanticError):
     pass
 
 
-def raise_validation_error(obj, msg: str, error_type: str = "Validation"):
+def raise_validation_error(obj, msg: str, error_type: str = "Semantics"):
     """Raise a validation error with location information"""
     raise TextXSemanticError(
         f'[{error_type}] {msg}',
@@ -106,7 +106,7 @@ def validate_power_connection(board_pin, peripheral_pin, connection) -> None:
         if not are_voltages_compatible(board_voltage, peripheral_voltage):
             raise_validation_error(
                 connection,
-                f"Incompatible power connection: board pin {board_pin.name} "
+                f"[Conn-Power] Incompatible power connection: board pin {board_pin.name} "
                 f"({board_voltage}V) cannot connect to peripheral pin "
                 f"{peripheral_pin.name} ({peripheral_voltage}V). "
                 f"Voltage difference exceeds 0.5V tolerance.",
@@ -117,7 +117,7 @@ def validate_power_connection(board_pin, peripheral_pin, connection) -> None:
     # One is GND and the other is not - invalid
     raise_validation_error(
         connection,
-        f"Cannot connect GND pin to power pin: board pin {board_pin.name} "
+        f"[Conn-Power] Cannot connect GND pin to power pin: board pin {board_pin.name} "
         f"({board_voltage}V) to peripheral pin {peripheral_pin.name} "
         f"({peripheral_voltage}V)",
         "PowerConnectionError"
@@ -161,7 +161,7 @@ def validate_gpio_connection(board_pin, peripheral_pin, connection) -> None:
     if 'gpio' not in board_funcs and not any('gpio' in str(f).lower() for f in board_funcs):
         raise_validation_error(
             connection,
-            f"Board pin {board_pin.name} does not have GPIO functionality. "
+            f"[Conn-GPIO] Board pin {board_pin.name} does not have GPIO functionality. "
             f"Available functions: {', '.join(board_funcs)}",
             "GPIOFunctionError"
         )
@@ -169,7 +169,7 @@ def validate_gpio_connection(board_pin, peripheral_pin, connection) -> None:
     if 'gpio' not in peripheral_funcs and not any('gpio' in str(f).lower() for f in peripheral_funcs):
         raise_validation_error(
             connection,
-            f"Peripheral pin {peripheral_pin.name} does not have GPIO functionality. "
+            f"[Conn-GPIO] Peripheral pin {peripheral_pin.name} does not have GPIO functionality. "
             f"Available functions: {', '.join(peripheral_funcs)}",
             "GPIOFunctionError"
         )
@@ -189,7 +189,7 @@ def validate_i2c_connection(board_sda, board_scl, peripheral_sda, peripheral_scl
     if not (0x00 <= slave_addr <= 0x7F):
         raise_validation_error(
             connection,
-            f"I2C slave address 0x{slave_addr:02X} out of valid range [0x00-0x7F]",
+            f"[Conn-I2C] I2C slave address 0x{slave_addr:02X} out of valid range [0x00-0x7F]",
             "I2CAddressError"
         )
     
@@ -198,7 +198,7 @@ def validate_i2c_connection(board_sda, board_scl, peripheral_sda, peripheral_scl
     if not any('sda' in str(f).lower() for f in board_sda_funcs):
         raise_validation_error(
             connection,
-            f"Board pin {board_sda.name} does not have SDA (I2C) functionality",
+            f"[Conn-I2C] Board pin {board_sda.name} does not have SDA (I2C) functionality",
             "I2CFunctionError"
         )
     
@@ -207,7 +207,7 @@ def validate_i2c_connection(board_sda, board_scl, peripheral_sda, peripheral_scl
     if not any('scl' in str(f).lower() for f in board_scl_funcs):
         raise_validation_error(
             connection,
-            f"Board pin {board_scl.name} does not have SCL (I2C) functionality",
+            f"[Conn-I2C] Board pin {board_scl.name} does not have SCL (I2C) functionality",
             "I2CFunctionError"
         )
     
@@ -216,7 +216,7 @@ def validate_i2c_connection(board_sda, board_scl, peripheral_sda, peripheral_scl
     if not any('sda' in str(f).lower() for f in peripheral_sda_funcs):
         raise_validation_error(
             connection,
-            f"Peripheral pin {peripheral_sda.name} does not have SDA (I2C) functionality",
+            f"[Conn-I2C] Peripheral pin {peripheral_sda.name} does not have SDA (I2C) functionality",
             "I2CFunctionError"
         )
     
@@ -225,7 +225,7 @@ def validate_i2c_connection(board_sda, board_scl, peripheral_sda, peripheral_scl
     if not any('scl' in str(f).lower() for f in peripheral_scl_funcs):
         raise_validation_error(
             connection,
-            f"Peripheral pin {peripheral_scl.name} does not have SCL (I2C) functionality",
+            f"[Conn-I2C] Peripheral pin {peripheral_scl.name} does not have SCL (I2C) functionality",
             "I2CFunctionError"
         )
 
@@ -246,7 +246,7 @@ def validate_spi_connection(board_pins: Dict[str, object], peripheral_pins: Dict
         if not any(pin_type in str(f).lower() for f in board_funcs):
             raise_validation_error(
                 connection,
-                f"Board pin {board_pin.name} does not have {pin_type.upper()} (SPI) functionality",
+                f"[Conn-SPI] Board pin {board_pin.name} does not have {pin_type.upper()} (SPI) functionality",
                 "SPIFunctionError"
             )
         
@@ -256,7 +256,7 @@ def validate_spi_connection(board_pins: Dict[str, object], peripheral_pins: Dict
         if not any(pin_type in str(f).lower() for f in peripheral_funcs):
             raise_validation_error(
                 connection,
-                f"Peripheral pin {peripheral_pin.name} does not have {pin_type.upper()} (SPI) functionality",
+                f"[Conn-SPI] Peripheral pin {peripheral_pin.name} does not have {pin_type.upper()} (SPI) functionality",
                 "SPIFunctionError"
             )
 
@@ -275,7 +275,7 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
     if baudrate not in valid_baudrates:
         raise_validation_error(
             connection,
-            f"Unusual UART baudrate {baudrate}. Common values: {valid_baudrates}",
+            f"[Conn-UART] Unusual UART baudrate {baudrate}. Common values: {valid_baudrates}",
             "UARTBaudrateWarning"
         )
     
@@ -284,7 +284,7 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
     if not any('tx' in str(f).lower() for f in board_tx_funcs):
         raise_validation_error(
             connection,
-            f"Board pin {board_tx.name} does not have TX (UART) functionality",
+            f"[Conn-UART] Board pin {board_tx.name} does not have TX (UART) functionality",
             "UARTFunctionError"
         )
     
@@ -292,7 +292,7 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
     if not any('rx' in str(f).lower() for f in peripheral_tx_funcs):
         raise_validation_error(
             connection,
-            f"Peripheral pin {peripheral_tx.name} does not have RX (UART) functionality. "
+            f"[Conn-UART] Peripheral pin {peripheral_tx.name} does not have RX (UART) functionality. "
             f"UART requires connecting Board TX to Peripheral RX.",
             "UARTFunctionError"
         )
@@ -302,7 +302,7 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
     if not any('rx' in str(f).lower() for f in board_rx_funcs):
         raise_validation_error(
             connection,
-            f"Board pin {board_rx.name} does not have RX (UART) functionality",
+            f"[Conn-UART] Board pin {board_rx.name} does not have RX (UART) functionality",
             "UARTFunctionError"
         )
     
@@ -310,7 +310,7 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
     if not any('tx' in str(f).lower() for f in peripheral_rx_funcs):
         raise_validation_error(
             connection,
-            f"Peripheral pin {peripheral_rx.name} does not have TX (UART) functionality. "
+            f"[Conn-UART] Peripheral pin {peripheral_rx.name} does not have TX (UART) functionality. "
             f"UART requires connecting Board RX to Peripheral TX.",
             "UARTFunctionError"
         )
@@ -392,7 +392,7 @@ def validate_no_pin_conflicts(connections: List) -> None:
                     if not allowed:
                         raise_validation_error(
                             connection,
-                            f"Pin conflict detected: Board pin '{pin}' is already used by "
+                            f"[Safety-Pin-Conflicts] Pin conflict detected: Board pin '{pin}' is already used by "
                             f"peripheral '{existing_peripheral}' as '{existing_usage}'. "
                             f"Cannot reuse for peripheral '{peripheral_name}' as '{usage}'.",
                             "PinConflictError"
@@ -422,7 +422,7 @@ def validate_i2c_address_uniqueness(connections: List) -> None:
                 if addr in i2c_addresses:
                     raise_validation_error(
                         connection,
-                        f"I2C address conflict: Address 0x{addr:02X} is already used by "
+                        f"[Safety-I2C-Address] I2C address conflict: Address 0x{addr:02X} is already used by "
                         f"peripheral(s): {', '.join(i2c_addresses[addr])}. "
                         f"Cannot reuse for peripheral '{peripheral_name}'.",
                         "I2CAddressConflictError"
@@ -455,7 +455,7 @@ def validate_voltage_limits(model) -> None:
                 if board_voltage and board_voltage > peripheral_vcc + 0.5:
                     raise_validation_error(
                         connection,
-                        f"Voltage limit exceeded: Board pin {pconn.boardPin} provides "
+                        f"[Safety-Voltage-Limits] Voltage limit exceeded: Board pin {pconn.boardPin} provides "
                         f"{board_voltage}V but peripheral {peripheral.name} is rated for "
                         f"{peripheral_vcc}V maximum.",
                         "VoltageLimitError"
@@ -505,7 +505,7 @@ def validate_io_voltage_compatibility(model) -> None:
             # Emit warning instead of raising error
             location = get_location(connection)
             warning_msg = (
-                f"[IOVoltageIncompatibilityWarning] IO Voltage Incompatibility at "
+                f"[Safety-IO-Voltage] IO Voltage Incompatibility at "
                 f"{location.get('filename', 'unknown')}:{location.get('line', '?')}: "
                 f"Board '{board.name}' operates at {board_io_v}V (IO), "
                 f"but peripheral '{peripheral.name}' operates at {periph_io_v}V (IO). "
@@ -539,7 +539,7 @@ def validate_common_ground(model) -> None:
             # No power connections defined - emit warning
             location = get_location(connection)
             warning_msg = (
-                f"[NoGroundConnectionWarning] No power connections defined at "
+                f"[WF-Common-Ground] No power connections defined at "
                 f"{location.get('filename', 'unknown')}:{location.get('line', '?')}: "
                 f"Peripheral '{peripheral_name}' (type: {peripheral.name}) has no power "
                 f"connections to the board. Ensure proper grounding through external means "
@@ -567,7 +567,7 @@ def validate_common_ground(model) -> None:
         if not has_ground:
             location = get_location(connection)
             warning_msg = (
-                f"[NoGroundConnectionWarning] Missing ground connection at "
+                f"[WF-Common-Ground] Missing ground connection at "
                 f"{location.get('filename', 'unknown')}:{location.get('line', '?')}: "
                 f"Peripheral '{peripheral_name}' (type: {peripheral.name}) does not have "
                 f"a GND (ground) power connection to the board. This may cause electrical "
@@ -595,7 +595,7 @@ def validate_all_peripherals_connected(model) -> None:
     if unconnected:
         raise_validation_error(
             model,
-            f"Unconnected peripherals detected: {', '.join(unconnected)}. "
+            f"[WF-All-Peripherals-Connected] Unconnected peripherals detected: {', '.join(unconnected)}. "
             f"All peripherals must have at least one connection defined.",
             "UnconnectedPeripheralError"
         )
@@ -616,7 +616,7 @@ def validate_broker_requirements(model) -> None:
     if has_endpoint and not hasattr(model, 'broker'):
         raise_validation_error(
             model,
-            "Broker configuration required: One or more connections define endpoints "
+            "[WF-Broker-Requirements] Broker configuration required: One or more connections define endpoints "
             "(Publisher/Subscriber), but no broker is configured in the model.",
             "MissingBrokerError"
         )

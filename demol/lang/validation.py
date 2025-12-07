@@ -34,6 +34,22 @@ class ValidationStatus(Enum):
     FAIL = "fail"
 
 
+ACTIVE_VALIDATIONS = [
+    ("WF-All-Peripherals-Connected", "All peripherals must be connected"),
+    ("WF-Broker-Requirements", "Broker required if endpoints used"),
+    ("WF-Common-Ground", "Common ground connection required"),
+    ("Conn-Power", "Power connection compatibility"),
+    ("Conn-GPIO", "GPIO functionality check"),
+    ("Conn-I2C", "I2C functionality and address check"),
+    ("Conn-SPI", "SPI functionality check"),
+    ("Conn-UART", "UART functionality and baudrate check"),
+    ("Safety-Pin-Conflicts", "No pin conflicts (unique pins)"),
+    ("Safety-I2C-Address", "Unique I2C addresses"),
+    ("Safety-Voltage-Limits", "Voltage limits check"),
+    ("Safety-IO-Voltage", "IO Voltage compatibility"),
+]
+
+
 @dataclass
 class ValidationResult:
     """Container for validation results"""
@@ -72,6 +88,31 @@ class ValidationReporter:
             self.console.print(message, style=style)
         else:
             print(message)
+
+    def print_active_validations(self) -> None:
+        """Print the list of active validations"""
+        if self.use_rich:
+            table = Table(
+                title="Active Validations",
+                box=box.SIMPLE,
+                show_header=True,
+                header_style="bold magenta",
+                title_style="bold white",
+            )
+            table.add_column("Validation ID", style="cyan", width=30)
+            table.add_column("Description", style="white")
+
+            for val_id, desc in ACTIVE_VALIDATIONS:
+                table.add_row(val_id, desc)
+            
+            self.console.print(table)
+            self.console.print()  # Add empty line
+        else:
+            print("\nActive Validations:")
+            print("=" * 50)
+            for val_id, desc in ACTIVE_VALIDATIONS:
+                print(f"{val_id:<30} {desc}")
+            print("=" * 50 + "\n")
     
     def create_summary_table(self, results: List[ValidationResult]) -> 'Table':
         """Create a formatted summary table of validation results"""
@@ -112,6 +153,47 @@ class ValidationReporter:
                 str(len(result.errors)) if result.errors else "-"
             )
         
+        return table
+
+    def create_failure_table(self, results: List[ValidationResult]) -> 'Table':
+        """Create a table showing specific validation failures"""
+        if not self.use_rich:
+            raise RuntimeError("Rich library is not available")
+
+        table = Table(
+            title="Validation Failures",
+            box=box.ROUNDED,
+            show_header=True,
+            header_style="bold red",
+            title_style="bold white",
+        )
+
+        table.add_column("Model File", style="white", width=30)
+        table.add_column("Failed Validation", style="red", width=25)
+        table.add_column("Error Message", style="dim white")
+
+        failed_results = [r for r in results if r.status == ValidationStatus.FAIL]
+
+        for result in failed_results:
+            file_display = result.rel_path
+            if len(file_display) > 28:
+                file_display = "..." + file_display[-25:]
+
+            for error in result.errors:
+                # Try to extract validation ID from error message if present
+                # Assuming error format "[ValidationID] Message" or similar
+                val_id = "Unknown"
+                message = error
+                
+                import re
+                match = re.search(r'\[(WF-[^\]]+|Conn-[^\]]+|Safety-[^\]]+)\]', error)
+                if match:
+                    val_id = match.group(1)
+                    # Optional: strip the ID from the message for cleaner display
+                    # message = error.replace(f"[{val_id}]", "").strip()
+                
+                table.add_row(file_display, val_id, message)
+
         return table
     
     def print_detailed_issues(self, results: List[ValidationResult]) -> None:
@@ -194,6 +276,10 @@ class ValidationReporter:
             print(f"✓ Passed: {passed}")
             print(f"⚠ Warnings: {warned}")
             print(f"✗ Failed: {failed}")
+
+        if failed > 0 and self.use_rich:
+             self.console.print()
+             self.console.print(self.create_failure_table(results))
     
     def print_header(self, title: str) -> None:
         """Print a header"""
@@ -273,6 +359,9 @@ def validate_models(
     if reporter is None:
         reporter = ValidationReporter()
     
+    # Print active validations at the start
+    reporter.print_active_validations()
+
     results: List[ValidationResult] = []
     
     if show_progress and reporter.use_rich:
@@ -305,5 +394,8 @@ def validate_models(
             if show_progress:
                 status_symbol = "✓" if result.status == ValidationStatus.PASS else ("⚠" if result.status == ValidationStatus.WARN else "✗")
                 print(f"{status_symbol} {result.rel_path}")
+    
+    # Print summary
+    reporter.print_summary_panel(results)
     
     return results
