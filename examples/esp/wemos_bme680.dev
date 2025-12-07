@@ -23,17 +23,11 @@ Components
         - BME680(BME)
 end
 
-Connection
-    peripheral: BME
-    powerConnections:
-        - gnd -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: i2c
-          slave_address: 0x78
-          pins:
-              sda: d2 -- sda
-              scl: d1 -- scl
-    endpoint:
-        topic: "my_wemos.actuators.visual.ledstrip"
+Connect BME
+    power:
+        gnd -- gnd,
+        power_5v -- vcc
+    data:
+        i2c[slave_address=0x78] sda d2 -- sda, scl d1 -- scl
+    remote: "my_wemos.actuators.visual.ledstrip"
 end

@@ -12,7 +12,7 @@ DeviceModel:
         network=Network
         components=Components
         (broker=MessageBroker)?
-        connections+=Connection
+        connections+=Connect
     )#
 ;
 
@@ -51,17 +51,17 @@ PeripheralDef:
     ref=[Peripheral:FQN|+m:component] '(' name=ID ')'
 ;
 
-Connection:
-	"Connection"
+Connect:
+	"Connect" peripheral=[PeripheralDef:FQN|~components.peripherals]
 	(
-	    ("peripheral:" peripheral=[PeripheralDef:FQN|~components.peripherals])
-	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
-        ("powerConnections:" '-' powerConns*=PowerConnection['-'])?
-	    ("endpoint:" endpoint=Endpoint)?
-        ("settings" ":" "-" settings*=Settings["-"])?
+	    ("power:" powerConns*=PowerConnection[','])?
+        ("data:" dataConns+=DataConnection[','])?
+	    ("remote:" remote=STRING)?
+        ("settings:" "-" settings*=Settings['-'])?
     )#
     'end'
 ;
+
 
 PinConnection:
     boardPin=ID "--" peripheralPin=ID
@@ -69,59 +69,28 @@ PinConnection:
 
 PowerConnection: PinConnection;
 
-IOConnection:
-	GPIOConnection | I2CConnection | SPIConnection | UARTConnection
+DataConnection:
+    type=IOType ('[' props*=Property[','] ']')? pins+=PinMapping[',']
 ;
 
-GPIOConnection:
-	"type" ":"  type="gpio"
-    ('name:' name=ID)?
-    (mode=GPIOMode)?
-    ('pin:' pinConn=PinConnection)
+IOType:
+    'gpio' | 'i2c' | 'spi' | 'uart'
 ;
 
-GPIOMode:
-    ('input' ':' input=BOOL)?
-    ('output' ':' output=BOOL)?
-    ('pullup' ':' pullup=BOOL)?
-    ('pulldown' ':' pulldown=BOOL)?
-    ('open_drain' ':' openDrain=BOOL)?
+Property:
+    name=ID '=' value=Value
 ;
 
-SPIConnection:
-	"type" ":" type="spi"
-    ('name:' name=ID)?
-    ('pins:')
-    (
-        ("mosi" ":" mosi=PinConnection)
-        ("miso" ":" miso=PinConnection)
-        ("sck" ":" sck=PinConnection)
-        ("cs" ":" cs=PinConnection)
-    )#
+PinMapping:
+    (function=ID boardPin=ID '--' peripheralPin=ID)
 ;
 
-I2CConnection:
-	"type" ":" type="i2c"
-    (
-    ('name:' name=ID)?
-    ("slave_address:" "0x" slaveAddr=INT)
-    ('pins:')
-    (
-        ("sda" ":" sda=PinConnection)
-        ("scl" ":" scl=PinConnection)
-    )#
-    )#
+Value:
+    Hex | INT | STRING | FLOAT | BOOL
 ;
 
-UARTConnection:
-	"type" ":" type="uart"
-    ('name:' name=ID)?
-    ('pins:')
-    (
-        ("tx" ":" tx=PinConnection)
-        ("rx" ":" rx=PinConnection)
-        ("baudrate:" baudrate=INT)
-    )#
+Hex:
+    /0x[0-9a-fA-F]+/
 ;
 
 Endpoint:

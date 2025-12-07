@@ -11,8 +11,6 @@ def component_model_proc(model, metamodel):
     """
     from demol.lang.semantics import validate_unique_pin_numbers
     
-    print(f'[*] Processing component model: {model._tx_filename}')
-    
     # Validate unique pin numbers for the component
     if hasattr(model, 'component'):
         validate_unique_pin_numbers(model.component)

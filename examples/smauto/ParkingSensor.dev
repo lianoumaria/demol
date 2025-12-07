@@ -25,22 +25,14 @@ Broker<MQTT> locsys_broker
         password: "issel.sensors"
 end
 
-Connection
-    peripheral: ParkingDistance
-    powerConnections:
-        - GND_1 -- GND
-        - power_5v_a -- VCC
-    ioConnections:
-        - type: gpio
-          name: echo
-          pin:
-              GPIO24 -- echo
-        - type: gpio
-          name: trigger
-          pin:
-              GPIO23 -- trigger
-    endpoint:
-        type: Publisher
+Connect ParkingDistance
+    power:
+        GND_1 -- GND,
+        power_5v_a -- VCC
+    data:
+        gpio[name="echo"] pin GPIO24 -- echo,
+        gpio[name="trigger"] pin GPIO23 -- trigger
+    // remote: ...
     settings:
         - frequency: float = 20.0
 end

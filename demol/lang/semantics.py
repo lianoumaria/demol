@@ -357,20 +357,31 @@ def validate_no_pin_conflicts(connections: List) -> None:
             used_pins.append((pconn.boardPin, 'POWER'))
         
         # IO connections
-        for ioconn in connection.ioConns:
-            if ioconn.__class__.__name__ == 'GPIOConnection':
-                used_pins.append((ioconn.pinConn.boardPin, 'GPIO'))
-            elif ioconn.__class__.__name__ == 'I2CConnection':
-                used_pins.append((ioconn.sda.boardPin, 'I2C-SDA'))
-                used_pins.append((ioconn.scl.boardPin, 'I2C-SCL'))
-            elif ioconn.__class__.__name__ == 'SPIConnection':
-                used_pins.append((ioconn.mosi.boardPin, 'SPI-MOSI'))
-                used_pins.append((ioconn.miso.boardPin, 'SPI-MISO'))
-                used_pins.append((ioconn.sck.boardPin, 'SPI-SCK'))
-                used_pins.append((ioconn.cs.boardPin, 'SPI-CS'))
-            elif ioconn.__class__.__name__ == 'UARTConnection':
-                used_pins.append((ioconn.tx.boardPin, 'UART-TX'))
-                used_pins.append((ioconn.rx.boardPin, 'UART-RX'))
+        for data_conn in connection.dataConns:
+            conn_type = data_conn.type
+            
+            for pin_map in data_conn.pins:
+                if conn_type == 'gpio':
+                    used_pins.append((pin_map.boardPin, 'GPIO'))
+                elif conn_type == 'i2c':
+                    if pin_map.function == 'sda':
+                        used_pins.append((pin_map.boardPin, 'I2C-SDA'))
+                    elif pin_map.function == 'scl':
+                        used_pins.append((pin_map.boardPin, 'I2C-SCL'))
+                elif conn_type == 'spi':
+                    if pin_map.function == 'mosi':
+                        used_pins.append((pin_map.boardPin, 'SPI-MOSI'))
+                    elif pin_map.function == 'miso':
+                        used_pins.append((pin_map.boardPin, 'SPI-MISO'))
+                    elif pin_map.function == 'sck':
+                        used_pins.append((pin_map.boardPin, 'SPI-SCK'))
+                    elif pin_map.function == 'cs':
+                        used_pins.append((pin_map.boardPin, 'SPI-CS'))
+                elif conn_type == 'uart':
+                    if pin_map.function == 'tx':
+                        used_pins.append((pin_map.boardPin, 'UART-TX'))
+                    elif pin_map.function == 'rx':
+                        used_pins.append((pin_map.boardPin, 'UART-RX'))
         
         # Check for conflicts
         for pin, usage in used_pins:
@@ -414,9 +425,22 @@ def validate_i2c_address_uniqueness(connections: List) -> None:
     i2c_addresses: Dict[int, List[str]] = {}
     
     for connection in connections:
-        for ioconn in connection.ioConns:
-            if ioconn.__class__.__name__ == 'I2CConnection':
-                addr = ioconn.slaveAddr
+        for data_conn in connection.dataConns:
+            if data_conn.type == 'i2c':
+                # Helper to get property value
+                addr = None
+                for p in data_conn.props:
+                    if p.name == 'slave_address':
+                        addr = p.value
+                        if isinstance(addr, str) and addr.lower().startswith('0x'):
+                            try:
+                                addr = int(addr, 16)
+                            except ValueError:
+                                pass
+                        break
+                
+                if addr is None:
+                    continue
                 peripheral_name = connection.peripheral.name
                 
                 if addr in i2c_addresses:
@@ -609,15 +633,15 @@ def validate_broker_requirements(model) -> None:
         (∃k. k.endpoint.type ∈ {Publisher, Subscriber}) ⇒ (broker ≠ None)
     """
     has_endpoint = any(
-        hasattr(conn, 'endpoint') and conn.endpoint is not None
+        hasattr(conn, 'remote') and conn.remote is not None
         for conn in model.connections
     )
     
     if has_endpoint and not hasattr(model, 'broker'):
         raise_validation_error(
             model,
-            "[WF-Broker-Requirements] Broker configuration required: One or more connections define endpoints "
-            "(Publisher/Subscriber), but no broker is configured in the model.",
+            "[WF-Broker-Requirements] Broker configuration required: One or more connections define remote endpoints "
+            "but no broker is configured in the model.",
             "MissingBrokerError"
         )
 
@@ -645,3 +669,196 @@ def validate_unique_pin_numbers(component) -> None:
                 f"Pin numbers must be unique within a component.",
                 "DuplicatePinNumberError"
             )
+
+
+def validate_connections(model) -> None:
+    """
+    Validate all connections in the model.
+    
+    Iterates over all connections and performs specific validations for
+    power and data connections.
+    """
+    board = model.components.board
+    
+    # Get pin mappings
+    board_pins_map = {p.name: p for p in board.pins}
+    board_pin_names = set(board_pins_map.keys())
+    
+    for c in model.connections:
+        peripheral = c.peripheral.ref
+        peripheral_pins_map = {p.name: p for p in peripheral.pins}
+        peripheral_pin_names = set(peripheral_pins_map.keys())
+        
+        # ====================================================================
+        # Validate Power Connections
+        # ====================================================================
+        for pconn in c.powerConns:
+            # Check if pins exist
+            if pconn.boardPin not in board_pin_names:
+                raise_validation_error(
+                    pconn,
+                    f'Board {board.name} does not have a pin named {pconn.boardPin}'
+                )
+            if pconn.peripheralPin not in peripheral_pin_names:
+                raise_validation_error(
+                    pconn,
+                    f'Peripheral {c.peripheral.name} does not have a pin named {pconn.peripheralPin}'
+                )
+            
+            # Enhanced validation: Check power compatibility
+            board_pin = board_pins_map[pconn.boardPin]
+            peripheral_pin = peripheral_pins_map[pconn.peripheralPin]
+            
+            # Only validate if both are power pins
+            if (hasattr(board_pin, 'ptype') and hasattr(peripheral_pin, 'ptype')):
+                validate_power_connection(board_pin, peripheral_pin, pconn)
+        
+        # ====================================================================
+        # Validate IO Connections
+        # ====================================================================
+        for data_conn in c.dataConns:
+            conn_type = data_conn.type
+            
+            # Helper to get property value
+            def get_prop(name, default=None):
+                for p in data_conn.props:
+                    if p.name == name:
+                        val = p.value
+                        if isinstance(val, str) and val.lower().startswith('0x'):
+                            try:
+                                return int(val, 16)
+                            except ValueError:
+                                return val
+                        return val
+                return default
+
+            # Helper to get pin mapping
+            def get_pin(func_name):
+                for p in data_conn.pins:
+                    if p.function == func_name:
+                        return p
+                return None
+
+            # Collect all used pins for this data connection
+            for pin_map in data_conn.pins:
+                # Check if board pin exists
+                if pin_map.boardPin not in board_pin_names:
+                    raise_validation_error(
+                        pin_map,
+                        f'Board {board.name} does not have a pin named {pin_map.boardPin}'
+                    )
+                # Check if peripheral pin exists
+                if pin_map.peripheralPin not in peripheral_pin_names:
+                    raise_validation_error(
+                        pin_map,
+                        f'Peripheral {peripheral.name} does not have a pin named {pin_map.peripheralPin}'
+                    )
+
+            if conn_type == 'gpio':
+                pin_conn = data_conn.pins[0] # Assuming single pin for GPIO for now
+                
+                # Enhanced validation: Check GPIO functionality
+                board_pin = board_pins_map[pin_conn.boardPin]
+                peripheral_pin = peripheral_pins_map[pin_conn.peripheralPin]
+                validate_gpio_connection(board_pin, peripheral_pin, data_conn)
+                
+            elif conn_type == 'i2c':
+                sda = get_pin('sda')
+                scl = get_pin('scl')
+                slave_addr = get_prop('slave_address')
+
+                if not sda or not scl:
+                     # TODO: Better error handling for missing pins
+                     continue
+                
+                # Check if pins exist
+                pin_conns = [sda, scl]
+                for pc in pin_conns:
+                    if pc.boardPin not in board_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Board {board.name} does not have a pin named {pc.boardPin}'
+                        )
+                    if pc.peripheralPin not in peripheral_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
+                        )
+                
+                # Enhanced validation: Check I2C functionality and address range
+                board_sda = board_pins_map[sda.boardPin]
+                board_scl = board_pins_map[scl.boardPin]
+                peripheral_sda = peripheral_pins_map[sda.peripheralPin]
+                peripheral_scl = peripheral_pins_map[scl.peripheralPin]
+                validate_i2c_connection(
+                    board_sda, board_scl, peripheral_sda, peripheral_scl,
+                    slave_addr, data_conn
+                )
+                
+            elif conn_type == 'spi':
+                miso = get_pin('miso')
+                mosi = get_pin('mosi')
+                sck = get_pin('sck')
+                cs = get_pin('cs')
+                
+                # Check if pins exist
+                pin_conns = [p for p in [miso, mosi, sck, cs] if p]
+                for pc in pin_conns:
+                    if pc.boardPin not in board_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Board {board.name} does not have a pin named {pc.boardPin}'
+                        )
+                    if pc.peripheralPin not in peripheral_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
+                        )
+                
+                # Enhanced validation: Check SPI functionality
+                if miso and mosi and sck and cs:
+                    board_spi_pins = {
+                        'mosi': board_pins_map[mosi.boardPin],
+                        'miso': board_pins_map[miso.boardPin],
+                        'sck': board_pins_map[sck.boardPin],
+                        'cs': board_pins_map[cs.boardPin]
+                    }
+                    peripheral_spi_pins = {
+                        'mosi': peripheral_pins_map[mosi.peripheralPin],
+                        'miso': peripheral_pins_map[miso.peripheralPin],
+                        'sck': peripheral_pins_map[sck.peripheralPin],
+                        'cs': peripheral_pins_map[cs.peripheralPin]
+                    }
+                    validate_spi_connection(board_spi_pins, peripheral_spi_pins, data_conn)
+                
+            elif conn_type == 'uart':
+                tx = get_pin('tx')
+                rx = get_pin('rx')
+                baudrate = get_prop('baudrate')
+                
+                if not tx or not rx:
+                    continue
+
+                # Check if pins exist
+                pin_conns = [tx, rx]
+                for pc in pin_conns:
+                    if pc.boardPin not in board_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Board {board.name} does not have a pin named {pc.boardPin}'
+                        )
+                    if pc.peripheralPin not in peripheral_pin_names:
+                        raise_validation_error(
+                            pc,
+                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
+                        )
+                
+                # Enhanced validation: Check UART functionality and baudrate
+                board_tx = board_pins_map[tx.boardPin]
+                board_rx = board_pins_map[rx.boardPin]
+                peripheral_tx = peripheral_pins_map[tx.peripheralPin]
+                peripheral_rx = peripheral_pins_map[rx.peripheralPin]
+                validate_uart_connection(
+                    board_tx, board_rx, peripheral_tx, peripheral_rx,
+                    baudrate, data_conn
+                )

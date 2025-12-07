@@ -25,28 +25,21 @@ Components
         - WS281X(Ledstrip)
 end
 
-Connection
-    peripheral: Sonar
-    powerConnections:
-        - gnd -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: gpio
-          pin: d3 -- trigger
-        - type: gpio
-          pin: d4 -- echo
-    endpoint:
-	topic: "my_wemos.sensors.distance.sonar"
+Connect Sonar
+    power:
+        gnd -- gnd,
+        power_5v -- vcc
+    data:
+        gpio pin d3 -- trigger,
+        gpio pin d4 -- echo
+    remote: "my_wemos.sensors.distance.sonar"
 end
 
-Connection
-    peripheral: Ledstrip
-    powerConnections:
-        - gnd -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: gpio
-          pin: d2 -- data_in
-    endpoint:
-        topic: "my_wemos.actuators.visual.ledstrip"
+Connect Ledstrip
+    power:
+        gnd -- gnd,
+        power_5v -- vcc
+    data:
+        gpio pin d2 -- data_in
+    remote: "my_wemos.actuators.visual.ledstrip"
 end

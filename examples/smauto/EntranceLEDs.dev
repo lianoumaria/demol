@@ -26,35 +26,23 @@ Broker<MQTT> locsys_broker
         password: "issel.sensors"
 end
 
-Connection
-    peripheral: EntranceSRF
-    powerConnections:
-        - GND_1 -- GND
-        - power_5v_a -- VCC
-    ioConnections:
-        - type: gpio
-          name: echo
-          pin:
-              GPIO24 -- echo
-        - type: gpio
-          name: trigger
-          pin:
-              GPIO23 -- trigger
-    endpoint:
-        type: Publisher
+Connect EntranceSRF
+    power:
+        GND_1 -- GND,
+        power_5v_a -- VCC
+    data:
+        gpio[name="echo"] pin GPIO24 -- echo,
+        gpio[name="trigger"] pin GPIO23 -- trigger
+    // remote: ...
 end
 
-Connection
-    peripheral: RoomLights
-    powerConnections:
-        - GND_2 -- GND
-        - power_5v_b -- VCC
-    ioConnections:
-        - type: gpio
-          name: LedControl
-          pin: GPIO10 -- DIN
-    endpoint:
-        type: Subscriber
+Connect RoomLights
+    power:
+        GND_2 -- GND,
+        power_5v_b -- VCC
+    data:
+        gpio[name="LedControl"] pin GPIO10 -- DIN
+    // remote: ...
     settings:
         - colors: list = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']
 end

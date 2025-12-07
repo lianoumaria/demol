@@ -25,33 +25,21 @@ Components
         - BME680(MyBME)
 end
 
-Connection
-    peripheral: MySonar
-    powerConnections:
-        - gnd_1 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: gpio
-          pin: p_13 -- trigger
-        - type: gpio
-          pin: p_14 -- echo
-    endpoint:
-	topic: "my_esp.sensors.distance.srf04_02"
-        type: Publisher
+Connect MySonar
+    power:
+        gnd_1 -- gnd,
+        power_5v -- vcc
+    data:
+        gpio pin p_13 -- trigger,
+        gpio pin p_14 -- echo
+    remote: "my_esp.sensors.distance.srf04_02"
 end
 
-Connection
-    peripheral: MyBME
-    powerConnections:
-        - gnd_1 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: i2c
-          slave_address: 0x76
-          pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
-    endpoint:
-        topic: "my_esp.sensors.env.bme680"
-        type: Publisher
+Connect MyBME
+    power:
+        gnd_1 -- gnd,
+        power_5v -- vcc
+    data:
+        i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
+    remote: "my_esp.sensors.env.bme680"
 end

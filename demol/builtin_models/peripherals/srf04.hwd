@@ -2,10 +2,10 @@
 
 Sensor[Distance] SonarSRF04
     operational
-    vcc: 5V
-    ioVcc: 5V
-    piTpl: "srf04"
-    riotTpl: "srf04"
+        vcc: 5V
+        ioVcc: 5V
+        piTpl: "srf04"
+        riotTpl: "srf04"
     end
     pins
         vcc[5V] @ 1;

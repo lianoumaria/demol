@@ -36,18 +36,13 @@ Broker<MQTT> locsys_broker
         password: "issel.sensors"
 end
 
-Connection
-    peripheral: Tracker1
-    powerConnections:
-        - GND_1 -- GND
-        - power_5v_a -- VCC
-    ioConnections:
-        - type: gpio
-          name: digitalIN
-          pin:
-              GPIO4 -- D0
-    endpoint:
-        type: Publisher
+Connect Tracker1
+    power:
+        GND_1 -- GND,
+        power_5v_a -- VCC
+    data:
+        gpio[name="digitalIN"] pin GPIO4 -- D0
+    // remote: ...
 end
 /*
 Connection

@@ -25,19 +25,11 @@ Broker<MQTT> MyBroker
         password: "guest"
 end
 
-Connection
-    peripheral: MyBME
-    powerConnections:
-        - GND_3 -- gnd
-        - power_5v_a -- vcc
-    ioConnections:
-        - type: i2c
-          name: env_data
-          slave_address: 0x76
-          pins:
-            sda: GPIO2 -- sda
-            scl: GPIO3 -- scl
-    endpoint:
-        topic: "my_raspi.sensors.env.bme680"
-        type: Publisher 
+Connect MyBME
+    power:
+        GND_3 -- gnd,
+        power_5v_a -- vcc
+    data:
+        i2c[name="env_data", slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
+    remote: "my_raspi.sensors.env.bme680"
 end

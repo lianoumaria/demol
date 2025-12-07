@@ -32,20 +32,13 @@ Broker<MQTT> locsys_broker
         password: "issel.sensors"
 end
 
-Connection
-    peripheral: MyToF
-    powerConnections:
-        - GND_3 -- GND
-        - power_3v3_a -- VIN
-    ioConnections:
-        - type: i2c
-          name: data
-          slave_address: 0x29
-          pins:
-            sda: GPIO2 -- SDA
-            scl: GPIO3 -- SCL
-    endpoint:
-        type: Publisher 
+Connect MyToF
+    power:
+        GND_3 -- GND,
+        power_3v3_a -- VIN
+    data:
+        i2c[name="data", slave_address=0x29] sda GPIO2 -- SDA, scl GPIO3 -- SCL
+    // remote: ...
 end
 /*
 Connection

@@ -25,18 +25,11 @@ Broker<MQTT> MyMqttBroker
         password: "guest"
 end
 
-Connection
-    peripheral: MyBME
-    powerConnections:
-        - gnd_1 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: i2c
-          slave_address: 0x76
-          pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
-    endpoint:
-        topic: "my_esp.sensors.env.bme680"
-        type: Publisher
+Connect MyBME
+    power:
+        gnd_1 -- gnd,
+        power_5v -- vcc
+    data:
+        i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
+    remote: "my_esp.sensors.env.bme680"
 end

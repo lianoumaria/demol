@@ -25,17 +25,13 @@ Broker<MQTT> locsys_broker
         password: "issel.sensors"
 end
 
-Connection
-    peripheral: WarningLights
-    powerConnections:
-        - GND_2 -- GND
-        - power_5v_b -- VCC
-    ioConnections:
-        - type: gpio
-          name: LedControl
-          pin: GPIO10 -- DIN
-    endpoint:
-        type: Subscriber
+Connect WarningLights
+    power:
+        GND_2 -- GND,
+        power_5v_b -- VCC
+    data:
+        gpio[name="LedControl"] pin GPIO10 -- DIN
+    // remote: ...
     settings:
         - colors: list = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']
 end
