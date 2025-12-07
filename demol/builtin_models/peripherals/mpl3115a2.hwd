@@ -5,9 +5,9 @@ Sensor[Env] Mpl3115a2
         vcc: 3V3
     end
     pins
-        PPIN vcc[3V3] @ 1;
-        PPIN gnd[GND] @ 2;
-        DPIN scl[scl-0] @ 5;
-        DPIN sda[sda-0] @ 6;
+        vcc[3V3] @ 1;
+        gnd[GND] @ 2;
+        scl[scl-0] @ 5;
+        sda[sda-0] @ 6;
     end
 end

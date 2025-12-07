@@ -3,13 +3,13 @@ Sensor[Distance] SRF05
         vcc: 5V        ioVcc: 5V
     end
     pins
-        PPIN VCC[5V] @ 1;
-        DPIN echo[gpio] @ 2;
-        DPIN trigger[gpio] @ 3;
-        PPIN GND[GND] @ 5;
+        VCC[5V] @ 1;
+        echo[gpio] @ 2;
+        trigger[gpio] @ 3;
+        GND[GND] @ 5;
     end
     attributes
-        ATTR frequency[float] = 10;
+        frequency[float] = 10;
     end
 end
 

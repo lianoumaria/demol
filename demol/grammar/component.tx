@@ -51,7 +51,7 @@ Pin:
 ;
 
 PowerPin:
-	'PPIN' name=ID '[' ptype=PowerType ']' '@' number=INT ';'
+	name=ID '[' ptype=PowerType ']' '@' number=INT ';'
 ;
 
 PowerType:
@@ -67,7 +67,7 @@ Custom:
 ;
 
 IOPin:
-	'DPIN' name=ID '[' funcs*=PinFunction[","] ']' '@' number=INT ';'
+	name=ID '[' funcs*=PinFunction[","] ']' '@' number=INT ';'
 ;
 
 PinFunction:
@@ -231,27 +231,27 @@ NumericAttribute:
 ;
 
 IntAttribute:
-    'ATTR' name=ID '[' type='int' ']' ('=' default=INT)? ';'
+    name=ID '[' type='int' ']' ('=' default=INT)? ';'
 ;
 
 FloatAttribute:
-    'ATTR' name=ID '[' type='float' ']' ('=' default=FLOAT)? ';'
+    name=ID '[' type='float' ']' ('=' default=FLOAT)? ';'
 ;
 
 StringAttribute:
-    'ATTR' name=ID '[' type='str' ']' ('=' default=STRING)? ';'
+    name=ID '[' type='str' ']' ('=' default=STRING)? ';'
 ;
 
 BoolAttribute:
-    'ATTR' name=ID '[' type='bool' ']' ('=' default=BOOL)? ';'
+    name=ID '[' type='bool' ']' ('=' default=BOOL)? ';'
 ;
 
 ListAttribute:
-    'ATTR' name=ID '[' type='list' ']' ('=' '[' default*=OBJECT[','] ']')? ';'
+    name=ID '[' type='list' ']' ('=' '[' default*=OBJECT[','] ']')? ';'
 ;
 
 DictAttribute:
-    'ATTR' name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')? ';'
+    name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')? ';'
 ;
 
 // Operational blocks

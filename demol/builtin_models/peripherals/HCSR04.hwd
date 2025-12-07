@@ -3,12 +3,12 @@ Sensor[Distance] HCSR04
         vcc: 5V //Νομίζω στο 3.3 το συνδέσαμε αλλά λέει 5.. Αν συνδεθεί στα 5 θέλει level shifter
     end
     pins
-        PPIN GND[GND] @ 1;
-        DPIN echo[gpio] @ 2;
-        DPIN trigger[gpio] @ 3;
-        PPIN VCC[5V] @ 4;
+        GND[GND] @ 1;
+        echo[gpio] @ 2;
+        trigger[gpio] @ 3;
+        VCC[5V] @ 4;
     end
     attributes
-        ATTR frequency[float] = 10;
+        frequency[float] = 10;
     end
 end
