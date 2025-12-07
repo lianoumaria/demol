@@ -47,6 +47,7 @@ ACTIVE_VALIDATIONS = [
     ("Safety-I2C-Address", "Unique I2C addresses"),
     ("Safety-Voltage-Limits", "Voltage limits check"),
     ("Safety-IO-Voltage", "IO Voltage compatibility"),
+    ("WF-Unique-Pin-Numbers", "Pin numbers must be unique within a component"),
 ]
 
 

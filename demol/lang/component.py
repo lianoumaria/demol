@@ -5,6 +5,19 @@ from textx import get_location, TextXSemanticError
 from demol.definitions import *
 
 
+def component_model_proc(model, metamodel):
+    """
+    Component model processor with validation.
+    """
+    from demol.lang.semantics import validate_unique_pin_numbers
+    
+    print(f'[*] Processing component model: {model._tx_filename}')
+    
+    # Validate unique pin numbers for the component
+    if hasattr(model, 'component'):
+        validate_unique_pin_numbers(model.component)
+
+
 def get_component_mm(global_repo: bool = False):
     # Get meta-model from language description
     mm = metamodel_from_file(
@@ -19,6 +32,8 @@ def get_component_mm(global_repo: bool = False):
             "*.*": scoping_providers.FQNImportURI(importAs=True),
         }
     )
+
+    mm.register_model_processor(component_model_proc)
 
     mm.register_obj_processors({
     })

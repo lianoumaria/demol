@@ -1,6 +1,7 @@
 Sensor[Env] BME680
     operational
-        vcc: 5V        ioVcc: 3V3
+        vcc: 5V
+        ioVcc: 3V3
         powerConsumption: 3 mW
     end
     pins

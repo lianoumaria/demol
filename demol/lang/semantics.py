@@ -620,3 +620,28 @@ def validate_broker_requirements(model) -> None:
             "(Publisher/Subscriber), but no broker is configured in the model.",
             "MissingBrokerError"
         )
+
+
+def validate_unique_pin_numbers(component) -> None:
+    """
+    Validate WF-Unique-Pin-Numbers.
+    
+    Ensures that all pins defined in a component have unique pin numbers.
+    """
+    from typing import Dict, List # Added import for type hints
+    pin_map: Dict[int, List[str]] = {}
+    
+    for pin in component.pins:
+        if pin.number in pin_map:
+            pin_map[pin.number].append(pin.name)
+        else:
+            pin_map[pin.number] = [pin.name]
+            
+    for pin_num, pin_names in pin_map.items():
+        if len(pin_names) > 1:
+            raise_validation_error(
+                component,
+                f"[WF-Unique-Pin-Numbers] Duplicate pin number {pin_num} used by pins: {', '.join(pin_names)}. "
+                f"Pin numbers must be unique within a component.",
+                "DuplicatePinNumberError"
+            )
