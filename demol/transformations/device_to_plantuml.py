@@ -43,7 +43,7 @@ def device_to_plantuml(model):
     for i in range(len(model.connections)):
         tmp = 'note ' + note_directions[i%4] + ' of ' + \
             str(model.connections[i].peripheral.name) + \
-            ' : topic - "' + str(model.connections[i].endpoint.topic[:-1]) + '"\n'
+            ' : topic - "' + str(model.connections[i].remote) + '"\n'
         f.write(tmp)
     f.write('\n')
 
@@ -51,27 +51,12 @@ def device_to_plantuml(model):
     for i in range(len(model.connections)):
         tmp = f'{model.connections[i].board.name} ' + \
             f'..{directions[i%len(directions)]}.. {model.connections[i].peripheral.name}\n'
-        for j in range(len(model.connections[i].ioConns)):
-            if model.connections[i].ioConns[j].type == 'gpio':
+        for data_conn in model.connections[i].dataConns:
+            for pin in data_conn.pins:
                 tmp += str(model.connections[i].board.name) + \
-                    ' "**' + str(model.connections[i].ioConns[j].pinConn.peripheralPin) + \
+                    ' "**' + str(pin.peripheralPin) + \
                     '**" #----# "**' + \
-                    str(model.connections[i].ioConns[j].pinConn.boardPin) + \
-                    '**" ' + str(model.connections[i].peripheral.name) + \
-                    (i%4 < 2) * ' : \\t\\t\\t\\t' + '\n'
-            elif model.connections[i].ioConns[j].type == 'i2c':
-                tmp += str(model.connections[i].board.name) + \
-                    ' "**' + \
-                    str(model.connections[i].ioConns[j].sda.peripheralPin) + \
-                    '**" #----# "**' + \
-                    str(model.connections[i].ioConns[j].sda.boardPin) + \
-                    '**" ' + str(model.connections[i].peripheral.name) + \
-                    (i%4 < 2) * ' : \\t\\t\\t\\t' + '\n'
-                tmp += str(model.connections[i].board.name) + \
-                    ' "**' + \
-                    str(model.connections[i].ioConns[j].scl.peripheralPin) + \
-                    '**" #----# "**' + \
-                    str(model.connections[i].ioConns[j].scl.boardPin) + \
+                    str(pin.boardPin) + \
                     '**" ' + str(model.connections[i].peripheral.name) + \
                     (i%4 < 2) * ' : \\t\\t\\t\\t' + '\n'
         f.write(tmp)

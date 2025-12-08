@@ -148,9 +148,9 @@ class DeviceModelExtractor:
                 "ref_name": conn.peripheral.name,
                 "real_name": conn.peripheral.ref.name,
                 "type": type(conn.peripheral.ref).__name__,
-                "pins": self._extract_pins(conn.ioConns),
+                "pins": self._extract_pins(conn.dataConns),
                 "attributes": self._extract_attributes(conn.peripheral.ref.attributes),
-                "topic": conn.endpoint.topic,
+                "topic": conn.remote,
                 "message": conn.peripheral.ref.type,
                 "custom_template": getattr(conn.peripheral.ref, "piTpl", None) or None,
             }
@@ -160,43 +160,66 @@ class DeviceModelExtractor:
             
             self.peripherals.append(peripheral_info)
     
-    def _extract_pins(self, io_conns) -> Dict[str, Any]:
-        """Extract pin configurations from IO connections."""
+    def _extract_pins(self, data_conns) -> Dict[str, Any]:
+        """Extract pin configurations from Data connections."""
         pins = {}
         
-        for io_conn in io_conns:
-            conn_type = io_conn.type
+        for data_conn in data_conns:
+            conn_type = data_conn.type
+            
+            # Extract name from props if present
+            conn_name = None
+            for prop in data_conn.props:
+                if prop.name == "name":
+                    conn_name = prop.value
+                    break
             
             if conn_type == "gpio":
                 # Handle special GPIO names
-                if io_conn.name == "trigger":
-                    pins["trigger"] = io_conn.pinConn.boardPin
-                elif io_conn.name == "echo":
-                    pins["echo"] = io_conn.pinConn.boardPin
-                else:
-                    pins["gpio"] = io_conn.pinConn.boardPin
+                for pin_map in data_conn.pins:
+                    if conn_name == "trigger":
+                        pins["trigger"] = pin_map.boardPin
+                    elif conn_name == "echo":
+                        pins["echo"] = pin_map.boardPin
+                    else:
+                        pins["gpio"] = pin_map.boardPin
                     
             elif conn_type == "spi":
-                pins.update({
-                    "mosi": io_conn.mosi.boardPin,
-                    "miso": io_conn.miso.boardPin,
-                    "sck": io_conn.sck.boardPin.clock,
-                    "cs": io_conn.cs.boardPin,
-                })
+                for pin_map in data_conn.pins:
+                    if pin_map.function == "mosi":
+                        pins["mosi"] = pin_map.boardPin
+                    elif pin_map.function == "miso":
+                        pins["miso"] = pin_map.boardPin
+                    elif pin_map.function == "sck":
+                        pins["sck"] = pin_map.boardPin
+                    elif pin_map.function == "cs":
+                        pins["cs"] = pin_map.boardPin
                 
             elif conn_type == "i2c":
-                pins.update({
-                    "sda": io_conn.sda.boardPin,
-                    "scl": io_conn.scl.boardPin,
-                    "slaveAddr": io_conn.slaveAddr,
-                })
+                # Extract slave_address
+                for prop in data_conn.props:
+                    if prop.name == "slave_address":
+                        pins["slaveAddr"] = prop.value
+                        break
+
+                for pin_map in data_conn.pins:
+                    if pin_map.function == "sda":
+                        pins["sda"] = pin_map.boardPin
+                    elif pin_map.function == "scl":
+                        pins["scl"] = pin_map.boardPin
                 
             elif conn_type == "uart":
-                pins.update({
-                    "baudrate": io_conn.baudrate,
-                    "tx": io_conn.tx.boardPin,
-                    "rx": io_conn.rx.boardPin,
-                })
+                # Extract baudrate
+                for prop in data_conn.props:
+                    if prop.name == "baudrate":
+                        pins["baudrate"] = prop.value
+                        break
+
+                for pin_map in data_conn.pins:
+                    if pin_map.function == "tx":
+                        pins["tx"] = pin_map.boardPin
+                    elif pin_map.function == "rx":
+                        pins["rx"] = pin_map.boardPin
                 
             else:
                 raise TypeError(f"Not a valid IO Connection Type: {conn_type}")
