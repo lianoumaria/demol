@@ -62,7 +62,6 @@ Connect:
     'end'
 ;
 
-
 PinConnection:
     boardPin=ID "--" peripheralPin=ID
 ;
@@ -73,33 +72,9 @@ DataConnection:
     type=IOType ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
 ;
 
-IOType:
-    'gpio' | 'i2c' | 'spi' | 'uart'
+IOType: 'gpio' | 'i2c' | 'spi' | 'uart'
 ;
 
 PinMapping:
     (function=ID boardPin=ID '--' peripheralPin=ID)
 ;
-
-
-
-Endpoint:
-	(
-        ("topic:" topic=STRING)?
-        ("type:" type=EndpointType)?
-    )#
-;
-
-EndpointType:
-    "Publisher"     |
-    "Subscriber"    |
-    "RPC"           |
-    "Action"
-;
-
-OperatingSystem:
-    'Raspbian' |
-    'RiotOS'
-;
-
-

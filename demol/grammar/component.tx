@@ -224,9 +224,9 @@ ActuatorType:
 // Operational blocks
 OperationalBoard:
     (
+        ("vcc" ":" vcc=PowerType)
         ("cpu" ":" cpu=CPU)
         ("memory" ":" memory=Memory)
-        ("vcc" ":" vcc=PowerType)
         ("ioVcc" ":" iovcc=PowerType)?
         ("wifi" ":" wifi=WifiInterface)?
         ("ethernet" ":" ethernet=EthernetInterface)?

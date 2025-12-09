@@ -99,4 +99,11 @@ DictAttribute:
     name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')?
 ;
 
-
+OperatingSystem:
+    'Raspbian'      |
+    'RiotOS'        |
+    'FreeRTOS'      |
+    'Arduino'       |
+    'ESP-IDF'       |
+    'ESP-IDF-RTOS'
+;
