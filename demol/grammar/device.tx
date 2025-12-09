@@ -48,7 +48,7 @@ Components:
 ;
 
 PeripheralDef:
-    ref=[Peripheral:FQN|+m:component] '(' name=ID ')'
+    ref=[Peripheral:FQN|+m:component] '(' name=ID ')' ('[' attributes*=AttributeSet[','] ']')?
 ;
 
 Connect:
@@ -70,15 +70,11 @@ PinConnection:
 PowerConnection: PinConnection;
 
 DataConnection:
-    type=IOType ('[' props*=Property[','] ']')? pins+=PinMapping[',']
+    type=IOType ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
 ;
 
 IOType:
     'gpio' | 'i2c' | 'spi' | 'uart'
-;
-
-Property:
-    name=ID '=' value=VALUE
 ;
 
 PinMapping:

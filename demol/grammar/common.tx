@@ -56,13 +56,11 @@ IP_ADDR: IPv4_ADDR | IPv6_ADDR;
 MAC_ADDR: /([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})/;
 
 // Value types
-VALUE:
-    Hex | INT | STRING | FLOAT | BOOL
-;
+VALUE: Hex | INT | STRING | FLOAT | BOOL;
 
-Hex:
-    /0x[0-9a-fA-F]+/
-;
+Hex: /0x[0-9a-fA-F]+/;
+
+AttributeSet: name=ID '=' value=VALUE;
 
 // Attribute/Settings types
 Attribute:
