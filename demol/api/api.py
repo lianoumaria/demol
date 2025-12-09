@@ -1,19 +1,16 @@
 import uuid
 import os
-import base64
-import subprocess
 import shutil
+import io
+import zipfile
 
-import tarfile
-
-from pydantic import BaseModel
-
-from fastapi import FastAPI, File, UploadFile, status, HTTPException, Security
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi import FastAPI, File, UploadFile, status, HTTPException, Security, Form
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 
 from demol.lang import build_model
+from demol.transformations import m2t_device_plantuml, m2t_device_json
 
 API_KEY = os.getenv("API_KEY", "API_KEY")
 
@@ -49,76 +46,92 @@ if not os.path.exists(TMP_DIR):
     os.mkdir(TMP_DIR)
 
 
-class DeMoLModel(BaseModel):
-    name: str
-    model: str
-    type: str = ''
-
-
-@api.post("/validate/file")
-async def validate_file(file: UploadFile = File(...),
-                        api_key: str = Security(get_api_key)):
-    print(f'Validation for request: file=<{file.filename}>,' + \
-          f' descriptor=<{file.file}>')
-    resp = {
-        'status': 200,
-        'message': ''
-    }
-    fd = file.file
-    u_id = uuid.uuid4().hex[0:8]
-    ext = file.filename.split('.')[-1]
-    fpath = os.path.join(
-        TMP_DIR,
-        f'model_for_validation-{u_id}.{ext}'
-    )
-    with open(fpath, 'w') as f:
-        f.write(fd.read().decode('utf8'))
-    try:
-        model = build_model(fpath)
-        print('Model validation success!!')
-        resp['message'] = 'Model validation success'
-    except Exception as e:
-        print('Exception while validating model. Validation failed!!')
-        print(e)
-        resp['status'] = 404
-        resp['message'] = str(e)
-        raise HTTPException(status_code=400, detail=f"Validation error: {e}")
-    return resp
-
-
 @api.post("/validate")
-async def validate(model: DeMoLModel,
-                   api_key: str = Security(get_api_key)):
-    model_txt = model.model
-    name = model.name
-    mtype = model.type if model.type not in (None, '') else 'device'
-    if len(model_txt) == 0:
-        return 404
-    resp = {
-        'status': 200,
-        'message': ''
-    }
-    if mtype == 'peripheral':
-        ext = 'hwd'
-    elif mtype == 'device':
-        ext = 'dev'
-    else:
-        raise HTTPException(status_code=400, detail=f"Not a valid model type")
+async def validate_model(file: UploadFile = File(...),
+                         api_key: str = Security(get_api_key)):
+    """
+    Validates a DeMoL model file (.dev or .hwd).
+    """
     u_id = uuid.uuid4().hex[0:8]
-    fpath = os.path.join(
-        TMP_DIR,
-        f'model_for_validation-{u_id}.{ext}'
-    )
-    with open(fpath, 'w') as f:
-        f.write(model_txt)
+    _, ext = os.path.splitext(file.filename)
+    if not ext:
+        ext = ".dev" # Default extension
+    fpath = os.path.join(TMP_DIR, f'model-{u_id}{ext}')
+
     try:
-        model = build_model(fpath)
-        print('Model validation success!!')
-        resp['message'] = 'Model validation success'
+        with open(fpath, 'wb') as f:
+            shutil.copyfileobj(file.file, f)
+
+        build_model(fpath)
+        return {"status": "success", "message": "Model validation successful"}
     except Exception as e:
-        print('Exception while validating model. Validation failed!!')
-        print(e)
-        resp['status'] = 404
-        resp['message'] = str(e)
-        raise HTTPException(status_code=400, detail=f"Validation error: {e}")
-    return resp
+        raise HTTPException(status_code=400, detail=f"Validation error: {str(e)}")
+    finally:
+        if os.path.exists(fpath):
+            os.remove(fpath)
+
+
+@api.post("/generate")
+async def generate_code(file: UploadFile = File(...),
+                        target: str = Form(...),
+                        api_key: str = Security(get_api_key)):
+    """
+    Generates code or documentation from a DeMoL model file.
+    Supported targets: 'plantuml', 'json'.
+    'rpi' and 'docs' are not yet implemented.
+    """
+    if target not in ['plantuml', 'json', 'rpi', 'docs']:
+        raise HTTPException(status_code=400,
+                            detail="Invalid target. Supported: 'plantuml', 'json', 'rpi', 'docs'")
+
+    if target in ['rpi', 'docs']:
+        raise HTTPException(status_code=501,
+                            detail=f"Generation for target '{target}' is not implemented yet.")
+
+    u_id = uuid.uuid4().hex[0:8]
+    _, ext = os.path.splitext(file.filename)
+    if not ext:
+        ext = ".dev" # Default extension
+    model_path = os.path.join(TMP_DIR, f'model-{u_id}{ext}')
+    output_dir = os.path.join(TMP_DIR, f'output-{u_id}')
+    os.makedirs(output_dir, exist_ok=True)
+
+    try:
+        with open(model_path, 'wb') as f:
+            shutil.copyfileobj(file.file, f)
+
+        model = build_model(model_path)
+
+        file_extension = ""
+        content = ""
+
+        if target == 'plantuml':
+            content = m2t_device_plantuml(model)
+            file_extension = "puml"
+        elif target == 'json':
+            content = m2t_device_json(model)
+            file_extension = "json"
+
+        model_name = model.metadata.name.strip('"')
+        output_filename = f"{model_name}.{file_extension}"
+        with open(os.path.join(output_dir, output_filename), "w") as f:
+            f.write(content)
+
+        zip_io = io.BytesIO()
+        with zipfile.ZipFile(zip_io, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            zipf.write(os.path.join(output_dir, output_filename), arcname=output_filename)
+
+        zip_io.seek(0)
+
+        return StreamingResponse(zip_io,
+                                 media_type="application/zip",
+                                 headers={"Content-Disposition": f"attachment; filename=generated_{target}_{model_name}.zip"})
+
+    except Exception as e:
+        raise HTTPException(status_code=500,
+                            detail=f"Code generation failed: {str(e)}")
+    finally:
+        if os.path.exists(model_path):
+            os.remove(model_path)
+        if os.path.exists(output_dir):
+            shutil.rmtree(output_dir)
