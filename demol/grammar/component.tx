@@ -199,6 +199,7 @@ ActuatorType:
     "ServoController"   |
     "Relay"             |
     "Switch"            |
+    "Button"            |
     
     // Display & Light Actuators
     "LedArray"          |

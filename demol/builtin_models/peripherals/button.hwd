@@ -1,0 +1,11 @@
+// Single Tactile Button model
+
+Actuator[Button] TactileButton
+    operational
+        vcc: 5V
+    end
+    pins
+        gnd[GND] @ 1,
+        state[gpio] @ 2
+    end
+end
