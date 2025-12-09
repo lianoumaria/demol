@@ -30,7 +30,7 @@ Connect MyToF
         GND_3 -- GND,
         power_3v3_a -- VIN
     data:
-        i2c[name="data", slave_address=0x29] sda GPIO2 -- SDA, scl GPIO3 -- SCL
+        i2c[slave_address=0x29] sda GPIO2 -- SDA, scl GPIO3 -- SCL
     remote: "my_raspi.sensors.tof.vl53l1x"
 end
 
@@ -48,7 +48,7 @@ Connect MyTFMini
         GND_4 -- GND,
         power_5v_b -- VCC
     data:
-        uart[name="data", baudrate=115200] tx GPIO14 -- RXD, rx GPIO15 -- TXD
+        uart[baudrate=115200] tx GPIO14 -- RXD, rx GPIO15 -- TXD
     remote: "my_raspi.sensors.tfmini"
 end
 
@@ -57,7 +57,7 @@ Connect MyBME
         GND_3 -- gnd,
         power_5v_a -- vcc
     data:
-        i2c[name="env_data", slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
+        i2c[slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
     remote: "my_raspi.sensors.env.bme680"
 end
 

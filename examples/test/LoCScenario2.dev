@@ -36,7 +36,7 @@ Connect MyToF
         GND_3 -- GND,
         power_3v3_a -- VIN
     data:
-        i2c[name="data", slave_address=0x29] sda GPIO2 -- SDA, scl GPIO3 -- SCL
+        i2c[slave_address=0x29] sda GPIO2 -- SDA, scl GPIO3 -- SCL
     // remote: ...
 end
 /*

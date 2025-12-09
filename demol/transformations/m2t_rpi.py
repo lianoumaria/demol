@@ -190,6 +190,12 @@ class DeviceModelExtractor:
                     pins[f"{key}_props"] = gpio_props
                     
             elif conn_type == "spi":
+                # Extract SPI properties
+                spi_props = {}
+                for prop in data_conn.props:
+                    if prop.name in ["bus_speed", "mode"]:
+                        spi_props[prop.name] = prop.value
+                
                 for pin_map in data_conn.pins:
                     if pin_map.function == "mosi":
                         pins["mosi"] = pin_map.boardPin
@@ -199,32 +205,42 @@ class DeviceModelExtractor:
                         pins["sck"] = pin_map.boardPin
                     elif pin_map.function == "cs":
                         pins["cs"] = pin_map.boardPin
+                    # Store properties for this pin if needed
+                    pins[f"{pin_map.function}_props"] = spi_props
                 
             elif conn_type == "i2c":
-                # Extract slave_address
+                # Extract I2C properties
+                i2c_props = {}
                 for prop in data_conn.props:
+                    if prop.name in ["slave_address", "bus_speed"]:
+                        i2c_props[prop.name] = prop.value
                     if prop.name == "slave_address":
                         pins["slaveAddr"] = prop.value
-                        break
 
                 for pin_map in data_conn.pins:
                     if pin_map.function == "sda":
                         pins["sda"] = pin_map.boardPin
                     elif pin_map.function == "scl":
                         pins["scl"] = pin_map.boardPin
+                    # Store properties for this pin if needed
+                    pins[f"{pin_map.function}_props"] = i2c_props
                 
             elif conn_type == "uart":
-                # Extract baudrate
+                # Extract UART properties
+                uart_props = {}
                 for prop in data_conn.props:
+                    if prop.name in ["baudrate", "parity", "stop_bits", "data_bits"]:
+                        uart_props[prop.name] = prop.value
                     if prop.name == "baudrate":
                         pins["baudrate"] = prop.value
-                        break
 
                 for pin_map in data_conn.pins:
                     if pin_map.function == "tx":
                         pins["tx"] = pin_map.boardPin
                     elif pin_map.function == "rx":
                         pins["rx"] = pin_map.boardPin
+                    # Store properties for this pin if needed
+                    pins[f"{pin_map.function}_props"] = uart_props
                 
             else:
                 raise TypeError(f"Not a valid IO Connection Type: {conn_type}")

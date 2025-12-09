@@ -218,6 +218,32 @@ def validate_i2c_connection(board_sda, board_scl, peripheral_sda, peripheral_scl
         - Peripheral pins must have SDA/SCL functions
         - Slave address must be in range 0x00-0x7F
     """
+    # Validate properties
+    valid_props = {'slave_address', 'bus_speed'}
+    for prop in connection.props:
+        if prop.name == 'name':
+            raise_validation_error(
+                connection,
+                f"[Conn-I2C] Property 'name' is deprecated for I2C connections. "
+                f"Use 'slave_address' or 'bus_speed' instead.",
+                "DeprecatedPropertyError"
+            )
+        if prop.name not in valid_props:
+            raise_validation_error(
+                connection,
+                f"[Conn-I2C] Invalid property '{prop.name}' for I2C connection. "
+                f"Valid properties are: {', '.join(valid_props)}",
+                "InvalidPropertyError"
+            )
+        
+        if prop.name == 'bus_speed':
+            if not isinstance(prop.value, int) or prop.value <= 0:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-I2C] Property 'bus_speed' must be a positive integer.",
+                    "InvalidValueError"
+                )
+
     # Validate slave address range
     if not (0x00 <= slave_addr <= 0x7F):
         raise_validation_error(
@@ -270,6 +296,39 @@ def validate_spi_connection(board_pins: Dict[str, object], peripheral_pins: Dict
     
     Checks that all required SPI pins (MOSI, MISO, SCK, CS) have appropriate functionality.
     """
+    # Validate properties
+    valid_props = {'bus_speed', 'mode'}
+    for prop in connection.props:
+        if prop.name == 'name':
+            raise_validation_error(
+                connection,
+                f"[Conn-SPI] Property 'name' is deprecated for SPI connections. "
+                f"Use 'bus_speed' or 'mode' instead.",
+                "DeprecatedPropertyError"
+            )
+        if prop.name not in valid_props:
+            raise_validation_error(
+                connection,
+                f"[Conn-SPI] Invalid property '{prop.name}' for SPI connection. "
+                f"Valid properties are: {', '.join(valid_props)}",
+                "InvalidPropertyError"
+            )
+        
+        if prop.name == 'bus_speed':
+            if not isinstance(prop.value, int) or prop.value <= 0:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-SPI] Property 'bus_speed' must be a positive integer.",
+                    "InvalidValueError"
+                )
+        elif prop.name == 'mode':
+            if not isinstance(prop.value, int) or prop.value not in [0, 1, 2, 3]:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-SPI] Property 'mode' must be an integer between 0 and 3.",
+                    "InvalidValueError"
+                )
+
     spi_pin_types = ['mosi', 'miso', 'sck', 'cs']
     
     for pin_type in spi_pin_types:
@@ -303,6 +362,53 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
     - TX/RX pin functionality
     - Valid baudrate (common values)
     """
+    # Validate properties
+    valid_props = {'baudrate', 'parity', 'stop_bits', 'data_bits'}
+    for prop in connection.props:
+        if prop.name == 'name':
+            raise_validation_error(
+                connection,
+                f"[Conn-UART] Property 'name' is deprecated for UART connections. "
+                f"Use 'baudrate', 'parity', 'stop_bits', or 'data_bits' instead.",
+                "DeprecatedPropertyError"
+            )
+        if prop.name not in valid_props:
+            raise_validation_error(
+                connection,
+                f"[Conn-UART] Invalid property '{prop.name}' for UART connection. "
+                f"Valid properties are: {', '.join(valid_props)}",
+                "InvalidPropertyError"
+            )
+        
+        if prop.name == 'baudrate':
+            if not isinstance(prop.value, int) or prop.value <= 0:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-UART] Property 'baudrate' must be a positive integer.",
+                    "InvalidValueError"
+                )
+        elif prop.name == 'parity':
+            if prop.value not in ['none', 'even', 'odd', 'mark', 'space']:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-UART] Invalid parity '{prop.value}'. Must be 'none', 'even', 'odd', 'mark', or 'space'.",
+                    "InvalidValueError"
+                )
+        elif prop.name == 'stop_bits':
+            if prop.value not in [1, 2]:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-UART] Invalid stop_bits '{prop.value}'. Must be 1 or 2.",
+                    "InvalidValueError"
+                )
+        elif prop.name == 'data_bits':
+            if prop.value not in [5, 6, 7, 8]:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-UART] Invalid data_bits '{prop.value}'. Must be 5, 6, 7, or 8.",
+                    "InvalidValueError"
+                )
+
     # Validate baudrate
     valid_baudrates = [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
     if baudrate not in valid_baudrates:

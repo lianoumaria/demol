@@ -29,6 +29,6 @@ Connect MyBME
         GND_3 -- gnd,
         power_5v_a -- vcc
     data:
-        i2c[name="env_data", slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
+        i2c[slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
     remote: "my_raspi.sensors.env.bme680"
 end
