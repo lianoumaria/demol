@@ -3,7 +3,7 @@
 
 import component
 import communication
-import utils
+import common
 
 DeviceModel:
     imports*=Import

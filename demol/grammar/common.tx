@@ -12,9 +12,25 @@ Import: 'import' importURI=FQNI ('as' name=ID)?;
 
 Description: /\#(.*?)$/;
 
+FQID[noskipws]:
+    /\s*/-
+    LID+['.']
+;
+
+// Language ID
+LID:
+    // Forbid keywords as IDs for better error reporting.
+    !Keyword ID
+;
+
+Keyword:
+    'import'
+;
+
+MULTILINE_STRING: /\"\"\"(.|\n)*?\"\"\"/;
+
 // Special rule for comments. Comments start with //
 
-// Comments
 Comment: CommentLine | CommentBlock ;
 
 CommentLine: /\/\/.*?$/;
