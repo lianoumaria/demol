@@ -7,8 +7,7 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals:
-        - TCRT5000(MyTracker)
+    peripherals: TCRT5000(MyTracker)
 end
 
 Network
@@ -30,7 +29,7 @@ Connect MyTracker
         GND_1 -- GND,
         power_5v_a -- VCC
     data:
-        gpio[name="digitalIN"] pin GPIO4 -- D0
+        gpio[mode="input"] pin GPIO4 -- D0
     remote: "my_raspi.sensors.tracker.TCRT5000"
 end
 

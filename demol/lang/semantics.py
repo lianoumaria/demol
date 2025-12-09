@@ -173,6 +173,39 @@ def validate_gpio_connection(board_pin, peripheral_pin, connection) -> None:
             f"Available functions: {', '.join(peripheral_funcs)}",
             "GPIOFunctionError"
         )
+    
+    # Validate properties
+    valid_props = {'mode', 'pullup', 'pulldown'}
+    for prop in connection.props:
+        if prop.name == 'name':
+            raise_validation_error(
+                connection,
+                f"[Conn-GPIO] Property 'name' is deprecated for GPIO connections. "
+                f"Use 'mode', 'pullup', or 'pulldown' instead.",
+                "DeprecatedPropertyError"
+            )
+        if prop.name not in valid_props:
+            raise_validation_error(
+                connection,
+                f"[Conn-GPIO] Invalid property '{prop.name}' for GPIO connection. "
+                f"Valid properties are: {', '.join(valid_props)}",
+                "InvalidPropertyError"
+            )
+        
+        if prop.name == 'mode':
+            if prop.value not in ['input', 'output']:
+                raise_validation_error(
+                    connection,
+                    f"[Conn-GPIO] Invalid mode '{prop.value}'. Must be 'input' or 'output'.",
+                    "InvalidModeError"
+                )
+        elif prop.name in ['pullup', 'pulldown']:
+            if not isinstance(prop.value, bool):
+                raise_validation_error(
+                    connection,
+                    f"[Conn-GPIO] Property '{prop.name}' must be a boolean.",
+                    "InvalidTypeError"
+                )
 
 
 def validate_i2c_connection(board_sda, board_scl, peripheral_sda, peripheral_scl, 
@@ -862,3 +895,24 @@ def validate_connections(model) -> None:
                     board_tx, board_rx, peripheral_tx, peripheral_rx,
                     baudrate, data_conn
                 )
+
+
+def validate_unique_peripheral_names(model) -> None:
+    """
+    Validate that all peripherals have unique names.
+    
+    From SEMANTICS.md Section 4.1 (implied well-formedness):
+        All peripheral instances must have unique identifiers.
+    """
+    peripheral_names = set()
+    
+    for peripheral_def in model.components.peripherals:
+        name = peripheral_def.name
+        if name in peripheral_names:
+            raise_validation_error(
+                peripheral_def,
+                f"[WF-Unique-Peripheral-Names] Duplicate peripheral name '{name}'. "
+                f"Peripheral names must be unique within the device.",
+                "DuplicatePeripheralNameError"
+            )
+        peripheral_names.add(name)

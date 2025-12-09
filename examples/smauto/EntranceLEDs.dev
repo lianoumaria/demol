@@ -7,9 +7,7 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals:
-        - SRF05(EntranceSRF)
-        - WS2812(RoomLights)
+    peripherals: SRF05(EntranceSRF), WS2812(RoomLights)
 end
 
 Network
@@ -31,8 +29,8 @@ Connect EntranceSRF
         GND_1 -- GND,
         power_5v_a -- VCC
     data:
-        gpio[name="echo"] pin GPIO24 -- echo,
-        gpio[name="trigger"] pin GPIO23 -- trigger
+        gpio[mode="input"] echo GPIO24 -- echo,
+        gpio[mode="output"] pin GPIO23 -- trigger
     // remote: ...
 end
 
@@ -41,7 +39,7 @@ Connect RoomLights
         GND_2 -- GND,
         power_5v_b -- VCC
     data:
-        gpio[name="LedControl"] pin GPIO10 -- DIN
+        gpio[mode="output"] pin GPIO10 -- DIN
     // remote: ...
     settings:
         - colors: list = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']

@@ -7,8 +7,7 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals:
-        - VL53L1X(MyToF)
+    peripherals: VL53L1X(MyToF)
         /*- TCRT5000(MyTracker)
         - TFMini(MyTFMini)
         - BME680(MyBME)

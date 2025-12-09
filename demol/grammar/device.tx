@@ -42,7 +42,7 @@ Components:
 	"Components"
 	(
         ('board:' board=[Board:FQN|+m:component])
-        ('peripherals:' '-' peripherals*=PeripheralDef['-'])
+        ('peripherals:' peripherals*=PeripheralDef[','])
     )#
     'end'
 ;

@@ -19,8 +19,7 @@ end
 
 Components
     board: WemosD1Mini
-    peripherals:
-        - BME680(BME)
+    peripherals: BME680(BME)
 end
 
 Connect BME

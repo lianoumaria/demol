@@ -7,8 +7,7 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals:
-        - TCRT5000(Tracker1)
+    peripherals: TCRT5000(Tracker1)
         /*- TCRT5000(Tracker2)
         - TCRT5000(Tracker3)
         - TCRT5000(Tracker4)
@@ -41,7 +40,7 @@ Connect Tracker1
         GND_1 -- GND,
         power_5v_a -- VCC
     data:
-        gpio[name="digitalIN"] pin GPIO4 -- D0
+        gpio[mode="input"] pin GPIO4 -- D0
     // remote: ...
 end
 /*

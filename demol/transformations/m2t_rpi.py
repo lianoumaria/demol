@@ -28,7 +28,6 @@ class PeripheralTemplateMapper:
         "SRF05": "DistanceSensor.py.tmpl",
         "HCSR04": "DistanceSensor.py.tmpl",
         "VL53L1X": "ToFSensor.py.tmpl",
-        "HW006": "TrackerSensor.py.tmpl",
         "TCRT5000": "TrackerSensor.py.tmpl",
         "BME680": "EnvSensor.py.tmpl",
         "TFMini": "TFMiniSensor.py.tmpl",
@@ -175,14 +174,20 @@ class DeviceModelExtractor:
                     break
             
             if conn_type == "gpio":
-                # Handle special GPIO names
+                # Extract GPIO properties
+                gpio_props = {}
+                for prop in data_conn.props:
+                    if prop.name in ["mode", "pullup", "pulldown"]:
+                        gpio_props[prop.name] = prop.value
+                
+                # Handle pins based on function or peripheral pin name
                 for pin_map in data_conn.pins:
-                    if conn_name == "trigger":
-                        pins["trigger"] = pin_map.boardPin
-                    elif conn_name == "echo":
-                        pins["echo"] = pin_map.boardPin
-                    else:
-                        pins["gpio"] = pin_map.boardPin
+                    # Use peripheral pin name as key if function is generic 'gpio'
+                    key = pin_map.peripheralPin if pin_map.function == 'gpio' else pin_map.function
+                    pins[key] = pin_map.boardPin
+                    # Store properties for this pin if needed (currently global for connection)
+                    # For now, we assume properties apply to the connection context
+                    pins[f"{key}_props"] = gpio_props
                     
             elif conn_type == "spi":
                 for pin_map in data_conn.pins:

@@ -7,8 +7,7 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals:
-        - WS2812(WarningLights)
+    peripherals: WS2812(WarningLights)
 end
 
 Network
@@ -30,7 +29,7 @@ Connect WarningLights
         GND_2 -- GND,
         power_5v_b -- VCC
     data:
-        gpio[name="LedControl"] pin GPIO10 -- DIN
+        gpio[mode="output"] led GPIO18 -- DIN
     // remote: ...
     settings:
         - colors: list = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']

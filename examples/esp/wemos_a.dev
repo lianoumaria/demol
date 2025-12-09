@@ -20,9 +20,7 @@ end
 
 Components
     board: WemosD1Mini
-    peripherals:
-        - SonarSRF04(Sonar)
-        - WS281X(Ledstrip)
+    peripherals: SonarSRF04(Sonar), WS281X(Ledstrip)
 end
 
 Connect Sonar

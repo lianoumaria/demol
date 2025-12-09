@@ -7,8 +7,7 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals:
-        - BME680(MyBME)
+    peripherals: BME680(MyBME)
 end
 
 Network

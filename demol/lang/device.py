@@ -40,6 +40,7 @@ def model_proc(model, metamodel):
         validate_io_voltage_compatibility,
         validate_common_ground,
         validate_connections,
+        validate_unique_peripheral_names,
     )
     
     device_name = model.metadata.name.strip('"')
@@ -55,6 +56,11 @@ def model_proc(model, metamodel):
     # Well-Formedness: All peripherals must be connected
     # ========================================================================
     validate_all_peripherals_connected(model)
+
+    # ========================================================================
+    # Well-Formedness: Unique peripheral names
+    # ========================================================================
+    validate_unique_peripheral_names(model)
     
     # ========================================================================
     # Well-Formedness: Broker requirements
