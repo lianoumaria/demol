@@ -2,6 +2,7 @@ Sensor[Distance] HCSR04
     operational
         vcc: 5V
         ioVcc: 5V
+        energy: 10 mW, 100 mW, 75 mW
     end
     pins
         GND[GND] @ 1,

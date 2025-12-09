@@ -1,6 +1,8 @@
 Sensor[Distance] TFMini
     operational
-        vcc: 5V    end
+        vcc: 5V
+        energy: 50 mW, 800 mW, 400 mW
+    end
     pins
         GND[GND] @ 1,
         VCC[5V] @ 2,

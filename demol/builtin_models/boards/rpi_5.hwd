@@ -8,6 +8,7 @@ Board[RPI] RaspberryPi_5_8GB
             cpu_family: PiArmCortex
             max_freq: 2400 mhz
             fpu: true
+        energy: 3.0 W, 8.0 W, 4.5 W
     end
     pins
         power_3v3_a[3V3] @ 1,

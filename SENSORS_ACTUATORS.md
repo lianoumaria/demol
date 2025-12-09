@@ -131,7 +131,7 @@ Sensor[Env] BME680
     operational
         vcc: 5V
         ioVcc: 3V3
-        powerConsumption: 3 mW
+        energy: 0.01 mW, 39.6 mW, 3 mW
     end
     pins
         PPIN vcc[5V] @ 1;

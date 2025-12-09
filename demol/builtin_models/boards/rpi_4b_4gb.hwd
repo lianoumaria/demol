@@ -8,6 +8,7 @@ Board[RPI] RaspberryPi_4B_4GB
         cpu_family: PiArmCortex
         max_freq: 1600 mhz
         fpu: false
+    energy: 2.5 W, 6.5 W, 3.5 W
     end
     pins
         power_3v3[3V3] @ 1,

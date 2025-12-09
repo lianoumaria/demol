@@ -1,6 +1,7 @@
 Actuator[ServoController] PCA9685
     operational
     vcc: 5V    ioVcc: 5V
+    energy: 10 mW, 500 mW, 100 mW
     end
     pins
         GND_1[GND] @ 1,

@@ -3,6 +3,7 @@
 Actuator[LedArray] WS281X
     operational
         vcc: 5V
+        energy: 5 mW, 300 mW, 150 mW
     end
     pins
         vcc[5V] @ 1,

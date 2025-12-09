@@ -8,6 +8,7 @@ Board[RPI] RaspberryPi_3B_Plus
         cpu_family: PiArmCortex
         max_freq: 1400 mhz
         fpu: true
+    energy: 1.8 W, 5.1 W, 2.9 W
     end
     pins
         power_3v3_a[3V3] @ 1,

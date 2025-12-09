@@ -8,6 +8,7 @@ Board[ESP] WemosD1Mini
         cpu_family: ESP8266
         max_freq: 160 mhz
         fpu: false
+      energy: 2 mW, 500 mW, 80 mW
     end
     pins
         rst[] @ 1,

@@ -11,6 +11,7 @@ Board[ESP] ESP32Wroom32
             name: wifi_1
             freq: 2.5 ghz
         bluetooth: BT4
+        energy: 2.64 mW, 792 mW, 100 mW
     end
     pins
         power_3v3[3V3] @ 1,

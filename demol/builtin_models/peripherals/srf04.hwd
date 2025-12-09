@@ -6,6 +6,7 @@ Sensor[Distance] SonarSRF04
         ioVcc: 5V
         piTpl: "srf04"
         riotTpl: "srf04"
+        energy: 10 mW, 100 mW, 75 mW
     end
     pins
         vcc[5V] @ 1,

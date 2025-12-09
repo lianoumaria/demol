@@ -38,23 +38,11 @@ def get_broker_info(device_model):
     #Gather additional info for specific brokers
     if broker_data["broker_type"] == "AMQP" and hasattr(device_model.broker, "vhost"):
         broker_data["broker_vhost"] = device_model.broker.vhost
-        print(f"Broker vhost: {broker_data['broker_vhost']}")  
-
     if broker_data["broker_type"] == "AMQP" and hasattr(device_model.broker, "topicE"):
         broker_data["broker_topicExchange"] = device_model.broker.topicE
-        print(f"Broker topicExchange: {broker_data['broker_topicExchange']}")
 
     if broker_data["broker_type"] == "Redis" and hasattr(device_model.broker, "db"):
         broker_data["broker_db"] = device_model.broker.db
-        print(f"Broker db: {broker_data['broker_db']}")
-
-    #Print gathered info for debugging
-    print(f"Broker type: {broker_data['broker_type']}")
-    print(f"Broker host: {broker_data['broker_host']}")
-    print(f"Broker port: {broker_data['broker_port']}")
-    print(f"Broker name: {broker_data['broker_name']}")
-    print(f"Broker username: {broker_data['broker_username']}")
-    print(f"Broker password: {broker_data['broker_password']}")
 
 
 def get_peripherals_info(device_model):
@@ -73,16 +61,12 @@ def get_peripherals_info(device_model):
         peripheral_data = {"per_name": per_dev_name, "per_real_name": per_real_name, "per_type": per_type, "per_topic": per_topic, "per_broker": per_broker, "per_msg_type": per_msg_type}
 
         for attribute in device_model.connections[i].peripheral.ref.attributes:
-            print("Checking attributes for frequency...")
             if attribute.name == "frequency":
-                print("Found frequency attribute!")
                 per_frequency = attribute.default
                 peripheral_data = peripheral_data | {"per_frequency": per_frequency}
         #In a peripheral model a default frequency might be given, but it must be overwritten if a new one is given in the device model.
         for setting in device_model.connections[i].settings:
-            print("Checking settings for frequency...")
             if setting.name == "frequency":
-                print("Found frequency setting!")
                 per_frequency = setting.default
                 peripheral_data["per_frequency"] = per_frequency
  

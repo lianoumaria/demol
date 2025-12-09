@@ -227,10 +227,11 @@ OperationalBoard:
         ("cpu" ":" cpu=CPU)
         ("memory" ":" memory=Memory)
         ("vcc" ":" vcc=PowerType)
+        ("ioVcc" ":" iovcc=PowerType)?
         ("wifi" ":" wifi=WifiInterface)?
         ("ethernet" ":" ethernet=EthernetInterface)?
         ("bluetooth" ":" bluetooth=Bluetooth)?
-        ("ioVcc" ":" iovcc=PowerType)?
+        ("energy" ":" min=PowerConsumption ',' max=PowerConsumption ',' avg=PowerConsumption)?
         ("riotName" ":" riotName=STRING)?
     )#
 ;
@@ -239,7 +240,7 @@ OperationalSensor:
     (
         ("vcc" ":" vcc=PowerType)
         ("ioVcc" ":" iovcc=PowerType)?
-        ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
+        ("energy" ":" min=PowerConsumption ',' max=PowerConsumption ',' avg=PowerConsumption)?
         ("riotTpl" ":" riotTpl=STRING)?
         ("piTpl" ":" piTpl=STRING)?
     )#
@@ -249,8 +250,12 @@ OperationalActuator:
     (
         ("vcc" ":" vcc=PowerType)
         ("ioVcc" ":" iovcc=PowerType)?
-        ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
+        ("energy" ":" min=PowerConsumption ',' max=PowerConsumption ',' avg=PowerConsumption)?
         ("riotTpl" ":" riotTpl=STRING)?
         ("piTpl" ":" piTpl=STRING)?
     )#
+;
+
+PowerConsumption:
+    value=NUMBER unit=PowerUnit
 ;

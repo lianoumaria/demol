@@ -3,6 +3,7 @@
 Actuator[Button] TactileButton
     operational
         vcc: 5V
+        energy: 0 mW, 1 mW, 0.5 mW
     end
     pins
         gnd[GND] @ 1,

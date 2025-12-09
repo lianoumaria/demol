@@ -1,6 +1,7 @@
 Sensor[Proximity] TCRT5000
     operational
         vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα..        ioVcc: 5V
+        energy: 10 mW, 100 mW, 50 mW
     end
     pins
         VCC[5V] @ 1,

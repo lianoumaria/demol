@@ -1,6 +1,8 @@
 Sensor[ADC] ADCDifferentialPi
     operational
-    vcc: 5V    end
+    vcc: 5V
+    energy: 5 mW, 50 mW, 20 mW
+    end
     pins
         VCC[5V] @ 1,
         GND[GND] @ 2,

@@ -2,6 +2,7 @@
 Actuator[LedArray] WS2812
     operational
         vcc: 5V
+        energy: 5 mW, 3600 mW, 1800 mW
     end
     pins
         VCC[5V] @ 1,

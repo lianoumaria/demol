@@ -1,6 +1,7 @@
 Sensor[Distance] VL53L1X
     operational
     vcc: 3V3 //According to the datasheet it is 2.6-5.5V    ioVcc: 3V3
+    energy: 5 mW, 60 mW, 20 mW
     end
     pins
         VDD[2.8V] @ 1,
