@@ -33,5 +33,5 @@ Connect ParkingDistance
         gpio[mode="output"] pin GPIO23 -- trigger
     // remote: ...
     settings:
-        - frequency: float = 20.0
+        - frequency [float] = 20.0
 end

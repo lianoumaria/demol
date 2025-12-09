@@ -57,7 +57,7 @@ Connect:
 	    ("power:" powerConns*=PowerConnection[','])?
         ("data:" dataConns+=DataConnection[','])?
 	    ("remote:" remote=STRING)?
-        ("settings:" "-" settings*=Settings['-'])?
+        ("settings:" "-" settings*=Attribute['-'])?
     )#
     'end'
 ;
@@ -78,20 +78,14 @@ IOType:
 ;
 
 Property:
-    name=ID '=' value=Value
+    name=ID '=' value=VALUE
 ;
 
 PinMapping:
     (function=ID boardPin=ID '--' peripheralPin=ID)
 ;
 
-Value:
-    Hex | INT | STRING | FLOAT | BOOL
-;
 
-Hex:
-    /0x[0-9a-fA-F]+/
-;
 
 Endpoint:
 	(
@@ -112,42 +106,4 @@ OperatingSystem:
     'RiotOS'
 ;
 
-Settings:
-    NumericSetting    |
-    BoolSetting       |
-    StringSetting     |
-    ListSetting       |
-    DictSetting
-;
 
-NumericSetting:
-    IntSetting | FloatSetting
-;
-
-IntSetting:
-    name=ID ':' type='int' ('=' default=INT)?
-;
-
-FloatSetting:
-    name=ID ':' type='float' ('=' default=FLOAT)?
-;
-
-StringSetting:
-    name=ID ':' type='str' ('=' default=STRING)?
-;
-
-BoolSetting:
-    name=ID ':' type='bool' ('=' default=BOOL)?
-;
-
-ListSetting:
-    name=ID ':' type='list' ('=' '[' default*=OBJECT[','] ']')?
-;
-
-DictSetting:
-    name=ID ':' type='dict' ('=' '{' items*=Settings[','] '}')?
-;
-
-OBJECT: 
-	INT | STRING | FLOAT | BOOL 
-;

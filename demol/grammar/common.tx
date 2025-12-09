@@ -54,3 +54,51 @@ IPv4_ADDR: /([0-9]{1,3}\.){3}[0-9]{1,3}/;
 IPv6_ADDR: /([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}/;
 IP_ADDR: IPv4_ADDR | IPv6_ADDR;
 MAC_ADDR: /([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})/;
+
+// Value types
+VALUE:
+    Hex | INT | STRING | FLOAT | BOOL
+;
+
+Hex:
+    /0x[0-9a-fA-F]+/
+;
+
+// Attribute/Settings types
+Attribute:
+    NumericAttribute    |
+    BoolAttribute       |
+    StringAttribute     |
+    ListAttribute       |
+    DictAttribute
+;
+
+NumericAttribute:
+    IntAttribute | FloatAttribute
+;
+
+IntAttribute:
+    name=ID '[' type='int' ']' ('=' default=INT)?
+;
+
+FloatAttribute:
+    name=ID '[' type='float' ']' ('=' default=FLOAT)?
+;
+
+StringAttribute:
+    name=ID '[' type='str' ']' ('=' default=STRING)?
+;
+
+BoolAttribute:
+    name=ID '[' type='bool' ']' ('=' default=BOOL)?
+;
+
+ListAttribute:
+    name=ID '[' type='list' ']' ('=' '[' default*=VALUE[','] ']')?
+;
+
+DictAttribute:
+    name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')?
+;
+
+

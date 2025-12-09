@@ -218,41 +218,7 @@ ActuatorType:
     "Fan"
 ;
 
-Attribute:
-    NumericAttribute    |
-    BoolAttribute       |
-    StringAttribute     |
-    ListAttribute       |
-    DictAttribute
-;
 
-NumericAttribute:
-    IntAttribute | FloatAttribute
-;
-
-IntAttribute:
-    name=ID '[' type='int' ']' ('=' default=INT)?
-;
-
-FloatAttribute:
-    name=ID '[' type='float' ']' ('=' default=FLOAT)?
-;
-
-StringAttribute:
-    name=ID '[' type='str' ']' ('=' default=STRING)?
-;
-
-BoolAttribute:
-    name=ID '[' type='bool' ']' ('=' default=BOOL)?
-;
-
-ListAttribute:
-    name=ID '[' type='list' ']' ('=' '[' default*=OBJECT[','] ']')?
-;
-
-DictAttribute:
-    name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')?
-;
 
 // Operational blocks
 OperationalBoard:
@@ -287,29 +253,3 @@ OperationalActuator:
         ("piTpl" ":" piTpl=STRING)?
     )#
 ;
-
-
-UNITS:
-    ("kb" | "mb" | "gb" | "b")
-;
-
-FrequencyUnit:
-	"ghz" | "mhz" | "khz" | "hz"
-;
-
-DistanceUnit:
-	"m" | "cm" | "mm"
-;
-
-TimeUnit:
-    "h" | "min" | "s" | "ms" | "us" | "ns"
-;
-
-PowerUnit:
-	"W" | "mW" | "uW"
-;
-
-OBJECT: 
-	INT | STRING | FLOAT | BOOL 
-;
-
