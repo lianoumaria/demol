@@ -1,13 +1,16 @@
 Sensor[Proximity] HW006
-    //ίσως αλλάξω τις προδιαγραφές ώτα να δέχονται για input range
     operational
-        vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα..
+        vcc: 5V
         energy: 0 mW, 5 mW, 2 mW
     end
     pins
         OUT[gpio] @ 1,
         VCC[5V] @ 2,
         GND[GND] @ 3
+    end
+    templates
+        raspbian: "irsensor.py.tmpl",
+        riotos: "irsensor.c.tmpl"
     end
     attributes
         frequency[int] = 100

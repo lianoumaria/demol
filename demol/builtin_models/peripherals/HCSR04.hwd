@@ -10,6 +10,10 @@ Sensor[Distance] HCSR04
         trigger[gpio] @ 3,
         VCC[5V] @ 4
     end
+    templates
+        raspbian: "hcsr04.py.tmpl",
+        riotos: "hcsr04.c.tmpl"
+    end
     attributes
         frequency[float] = 10
     end

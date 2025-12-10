@@ -2,7 +2,7 @@ Metadata
     name: "EntranceLEDs"
     description: "Embedded device with SRF and LEDs"
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

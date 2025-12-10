@@ -14,4 +14,8 @@ Sensor[Distance] SonarSRF04
         trigger[gpio] @ 2,
         echo[gpio] @ 3
     end
+    templates
+        raspbian: "srf04.py.tmpl",
+        riotos: "srf04_riot.c.tmpl"
+    end
 end

@@ -2,7 +2,7 @@ Metadata
     name: "ParkingLeds"
     description: "Device with warning lights"
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

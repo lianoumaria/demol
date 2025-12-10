@@ -4,7 +4,7 @@ import time
 GPIO_PIN = "{{gpio}}"
 MAX_FREQUENCY = {{max_frequency | default(1000.0)}}
 
-class TrackerSensor:
+class IRSensor:
     #The sensor recognizes whether it "sees" black or a white/reflective area
     def __init__(self):
         self.sensor = DInD(GPIO_PIN)
@@ -25,8 +25,8 @@ class TrackerSensor:
         #Release used resources
         self.sensor.close()
 
-class TCRT5000(TrackerSensor):
+class TCRT5000(IRSensor):
     pass
 
-class HW006(TrackerSensor):
+class HW006(IRSensor):
     pass

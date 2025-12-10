@@ -2,7 +2,7 @@ Metadata
     name: "RpiRoom"
     description: "My RaspberryPi 5 with a BME680 and a LedRing"
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

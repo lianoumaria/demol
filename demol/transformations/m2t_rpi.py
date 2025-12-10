@@ -24,36 +24,28 @@ logger = logging.getLogger(__name__)
 class PeripheralTemplateMapper:
     """Maps peripheral types to their corresponding Jinja2 templates."""
     
-    TEMPLATE_MAP = {
-        "SRF05": "DistanceSensor.py.tmpl",
-        "HCSR04": "DistanceSensor.py.tmpl",
-        "VL53L1X": "ToFSensor.py.tmpl",
-        "TCRT5000": "TrackerSensor.py.tmpl",
-        "BME680": "EnvSensor.py.tmpl",
-        "TFMini": "TFMiniSensor.py.tmpl",
-        "ADCDifferentialPi": "ADCDifferentialPi.py.tmpl",
-        "WS2812": "WS2812.py.tmpl",
-        "PCA9685": "PCA9685.py.tmpl",
-    }
-    
     @classmethod
-    def get_template(cls, peripheral_type: str, custom_template: Optional[str] = None) -> str:
-        """Get template name for a peripheral type.
+    def get_template(cls, peripheral_ref) -> Optional[str]:
+        """Get template name for a peripheral from its templates section.
         
         Args:
-            peripheral_type: Type of the peripheral
-            custom_template: Optional custom template path
+            peripheral_ref: Reference to the peripheral object (has .name and .templates)
             
         Returns:
-            Template filename
+            Template filename for raspbian OS, or None if not found
         """
-        if custom_template:
-            return custom_template
+        # Check peripheral's templates section for raspbian
+        if hasattr(peripheral_ref, 'templates') and peripheral_ref.templates:
+            for template_mapping in peripheral_ref.templates:
+                if template_mapping.os == 'raspbian':
+                    return template_mapping.template
         
-        template = cls.TEMPLATE_MAP.get(peripheral_type)
-        if not template:
-            logger.warning(f"No template found for peripheral type: {peripheral_type}")
-        return template
+        # No template found
+        logger.warning(
+            f"No raspbian template found for peripheral '{peripheral_ref.name}'. "
+            f"Please add a templates section with raspbian mapping to the peripheral model."
+        )
+        return None
 
 
 class UnitConverter:
@@ -147,11 +139,11 @@ class DeviceModelExtractor:
                 "ref_name": conn.peripheral.name,
                 "real_name": conn.peripheral.ref.name,
                 "type": type(conn.peripheral.ref).__name__,
+                "peripheral_ref": conn.peripheral.ref,  # Pass the full peripheral reference
                 "pins": self._extract_pins(conn.dataConns),
                 "attributes": self._extract_attributes(conn.peripheral.ref.attributes),
                 "topic": conn.remote,
                 "message": conn.peripheral.ref.type,
-                "custom_template": getattr(conn.peripheral.ref, "piTpl", None) or None,
             }
             
             # Apply settings (override attributes)
@@ -333,10 +325,9 @@ class RPiCodeGenerator:
     
     def _generate_peripheral_class(self, peripheral: Dict[str, Any]) -> None:
         """Generate a single peripheral class file."""
-        # Get template
+        # Get template using peripheral reference
         template_name = PeripheralTemplateMapper.get_template(
-            peripheral["real_name"],
-            peripheral.get("custom_template")
+            peripheral["peripheral_ref"]
         )
         
         if not template_name:

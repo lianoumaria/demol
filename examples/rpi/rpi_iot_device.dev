@@ -2,7 +2,7 @@ Metadata
     name: "MyPiIotDevice"
     description: "My RaspberryPi IoT device"
     author: "klpanagi"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

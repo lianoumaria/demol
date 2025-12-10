@@ -2,7 +2,7 @@ Metadata
     name: "ParkingSensor"
     description: "Device for distance sensing"
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

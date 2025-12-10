@@ -12,4 +12,8 @@ Sensor[Distance] VL53L1X
         XSHUT[gpio] @ 6,
         GPIO1[gpio] @ 7
     end
+    templates
+        raspbian: "vl53l1x.py.tmpl",
+        riotos: "vl53l1x_riot.c.tmpl"
+    end
 end

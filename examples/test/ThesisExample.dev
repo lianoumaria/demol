@@ -2,7 +2,7 @@ Metadata
     name: "my_raspi"
     description: "My Embedded Device"
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

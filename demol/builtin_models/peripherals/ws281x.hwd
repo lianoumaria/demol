@@ -11,4 +11,8 @@ Actuator[LedArray] WS281X
         data_in[gpio] @ 3,
         data_out[gpio] @ 4
     end
+    templates
+        raspbian: "ws281x.py.tmpl",
+        riotos: "ws281x_riot.c.tmpl"
+    end
 end

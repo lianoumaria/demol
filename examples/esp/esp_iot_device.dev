@@ -2,7 +2,7 @@ Metadata
     name: "MyESP32Device"
     description: "My ESP32 IoT device"
     author: "klpanagi"
-    os: RiotOS
+    os: riotos
 end
 
 Network

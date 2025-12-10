@@ -100,10 +100,10 @@ DictAttribute:
 ;
 
 OperatingSystem:
-    'Raspbian'      |
-    'RiotOS'        |
-    'FreeRTOS'      |
-    'Arduino'       |
-    'ESP-IDF'       |
-    'ESP-IDF-RTOS'
+    'raspbian'      |
+    'riotos'        |
+    'freertos'      |
+    'arduino'       |
+    'esp-idf'       |
+    'esp-idf-rtos'
 ;

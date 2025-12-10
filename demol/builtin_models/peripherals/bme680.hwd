@@ -10,6 +10,10 @@ Sensor[Env] BME680
         sda[sda-0] @ 2,
         scl[scl-0] @ 3
     end
+    templates
+        raspbian: "bme680.py.tmpl",
+        riotos: "bme680.c.tmpl"
+    end
     attributes
         poll_period[int] = 10,
         humidity_oversample[int] = 2,

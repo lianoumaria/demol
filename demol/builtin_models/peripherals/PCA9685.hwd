@@ -65,6 +65,10 @@ Actuator[ServoController] PCA9685
         Vplus_CH15[5V] @ 59,
         GND_CH15[GND] @ 60
     end
+    templates
+        raspbian: "pca9685.py.tmpl",
+        riotos: "pca9685_riot.c.tmpl"
+    end
     attributes
         channels[int] = 16,
         frequency[int] = 50

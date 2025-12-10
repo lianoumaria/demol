@@ -2,7 +2,7 @@ Metadata
     name: "Scenario1"
     description: "My RaspberryPi 5 with increasing number of TCRT5000 tracker sensors."
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

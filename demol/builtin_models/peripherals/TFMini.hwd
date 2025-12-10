@@ -9,6 +9,10 @@ Sensor[Distance] TFMini
         RXD[rx-0] @ 3,
         TXD[tx-0] @ 4
     end
+    templates
+        raspbian: "tfmini.py.tmpl",
+        riotos: "tfmini_riot.c.tmpl"
+    end
     attributes
         serial_port[str] = "/dev/ttyAMA0"
     end

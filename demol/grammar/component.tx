@@ -32,6 +32,7 @@ Actuator:
 	  ('operational' operational=OperationalActuator 'end')
 	  ('pins' pins*=Pin[','] 'end')
 	  ('attributes' attributes*=Attribute[','] 'end')?
+	  ('templates' templates*=TemplateMapping[','] 'end')?
     )#
     'end'
 ;
@@ -42,6 +43,7 @@ Sensor:
 	  ('operational' operational=OperationalSensor 'end')
 	  ('pins' pins*=Pin[','] 'end')
 	  ('attributes' attributes*=Attribute[','] 'end')?
+	  ('templates' templates*=TemplateMapping[','] 'end')?
     )#
     'end'
 ;
@@ -258,4 +260,8 @@ OperationalActuator:
 
 PowerConsumption:
     value=NUMBER unit=PowerUnit
+;
+
+TemplateMapping:
+    os=OperatingSystem ':' template=STRING
 ;

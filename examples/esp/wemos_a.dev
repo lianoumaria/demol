@@ -2,7 +2,7 @@ Metadata
     name: "MyWemosDevice_A"
     description: "My WemosD1Mini IoT device"
     author: "klpanagi"
-    os: RiotOS
+    os: riotos
 end
 
 Network

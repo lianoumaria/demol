@@ -25,6 +25,10 @@ Sensor[ADC] ADCDifferentialPi
         CH8_PLUS[adc] @ 19,
         CH8_MINUS[adc] @ 20
     end
+    templates
+        raspbian: "adc_differential_pi.py.tmpl",
+        riotos: "adc_differential_pi_riot.c.tmpl"
+    end
     attributes
         num_channels[int] = 8,
         resolution[list] = [12, 14, 16, 18],

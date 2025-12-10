@@ -2,7 +2,7 @@ Metadata
     name: "RpiFan"
     description: "My RaspberryPi 5 with a BME680 and a ServoMotor"
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components

@@ -2,7 +2,7 @@ Metadata
     name: "RpiTrackerSensor"
     description: "My RaspberryPi 5 with a TCRT5000 tracker sensor"
     author: "maria"
-    os: Raspbian
+    os: raspbian
 end
 
 Components
