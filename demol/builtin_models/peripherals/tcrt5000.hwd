@@ -1,6 +1,7 @@
 Sensor[Proximity] TCRT5000
     operational
-        vcc: 5V //Στα 3V3 πολύ αδύναμο σήμα..        ioVcc: 5V
+        vcc: 5V
+        ioVcc: 5V
         energy: 10 mW, 100 mW, 50 mW
     end
     pins
@@ -11,7 +12,7 @@ Sensor[Proximity] TCRT5000
     end
     templates
         raspbian: "tcrt5000.py.tmpl",
-        riotos: "tcrt5000_riot.c.tmpl"
+        riotos: "tcrt5000.c.tmpl"
     end
     attributes
         frequency[int] = 100

@@ -38,7 +38,7 @@ Connect LedWarning
         GND_2 -- GND,
         power_5v_b -- VCC
     data:
-        gpio[mode="output"] led GPIO18 -- DIN
+        gpio[mode="output"] GPIO18 -- DIN
     // remote: "..."
     settings:
         - colors [list] = ['0xFF0000','0x00FF00','0x0000FF','0xFFFF00','0xFF00FF','0x00FFFF','0xFFFFFF','0x800000','0x008000','0x000080','0xFFA500','0x800080']

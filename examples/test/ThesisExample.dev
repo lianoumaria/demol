@@ -29,8 +29,8 @@ Connect MySRF
         GND_1 -- GND,
         power_5v_a -- VCC
     data:
-        gpio[mode="input"] pin GPIO24 -- echo,
-        gpio[mode="output"] pin GPIO23 -- trigger
+        gpio[mode="input"] GPIO24 -- echo,
+        gpio[mode="output"] GPIO23 -- trigger
     // remote: ...
 end
 
@@ -39,7 +39,7 @@ Connect MyLedRing
         GND_2 -- GND,
         power_5v_b -- VCC
     data:
-        gpio[mode="output"] pin GPIO4 -- DIN
+        gpio[mode="output"] GPIO4 -- DIN
     // remote: ...
     settings:
         - colors [list] = ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']

@@ -69,10 +69,23 @@ PinConnection:
 PowerConnection: PinConnection;
 
 DataConnection:
-    type=IOType ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
+    GPIOConnection | I2CConnection | SPIConnection | UARTConnection
 ;
 
-IOType: 'gpio' | 'i2c' | 'spi' | 'uart'
+GPIOConnection:
+    type='gpio' ('[' props*=AttributeSet[','] ']')? pins+=PinConnection[',']
+;
+
+I2CConnection:
+    type='i2c' ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
+;
+
+SPIConnection:
+    type='spi' ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
+;
+
+UARTConnection:
+    type='uart' ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
 ;
 
 PinMapping:

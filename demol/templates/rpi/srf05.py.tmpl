@@ -16,7 +16,7 @@ TRIGGER_PIN = "{{trigger}}"
 ECHO_PIN = "{{echo}}"
 
 
-class Distance_sensor:
+class DistanceSensor:
     #The class that sums up all distance sensors
 
     def __init__(self):
@@ -48,8 +48,8 @@ class Distance_sensor:
         #Release used resources
         self.sensor.close()
 
-class SRF05(Distance_sensor):
+class SRF05(DistanceSensor):
     pass
     
-class HCSR04(Distance_sensor):
+class HCSR04(DistanceSensor):
     pass

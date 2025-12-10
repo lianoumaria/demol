@@ -136,14 +136,14 @@ class DeviceModelExtractor:
         """Extract peripheral configurations."""
         for conn in self.device_model.connections:
             peripheral_info = {
-                "ref_name": conn.peripheral.name,
-                "real_name": conn.peripheral.ref.name,
+                "instance": conn.peripheral.name,
+                "name": conn.peripheral.ref.name,
+                "class": conn.peripheral.ref.type,
                 "type": type(conn.peripheral.ref).__name__,
                 "peripheral_ref": conn.peripheral.ref,  # Pass the full peripheral reference
                 "pins": self._extract_pins(conn.dataConns),
                 "attributes": self._extract_attributes(conn.peripheral.ref.attributes),
                 "topic": conn.remote,
-                "message": conn.peripheral.ref.type,
             }
             
             # Apply settings (override attributes)
@@ -175,7 +175,7 @@ class DeviceModelExtractor:
                 # Handle pins based on function or peripheral pin name
                 for pin_map in data_conn.pins:
                     # Use peripheral pin name as key if function is generic 'gpio'
-                    key = pin_map.peripheralPin if pin_map.function == 'gpio' else pin_map.function
+                    key = pin_map.peripheralPin
                     pins[key] = pin_map.boardPin
                     # Store properties for this pin if needed (currently global for connection)
                     # For now, we assume properties apply to the connection context
@@ -206,8 +206,6 @@ class DeviceModelExtractor:
                 for prop in data_conn.props:
                     if prop.name in ["slave_address", "bus_speed"]:
                         i2c_props[prop.name] = prop.value
-                    if prop.name == "slave_address":
-                        pins["slaveAddr"] = prop.value
 
                 for pin_map in data_conn.pins:
                     if pin_map.function == "sda":
@@ -223,8 +221,6 @@ class DeviceModelExtractor:
                 for prop in data_conn.props:
                     if prop.name in ["baudrate", "parity", "stop_bits", "data_bits"]:
                         uart_props[prop.name] = prop.value
-                    if prop.name == "baudrate":
-                        pins["baudrate"] = prop.value
 
                 for pin_map in data_conn.pins:
                     if pin_map.function == "tx":
@@ -329,10 +325,12 @@ class RPiCodeGenerator:
         template_name = PeripheralTemplateMapper.get_template(
             peripheral["peripheral_ref"]
         )
+
+        print(peripheral)
         
         if not template_name:
             logger.warning(
-                f"Skipping peripheral {peripheral['ref_name']}: no template available"
+                f"Skipping peripheral {peripheral['instance']}: no template available"
             )
             return
         
@@ -340,14 +338,14 @@ class RPiCodeGenerator:
         
         # Prepare template context
         context = {
-            f"{peripheral['type'].lower()}_type": peripheral["real_name"],
+            f"{peripheral['type'].lower()}_type": peripheral["name"],
         }
         context.update(peripheral["pins"])
         context.update(peripheral["attributes"])
         
         # Render and write
         output = template.render(**context)
-        output_path = self.output_dir / f"{peripheral['ref_name']}.py"
+        output_path = self.output_dir / f"{peripheral['instance']}.py"
         
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(output)
@@ -378,7 +376,7 @@ class RPiCodeGenerator:
     ) -> None:
         """Generate MQTT process files for a peripheral."""
         ptype = peripheral["type"]
-        ref_name = peripheral["ref_name"]
+        instance = peripheral["instance"]
         
         # Determine if sensor or actuator
         if ptype == "Sensor":
@@ -393,9 +391,9 @@ class RPiCodeGenerator:
     ) -> None:
         """Generate MQTT files for sensor."""
         context = {
-            "sensor_name": sensor["ref_name"],
-            "sensor_type": sensor["real_name"],
-            "sensorMsg": sensor["message"],
+            "sensor_name": sensor["instance"],
+            "sensor_type": sensor["name"],
+            "sensorMsg": sensor["type"],
             "topic": sensor["topic"],
             **broker_config,
             **sensor["attributes"],
@@ -406,15 +404,7 @@ class RPiCodeGenerator:
         self._write_template(
             template,
             context,
-            self.output_dir / f"{sensor['ref_name']}publisher.py"
-        )
-        
-        # Subscriber
-        template = self.env.get_template("MQTTSensorSubscriber.py.tmpl")
-        self._write_template(
-            template,
-            context,
-            self.output_dir / f"{sensor['ref_name']}subscriber.py"
+            self.output_dir / f"{sensor['instance']}publisher.py"
         )
     
     def _generate_actuator_mqtt(
@@ -424,28 +414,20 @@ class RPiCodeGenerator:
     ) -> None:
         """Generate MQTT files for actuator."""
         context = {
-            "actuator_name": actuator["ref_name"],
-            "actuator_type": actuator["real_name"],
-            "actuatorMsg": actuator["message"],
+            "actuator_name": actuator["instance"],
+            "actuator_type": actuator["name"],
+            "actuatorMsg": actuator["type"],
             "topic": actuator["topic"],
             **broker_config,
             **actuator["attributes"],
         }
-        
-        # Publisher
-        template = self.env.get_template("MQTTActuatorPublisher.py.tmpl")
-        self._write_template(
-            template,
-            context,
-            self.output_dir / f"{actuator['ref_name']}publisher.py"
-        )
         
         # Subscriber
         template = self.env.get_template("MQTTActuatorSubscriber.py.tmpl")
         self._write_template(
             template,
             context,
-            self.output_dir / f"{actuator['ref_name']}subscriber.py"
+            self.output_dir / f"{actuator['instance']}subscriber.py"
         )
     
     def _generate_messages_module(self) -> None:
@@ -489,31 +471,31 @@ def transform_device_model(device_model_path: str, output_dir: str) -> None:
     model_path = Path(REPO_PATH) / "examples" / device_model_path
     output_path = Path(REPO_PATH) / output_dir
     
-    logger.info(f"Loading device model from: {model_path}")
+    logger.debug(f"Loading device model from: {model_path}")
     
     # Parse device model
     device_model = build_model(str(model_path))
     
     # Extract information
-    logger.info("Extracting device model information...")
+    logger.debug("Extracting device model information...")
     extractor = DeviceModelExtractor(device_model)
     extractor.extract()
     
     # Log extracted info
-    logger.info(f"Found {len(extractor.peripherals)} peripheral(s)")
-    logger.info(f"Broker: {extractor.broker_config['host']}:{extractor.broker_config['port']}")
+    logger.debug(f"Found {len(extractor.peripherals)} peripheral(s)")
+    logger.debug(f"Broker: {extractor.broker_config['host']}:{extractor.broker_config['port']}")
     
     # Generate code
-    logger.info(f"Generating code to: {output_path}")
+    logger.debug(f"Generating code to: {output_path}")
     generator = RPiCodeGenerator(output_path)
     
-    logger.info("Generating peripheral classes...")
+    logger.debug("Generating peripheral classes...")
     generator.generate_peripheral_classes(extractor.peripherals)
     
-    logger.info("Generating MQTT processes...")
+    logger.debug("Generating MQTT processes...")
     generator.generate_mqtt_processes(extractor.peripherals, extractor.broker_config)
     
-    logger.info("Code generation complete!")
+    logger.debug("Code generation complete!")
 
 
 def main(dev_model: str, output_dir: str) -> None:

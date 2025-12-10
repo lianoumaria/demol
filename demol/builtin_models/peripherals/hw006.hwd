@@ -4,15 +4,15 @@ Sensor[Proximity] HW006
         energy: 0 mW, 5 mW, 2 mW
     end
     pins
-        OUT[gpio] @ 1,
+        DO[gpio] @ 1,
         VCC[5V] @ 2,
         GND[GND] @ 3
     end
     templates
-        raspbian: "irsensor.py.tmpl",
-        riotos: "irsensor.c.tmpl"
+        raspbian: "hw006.py.tmpl",
+        riotos: "hw006.c.tmpl"
     end
     attributes
         frequency[int] = 100
     end
-end    
+end

@@ -29,8 +29,8 @@ Connect ParkingDistance
         GND_1 -- GND,
         power_5v_a -- VCC
     data:
-        gpio[mode="input"] pin GPIO24 -- echo,
-        gpio[mode="output"] pin GPIO23 -- trigger
+        gpio[mode="input"] GPIO24 -- echo,
+        gpio[mode="output"] GPIO23 -- trigger
     // remote: ...
     settings:
         - frequency [float] = 20.0

@@ -501,8 +501,10 @@ def validate_no_pin_conflicts(connections: List) -> None:
             
             for pin_map in data_conn.pins:
                 if conn_type == 'gpio':
+                    # GPIO uses PinConnection (no function attribute)
                     used_pins.append((pin_map.boardPin, 'GPIO'))
                 elif conn_type == 'i2c':
+                    # I2C uses PinMapping (has function attribute)
                     if pin_map.function == 'sda':
                         used_pins.append((pin_map.boardPin, 'I2C-SDA'))
                     elif pin_map.function == 'scl':
