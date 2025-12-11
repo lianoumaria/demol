@@ -105,19 +105,19 @@ UARTPinType:
 ;
 
 PWM:
-	ptype="pwm" "-" channel=INT
+	ptype="pwm" ("-" channel=INT)?
 ;
 
 ADC:
-	ptype="adc"
+	ptype="adc" ("-" bus=INT)?
 ;
 
 DAC:
-	ptype="dac"
+	ptype="dac" ("-" bus=INT)?
 ;
 
 PCM:
-    ptype=PCMType
+    ptype=PCMType ("-" bus=INT)?
 ;
 
 PCMType:

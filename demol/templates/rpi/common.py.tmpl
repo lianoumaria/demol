@@ -1,0 +1,74 @@
+from commlib.utils import Rate
+
+
+class SensorState:
+    IDLE = "IDLE"
+    RUNNING = "RUNNING"
+    ERROR = "ERROR"
+
+
+class Sensor:
+    def __init__(self, attributes: dict, conn: dict):
+        self._attributes = attributes
+        self._conn = conn
+        self._data = {}
+        self._state = IDLE
+        self._rate = Rate(self._attributes.get("frequency", 100.0))
+
+    @property
+    def attributes(self):
+        return self._attributes
+
+    @property
+    def conn(self):
+        return self._conn
+ 
+    def read(self):
+        # Implement in inherited class
+        raise NotImplementedError
+
+    def initialize(self):
+        # Implement in inherited class
+        raise NotImplementedError
+
+    def run(sensor: Sensor):
+        from commlib.node import Node
+        from commlib.transports.mqtt import ConnectionParameters
+        sensor.initialize()
+        conn_params = ConnectionParameters(host="{{host}}", port={{port}}{% if ssl is defined %}, ssl={{ssl}}{% endif %}{% if username is defined and username %}, username="{{username}}"{% endif %}{% if password is defined and password %}, password="{{password}}"{% endif %})
+        node = Node(node_name='sensors.{{sensor_type}}', connection_params=conn_params, heartbeats=False)
+        pub = node.create_publisher(msg_type={{sensorMsg}}Message, topic="{{topic}}")
+        node.run()
+        try:
+            while True:
+                sensor.read()
+                pub.send(self.msg)
+                self._rate.sleep()
+        except KeyboardInterrupt:
+            sensor.disconnect()
+
+
+class Actuator:
+    def __init__(self, attributes: dict, conn: dict):
+        self._attributes = attributes
+        self._conn = conn
+        self._data = {}
+        self._state = IDLE
+
+    @property
+    def conn(self):
+        return self._conn
+
+    @property
+    def attributes(self):
+        return self._attributes
+        
+    def write(self):
+        # Implement in inherited class
+        raise NotImplementedError
+
+    def initialize(self):
+        # Implement in inherited class
+        raise NotImplementedError
+
+    

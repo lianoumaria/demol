@@ -14,10 +14,9 @@ class EnvMessage(PubSubMessage):
     humidity : float = 45.00
     gas_resistance : float = 50000.0
 
-class TrackerMessage(PubSubMessage):
+class ProximityMessage(PubSubMessage):
     header: MessageHeader = MessageHeader()
-    object_detection : bool = 0
-    color : str = "Black"
+    detect : bool = 0
 
 class ADCMessage(PubSubMessage):
     header: MessageHeader = MessageHeader()

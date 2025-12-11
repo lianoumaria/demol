@@ -135,16 +135,28 @@ class DeviceModelExtractor:
     def _extract_peripherals(self) -> None:
         """Extract peripheral configurations."""
         for conn in self.device_model.connections:
+            # Extract pins first to get bus information
+            pins = self._extract_pins(conn.dataConns)
+            
             peripheral_info = {
                 "instance": conn.peripheral.name,
                 "name": conn.peripheral.ref.name,
                 "class": conn.peripheral.ref.type,
                 "type": type(conn.peripheral.ref).__name__,
                 "peripheral_ref": conn.peripheral.ref,  # Pass the full peripheral reference
-                "pins": self._extract_pins(conn.dataConns),
+                "board_ref": self.device_model.components.board,  # Pass the board reference
+                "pins": pins,
                 "attributes": self._extract_attributes(conn.peripheral.ref.attributes),
                 "topic": conn.remote,
             }
+            
+            # Add bus information to top level for easy access in templates
+            if "i2c_bus" in pins:
+                peripheral_info["i2c_bus"] = pins["i2c_bus"]
+            if "spi_bus" in pins:
+                peripheral_info["spi_bus"] = pins["spi_bus"]
+            if "uart_port" in pins:
+                peripheral_info["uart_port"] = pins["uart_port"]
             
             # Apply settings (override attributes)
             self._apply_settings(peripheral_info["attributes"], conn.settings)
@@ -152,14 +164,18 @@ class DeviceModelExtractor:
             self.peripherals.append(peripheral_info)
     
     def _extract_pins(self, data_conns) -> Dict[str, Any]:
-        """Extract pin configurations from Data connections."""
+        """Extract pin mappings from data connections."""
         pins = {}
+        
+        # Get board reference to access pin definitions
+        board = self.device_model.components.board
+        board_pins_map = {pin.name: pin for pin in board.pins}
         
         for data_conn in data_conns:
             conn_type = data_conn.type
-            
-            # Extract name from props if present
             conn_name = None
+            
+            # Extract connection name if provided
             for prop in data_conn.props:
                 if prop.name == "name":
                     conn_name = prop.value
@@ -172,13 +188,10 @@ class DeviceModelExtractor:
                     if prop.name in ["mode", "pullup", "pulldown"]:
                         gpio_props[prop.name] = prop.value
                 
-                # Handle pins based on function or peripheral pin name
+                # Handle pins based on peripheral pin name
                 for pin_map in data_conn.pins:
-                    # Use peripheral pin name as key if function is generic 'gpio'
                     key = pin_map.peripheralPin
                     pins[key] = pin_map.boardPin
-                    # Store properties for this pin if needed (currently global for connection)
-                    # For now, we assume properties apply to the connection context
                     pins[f"{key}_props"] = gpio_props
                     
             elif conn_type == "spi":
@@ -189,15 +202,19 @@ class DeviceModelExtractor:
                         spi_props[prop.name] = prop.value
                 
                 for pin_map in data_conn.pins:
+                    board_pin = board_pins_map.get(pin_map.boardPin)
+                    
                     if pin_map.function == "mosi":
                         pins["mosi"] = pin_map.boardPin
+                        # Extract SPI bus from board pin's function definition
+                        if board_pin:
+                            pins["spi_bus"] = self._get_bus_from_pin(board_pin, "mosi")
                     elif pin_map.function == "miso":
                         pins["miso"] = pin_map.boardPin
                     elif pin_map.function == "sck":
                         pins["sck"] = pin_map.boardPin
                     elif pin_map.function == "cs":
                         pins["cs"] = pin_map.boardPin
-                    # Store properties for this pin if needed
                     pins[f"{pin_map.function}_props"] = spi_props
                 
             elif conn_type == "i2c":
@@ -208,11 +225,15 @@ class DeviceModelExtractor:
                         i2c_props[prop.name] = prop.value
 
                 for pin_map in data_conn.pins:
+                    board_pin = board_pins_map.get(pin_map.boardPin)
+                    
                     if pin_map.function == "sda":
                         pins["sda"] = pin_map.boardPin
+                        # Extract I2C bus from board pin's function definition
+                        if board_pin:
+                            pins["i2c_bus"] = self._get_bus_from_pin(board_pin, "sda")
                     elif pin_map.function == "scl":
                         pins["scl"] = pin_map.boardPin
-                    # Store properties for this pin if needed
                     pins[f"{pin_map.function}_props"] = i2c_props
                 
             elif conn_type == "uart":
@@ -223,17 +244,40 @@ class DeviceModelExtractor:
                         uart_props[prop.name] = prop.value
 
                 for pin_map in data_conn.pins:
+                    board_pin = board_pins_map.get(pin_map.boardPin)
+                    
                     if pin_map.function == "tx":
                         pins["tx"] = pin_map.boardPin
+                        # Extract UART port from board pin's function definition
+                        if board_pin:
+                            pins["uart_port"] = self._get_bus_from_pin(board_pin, "tx")
                     elif pin_map.function == "rx":
                         pins["rx"] = pin_map.boardPin
-                    # Store properties for this pin if needed
                     pins[f"{pin_map.function}_props"] = uart_props
                 
             else:
                 raise TypeError(f"Not a valid IO Connection Type: {conn_type}")
         
         return pins
+    
+    def _get_bus_from_pin(self, board_pin, function_type: str) -> int:
+        """Extract bus number from board pin's function definition.
+        
+        Args:
+            board_pin: Board pin object with funcs attribute
+            function_type: Type of function to look for (e.g., 'sda', 'mosi', 'tx')
+            
+        Returns:
+            Bus number as integer, defaults to 0 if not found
+        """
+        if hasattr(board_pin, 'funcs'):
+            for func in board_pin.funcs:
+                # Check if this function matches the type we're looking for
+                if hasattr(func, 'ptype') and func.ptype == function_type:
+                    # Return the bus number from the function definition
+                    if hasattr(func, 'bus'):
+                        return func.bus
+        return 0
     
     def _extract_attributes(self, attributes) -> Dict[str, Any]:
         """Extract attributes from peripheral."""
@@ -260,23 +304,6 @@ class DeviceModelExtractor:
                 result[item.name] = self._convert_dict_attribute(item)
             else:
                 result[item.name] = item.default
-        
-        return result
-    
-    def _extract_constraints(self, constraints) -> Dict[str, float]:
-        """Extract and normalize constraints."""
-        result = {}
-        
-        for constraint in constraints:
-            if constraint.name == "max_frequency":
-                result[constraint.name] = UnitConverter.convert_frequency(
-                    constraint.value, constraint.unit
-                )
-            else:
-                # Assume distance constraint
-                result[constraint.name] = UnitConverter.convert_distance(
-                    constraint.value, constraint.unit
-                )
         
         return result
     
@@ -307,26 +334,153 @@ class RPiCodeGenerator:
         fsloader = jinja2.FileSystemLoader(TEMPLATES_RPI)
         self.env = jinja2.Environment(loader=fsloader)
     
+    def build_template_context(self, peripheral_info: Dict[str, Any], broker_config: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Build structured context dictionary for Jinja2 templates.
+        
+        Args:
+            peripheral_info: Peripheral information dictionary
+            broker_config: MQTT broker configuration (optional)
+            
+        Returns:
+            Structured context dictionary
+        """
+        context = {
+            "name": peripheral_info["name"],
+            "instance": peripheral_info["instance"],
+            "type": peripheral_info["type"],
+            "class": peripheral_info["class"],
+            "board": peripheral_info["board_ref"],
+            "peripheral": peripheral_info["peripheral_ref"],
+            "conn": {},
+            "attributes": peripheral_info["attributes"],
+            "broker": broker_config or {}
+        }
+        
+        # Get board pins map for pin number lookup
+        board = peripheral_info["board_ref"]
+        board_pins_map = {pin.name: pin for pin in board.pins}
+        
+        # Organize pins and properties by connection type
+        pins = peripheral_info["pins"]
+        
+        # GPIO connection
+        gpio_pins = {}
+        gpio_props = {}
+        for key, value in pins.items():
+            if key.endswith("_props") and "gpio" in key.lower():
+                gpio_props.update(value if isinstance(value, dict) else {})
+            elif not key.endswith("_props") and key not in ["sda", "scl", "mosi", "miso", "sck", "cs", "tx", "rx", "i2c_bus", "spi_bus", "uart_port"]:
+                # Add pin name and id
+                board_pin = board_pins_map.get(value)
+                gpio_pins[key] = {
+                    "name": value,
+                    "id": board_pin.number if board_pin else None
+                }
+        
+        if gpio_pins or gpio_props:
+            context["conn"]["gpio"] = {**gpio_props, "pins": gpio_pins}
+        
+        # I2C connection
+        if "sda" in pins or "scl" in pins:
+            i2c_pins = {}
+            i2c_props = {}
+            if "i2c_bus" in pins:
+                i2c_props["bus"] = pins["i2c_bus"]
+            
+            # Add SDA pin with id
+            if "sda" in pins:
+                board_pin = board_pins_map.get(pins["sda"])
+                i2c_pins["sda"] = {
+                    "name": pins["sda"],
+                    "id": board_pin.number if board_pin else None
+                }
+            
+            # Add SCL pin with id
+            if "scl" in pins:
+                board_pin = board_pins_map.get(pins["scl"])
+                i2c_pins["scl"] = {
+                    "name": pins["scl"],
+                    "id": board_pin.number if board_pin else None
+                }
+            
+            # Add I2C properties
+            for key, value in pins.items():
+                if "sda_props" in key or "scl_props" in key:
+                    i2c_props.update(value if isinstance(value, dict) else {})
+            context["conn"]["i2c"] = {**i2c_props, "pins": i2c_pins}
+        
+        # SPI connection
+        if "mosi" in pins or "miso" in pins or "sck" in pins:
+            spi_pins = {}
+            spi_props = {}
+            if "spi_bus" in pins:
+                spi_props["bus"] = pins["spi_bus"]
+            
+            # Add pin mappings with ids
+            for pin_name in ["mosi", "miso", "sck", "cs"]:
+                if pin_name in pins:
+                    board_pin = board_pins_map.get(pins[pin_name])
+                    spi_pins[pin_name] = {
+                        "name": pins[pin_name],
+                        "id": board_pin.number if board_pin else None
+                    }
+            
+            # Add SPI properties
+            for key, value in pins.items():
+                if any(x in key for x in ["mosi_props", "miso_props", "sck_props", "cs_props"]):
+                    spi_props.update(value if isinstance(value, dict) else {})
+            context["conn"]["spi"] = {**spi_props, "pins": spi_pins}
+        
+        # UART connection
+        if "tx" in pins or "rx" in pins:
+            uart_pins = {}
+            uart_props = {}
+            if "uart_port" in pins:
+                uart_props["port"] = pins["uart_port"]
+            
+            # Add TX pin with id
+            if "tx" in pins:
+                board_pin = board_pins_map.get(pins["tx"])
+                uart_pins["tx"] = {
+                    "name": pins["tx"],
+                    "id": board_pin.number if board_pin else None
+                }
+            
+            # Add RX pin with id
+            if "rx" in pins:
+                board_pin = board_pins_map.get(pins["rx"])
+                uart_pins["rx"] = {
+                    "name": pins["rx"],
+                    "id": board_pin.number if board_pin else None
+                }
+            
+            # Add UART properties
+            for key, value in pins.items():
+                if "tx_props" in key or "rx_props" in key:
+                    uart_props.update(value if isinstance(value, dict) else {})
+            context["conn"]["uart"] = {**uart_props, "pins": uart_pins}
+        
+        return context
+    
     def generate_peripheral_classes(
         self, 
-        peripherals: List[Dict[str, Any]]
-    ) -> None:
+        peripherals: List[Dict[str, Any]],
+        broker_config: Dict[str, Any] = None) -> None:
         """Generate peripheral class files.
         
         Args:
             peripherals: List of peripheral configurations
+            broker_config: MQTT broker configuration (optional)
         """
         for peripheral in peripherals:
-            self._generate_peripheral_class(peripheral)
+            self._generate_peripheral_class(peripheral, broker_config)
     
-    def _generate_peripheral_class(self, peripheral: Dict[str, Any]) -> None:
+    def _generate_peripheral_class(self, peripheral: Dict[str, Any], broker_config: Dict[str, Any] = None) -> None:
         """Generate a single peripheral class file."""
         # Get template using peripheral reference
         template_name = PeripheralTemplateMapper.get_template(
             peripheral["peripheral_ref"]
         )
-
-        print(peripheral)
         
         if not template_name:
             logger.warning(
@@ -336,12 +490,8 @@ class RPiCodeGenerator:
         
         template = self.env.get_template(template_name)
         
-        # Prepare template context
-        context = {
-            f"{peripheral['type'].lower()}_type": peripheral["name"],
-        }
-        context.update(peripheral["pins"])
-        context.update(peripheral["attributes"])
+        # Build structured context using new schema
+        context = self.build_template_context(peripheral, broker_config)
         
         # Render and write
         output = template.render(**context)
@@ -355,8 +505,7 @@ class RPiCodeGenerator:
     def generate_mqtt_processes(
         self,
         peripherals: List[Dict[str, Any]],
-        broker_config: Dict[str, Any]
-    ) -> None:
+        broker_config: Dict[str, Any]) -> None:
         """Generate MQTT publisher/subscriber processes.
         
         Args:
@@ -372,8 +521,7 @@ class RPiCodeGenerator:
     def _generate_mqtt_process(
         self,
         peripheral: Dict[str, Any],
-        broker_config: Dict[str, Any]
-    ) -> None:
+        broker_config: Dict[str, Any]) -> None:
         """Generate MQTT process files for a peripheral."""
         ptype = peripheral["type"]
         instance = peripheral["instance"]
@@ -387,8 +535,7 @@ class RPiCodeGenerator:
     def _generate_sensor_mqtt(
         self,
         sensor: Dict[str, Any],
-        broker_config: Dict[str, Any]
-    ) -> None:
+        broker_config: Dict[str, Any]) -> None:
         """Generate MQTT files for sensor."""
         context = {
             "sensor_name": sensor["instance"],
@@ -410,8 +557,7 @@ class RPiCodeGenerator:
     def _generate_actuator_mqtt(
         self,
         actuator: Dict[str, Any],
-        broker_config: Dict[str, Any]
-    ) -> None:
+        broker_config: Dict[str, Any]) -> None:
         """Generate MQTT files for actuator."""
         context = {
             "actuator_name": actuator["instance"],
@@ -430,21 +576,29 @@ class RPiCodeGenerator:
             self.output_dir / f"{actuator['instance']}subscriber.py"
         )
     
-    def _generate_messages_module(self) -> None:
+    def generate_messages(self) -> None:
         """Generate MQTT messages module."""
-        template = self.env.get_template("MQTTMessages.py.tmpl")
+        template = self.env.get_template("msg.py.tmpl")
         self._write_template(
             template,
             {},
-            self.output_dir / "MQTTMessages.py"
+            self.output_dir / "msg.py"
+        )
+        
+    def generate_common(self) -> None:
+        """Generate common module."""
+        template = self.env.get_template("common.py.tmpl")
+        self._write_template(
+            template,
+            {},
+            self.output_dir / "common.py"
         )
     
     def _write_template(
         self,
         template: jinja2.Template,
         context: Dict[str, Any],
-        output_path: Path
-    ) -> None:
+        output_path: Path) -> None:
         """Render template and write to file.
         
         Args:
@@ -490,10 +644,12 @@ def transform_device_model(device_model_path: str, output_dir: str) -> None:
     generator = RPiCodeGenerator(output_path)
     
     logger.debug("Generating peripheral classes...")
-    generator.generate_peripheral_classes(extractor.peripherals)
+    generator.generate_peripheral_classes(extractor.peripherals, extractor.broker_config)
+    generator.generate_messages()
+    generator.generate_common()
     
-    logger.debug("Generating MQTT processes...")
-    generator.generate_mqtt_processes(extractor.peripherals, extractor.broker_config)
+    # logger.debug("Generating MQTT processes...")
+    # generator.generate_mqtt_processes(extractor.peripherals, extractor.broker_config)
     
     logger.debug("Code generation complete!")
 
