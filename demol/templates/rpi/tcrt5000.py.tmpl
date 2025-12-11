@@ -42,3 +42,8 @@ class TCRT5000(Sensor):
         """Release hardware resources"""
         if self.sensor:
             self.sensor.close()
+
+
+if __name__ == "__main__":
+    sensor = TCRT5000()
+    sensor.run()

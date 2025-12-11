@@ -12,13 +12,11 @@ MIN_DISTANCE = {{min_distance | default(0.0)}}
 {% endif -%}
 
 
-TRIGGER_PIN = "{{conn.gpio.pins.trigger.name}}"
-TRIGGER_PIN_NUMBER = "{{conn.gpio.pins.trigger.id}}"
-ECHO_PIN = "{{conn.gpio.pins.echo.name}}"
-ECHO_PIN_NUMBER = "{{conn.gpio.pins.echo.id}}"
+TRIGGER_PIN = "{{trigger}}"
+ECHO_PIN = "{{echo}}"
 
 
-class SRF05(Sensor):
+class HCSR04(Sensor):
     #The class that sums up all distance sensors
 
     def __init__(self):
@@ -47,3 +45,8 @@ class SRF05(Sensor):
 
     def disconnect(self):
         self.sensor.close()
+
+
+if __name__ == "__main__":
+    sensor = HCSR04Sensor()
+    sensor.run()
