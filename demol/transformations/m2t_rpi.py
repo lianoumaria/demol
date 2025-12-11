@@ -317,51 +317,81 @@ class DeviceModelExtractor:
             else:
                 attributes[setting.name] = setting.default
 
+from .base_generator import BaseCodeGenerator
 
-class RPiCodeGenerator:
+
+class RPiCodeGenerator(BaseCodeGenerator):
     """Generates Raspberry Pi code from device model."""
     
-    def __init__(self, output_dir: Path):
-        """Initialize code generator.
+    def __init__(self, device_model, output_dir: Path):
+        """Initialize code generator with device model.
         
         Args:
+            device_model: Parsed textX device model
             output_dir: Output directory for generated code
         """
-        self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Setup Jinja2 environment
-        fsloader = jinja2.FileSystemLoader(TEMPLATES_RPI)
-        self.env = jinja2.Environment(loader=fsloader)
+        super().__init__(device_model, output_dir)
+        self.env = self.setup_template_environment()
     
-    def build_template_context(self, peripheral_info: Dict[str, Any], broker_config: Dict[str, Any] = None) -> Dict[str, Any]:
-        """Build structured context dictionary for Jinja2 templates.
+    def setup_template_environment(self) -> jinja2.Environment:
+        """Setup Jinja2 environment with RPI-specific templates.
+        
+        Returns:
+            Configured Jinja2 Environment
+        """
+        fsloader = jinja2.FileSystemLoader(TEMPLATES_RPI)
+        return jinja2.Environment(loader=fsloader)
+    
+    
+    def build_template_context(self, connection) -> Dict[str, Any]:
+        """Build structured context dictionary by querying model.
         
         Args:
-            peripheral_info: Peripheral information dictionary
-            broker_config: MQTT broker configuration (optional)
+            connection: Connection object from device model
             
         Returns:
-            Structured context dictionary
+            Structured context dictionary for templates
         """
+        # Query model for all needed information
+        peripheral_ref = connection.peripheral.ref
+        board = self.get_board()
+        broker_config = self.get_broker_config()
+        pins = self.get_pin_mappings(connection.dataConns, board)
+        attributes = self.get_peripheral_attributes(peripheral_ref)
+        
+        # Apply settings to override attributes
+        self._apply_settings(attributes, connection.settings)
+        
+        # Build base context
         context = {
-            "name": peripheral_info["name"],
-            "instance": peripheral_info["instance"],
-            "type": peripheral_info["type"],
-            "class": peripheral_info["class"],
-            "board": peripheral_info["board_ref"],
-            "peripheral": peripheral_info["peripheral_ref"],
+            "name": peripheral_ref.name,
+            "instance": connection.peripheral.name,
+            "type": type(peripheral_ref).__name__,
+            "class": peripheral_ref.type,
+            "board": board,
+            "peripheral": peripheral_ref,
+            "broker": broker_config,
             "conn": {},
-            "attributes": peripheral_info["attributes"],
-            "broker": broker_config or {}
+            "attributes": attributes
         }
         
-        # Get board pins map for pin number lookup
-        board = peripheral_info["board_ref"]
-        board_pins_map = {pin.name: pin for pin in board.pins}
+        # Build structured connection info
+        context["conn"] = self._build_conn_info(pins, board)
         
-        # Organize pins and properties by connection type
-        pins = peripheral_info["pins"]
+        return context
+    
+    def _build_conn_info(self, pins: Dict[str, Any], board) -> Dict[str, Any]:
+        """Build structured connection information dictionary.
+        
+        Args:
+            pins: Pin mappings dictionary
+            board: Board object
+            
+        Returns:
+            Structured connection dictionary organized by type
+        """
+        conn = {}
+        board_pins_map = {pin.name: pin for pin in board.pins}
         
         # GPIO connection
         gpio_pins = {}
@@ -378,7 +408,7 @@ class RPiCodeGenerator:
                 }
         
         if gpio_pins or gpio_props:
-            context["conn"]["gpio"] = {**gpio_props, "pins": gpio_pins}
+            conn["gpio"] = {**gpio_props, "pins": gpio_pins}
         
         # I2C connection
         if "sda" in pins or "scl" in pins:
@@ -407,7 +437,7 @@ class RPiCodeGenerator:
             for key, value in pins.items():
                 if "sda_props" in key or "scl_props" in key:
                     i2c_props.update(value if isinstance(value, dict) else {})
-            context["conn"]["i2c"] = {**i2c_props, "pins": i2c_pins}
+            conn["i2c"] = {**i2c_props, "pins": i2c_pins}
         
         # SPI connection
         if "mosi" in pins or "miso" in pins or "sck" in pins:
@@ -429,7 +459,7 @@ class RPiCodeGenerator:
             for key, value in pins.items():
                 if any(x in key for x in ["mosi_props", "miso_props", "sck_props", "cs_props"]):
                     spi_props.update(value if isinstance(value, dict) else {})
-            context["conn"]["spi"] = {**spi_props, "pins": spi_pins}
+            conn["spi"] = {**spi_props, "pins": spi_pins}
         
         # UART connection
         if "tx" in pins or "rx" in pins:
@@ -458,44 +488,48 @@ class RPiCodeGenerator:
             for key, value in pins.items():
                 if "tx_props" in key or "rx_props" in key:
                     uart_props.update(value if isinstance(value, dict) else {})
-            context["conn"]["uart"] = {**uart_props, "pins": uart_pins}
+            conn["uart"] = {**uart_props, "pins": uart_pins}
         
-        return context
+        return conn
     
-    def generate_peripheral_classes(
-        self, 
-        peripherals: List[Dict[str, Any]],
-        broker_config: Dict[str, Any] = None) -> None:
-        """Generate peripheral class files.
+    def generate(self) -> None:
+        """Generate all RPI code from device model."""
+        logger.info("Generating RPI code...")
+        self.generate_peripheral_classes()
+        self.generate_common()
+        self.generate_messages()
+        logger.info("Code generation complete!")
+    
+    def generate_peripheral_classes(self) -> None:
+        """Generate peripheral class files by querying model."""
+        for connection in self.get_connections():
+            self._generate_peripheral_class(connection)
+    
+    def _generate_peripheral_class(self, connection) -> None:
+        """Generate a single peripheral class file.
         
         Args:
-            peripherals: List of peripheral configurations
-            broker_config: MQTT broker configuration (optional)
+            connection: Connection object from device model
         """
-        for peripheral in peripherals:
-            self._generate_peripheral_class(peripheral, broker_config)
-    
-    def _generate_peripheral_class(self, peripheral: Dict[str, Any], broker_config: Dict[str, Any] = None) -> None:
-        """Generate a single peripheral class file."""
+        peripheral_ref = connection.peripheral.ref
+        
         # Get template using peripheral reference
-        template_name = PeripheralTemplateMapper.get_template(
-            peripheral["peripheral_ref"]
-        )
+        template_name = PeripheralTemplateMapper.get_template(peripheral_ref)
         
         if not template_name:
             logger.warning(
-                f"Skipping peripheral {peripheral['instance']}: no template available"
+                f"Skipping peripheral {connection.peripheral.name}: no template available"
             )
             return
         
         template = self.env.get_template(template_name)
         
-        # Build structured context using new schema
-        context = self.build_template_context(peripheral, broker_config)
+        # Build context by querying model
+        context = self.build_template_context(connection)
         
         # Render and write
         output = template.render(**context)
-        output_path = self.output_dir / f"{peripheral['instance']}.py"
+        output_path = self.output_dir / f"{connection.peripheral.name}.py"
         
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(output)
@@ -611,7 +645,7 @@ class RPiCodeGenerator:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(output)
         
-        logger.info(f"Generated: {output_path}")
+        logger.debug(f"Generated: {output_path}")
 
 
 def transform_device_model(device_model_path: str, output_dir: str) -> None:
@@ -622,36 +656,19 @@ def transform_device_model(device_model_path: str, output_dir: str) -> None:
         output_dir: Output directory (relative to REPO_PATH)
     """
     # Build paths
-    model_path = Path(REPO_PATH) / "examples" / device_model_path
-    output_path = Path(REPO_PATH) / output_dir
+    model_path = Path(device_model_path)
+    output_path = Path('.') / output_dir
     
-    logger.debug(f"Loading device model from: {model_path}")
+    logger.info(f"Transforming: {model_path}")
     
     # Parse device model
     device_model = build_model(str(model_path))
     
-    # Extract information
-    logger.debug("Extracting device model information...")
-    extractor = DeviceModelExtractor(device_model)
-    extractor.extract()
+    # Generate code using new architecture
+    generator = RPiCodeGenerator(device_model, output_path)
+    generator.generate()
     
-    # Log extracted info
-    logger.debug(f"Found {len(extractor.peripherals)} peripheral(s)")
-    logger.debug(f"Broker: {extractor.broker_config['host']}:{extractor.broker_config['port']}")
-    
-    # Generate code
-    logger.debug(f"Generating code to: {output_path}")
-    generator = RPiCodeGenerator(output_path)
-    
-    logger.debug("Generating peripheral classes...")
-    generator.generate_peripheral_classes(extractor.peripherals, extractor.broker_config)
-    generator.generate_messages()
-    generator.generate_common()
-    
-    # logger.debug("Generating MQTT processes...")
-    # generator.generate_mqtt_processes(extractor.peripherals, extractor.broker_config)
-    
-    logger.debug("Code generation complete!")
+    logger.info("Transformation complete!")
 
 
 def main(dev_model: str, output_dir: str) -> None:
@@ -662,8 +679,3 @@ def main(dev_model: str, output_dir: str) -> None:
         output_dir: Output directory for generated code
     """
     transform_device_model(dev_model, output_dir)
-
-
-if __name__ == "__main__":
-    # Use forward slashes for cross-platform compatibility
-    main("ThesisExamples/ThesisExample.dev", "rpi5_out/ThesisExample")
