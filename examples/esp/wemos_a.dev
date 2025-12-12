@@ -23,21 +23,19 @@ Components
     peripherals: SonarSRF04(Sonar), WS281X(Ledstrip)
 end
 
-Connect Sonar
-    power:
+CONNECT Sonar WITH
+    POWER
         gnd -- gnd,
         power_5v -- vcc
-    data:
-        gpio pin d3 -- trigger,
-        gpio pin d4 -- echo
-    remote: "my_wemos.sensors.distance.sonar"
-end
+    DATA
+        gpio d3 -- trigger,
+        gpio d4 -- echo
+    @ "my_wemos.sensors.distance.sonar";
 
-Connect Ledstrip
-    power:
+CONNECT Ledstrip WITH
+    POWER
         gnd -- gnd,
         power_5v -- vcc
-    data:
-        gpio pin d2 -- data_in
-    remote: "my_wemos.actuators.visual.ledstrip"
-end
+    DATA
+        gpio d2 -- data_in
+    @ "my_wemos.actuators.visual.ledstrip";

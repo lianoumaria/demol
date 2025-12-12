@@ -24,11 +24,10 @@ Broker[MQTT] locsys_broker
         password: "issel.sensors"
 end
 
-Connect WarningLights
-    power:
+CONNECT WarningLights WITH
+    POWER
         GND_2 -- GND,
         power_5v_b -- VCC
-    data:
+    DATA
         gpio[mode="output"] GPIO18 -- DIN
-    // remote: ...
-end
+;

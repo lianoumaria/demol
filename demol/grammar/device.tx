@@ -52,13 +52,13 @@ PeripheralDef:
 ;
 
 Connect:
-	"Connect" peripheral=[PeripheralDef:FQN|~components.peripherals]
+	/[Cc][Oo][Nn][Nn][Ee][Cc][Tt]/ peripheral=[PeripheralDef:FQN|~components.peripherals] /[Ww][Ii][Tt][Hh]/
 	(
-	    ("power:" powerConns*=PowerConnection[','])?
-        ("data:" dataConns+=DataConnection[','])?
-	    ("remote:" remote=STRING)?
+	    (/[Pp][Oo][Ww][Ee][Rr]/ powerConns*=PowerConnection[','])?
+        (/[Dd][Aa][Tt][Aa]/ dataConns+=DataConnection[','])?
+	    ("@" remote=STRING)?
     )#
-    'end'
+    ';'
 ;
 
 PinConnection:

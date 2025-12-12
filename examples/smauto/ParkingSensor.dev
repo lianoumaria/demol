@@ -24,12 +24,11 @@ Broker[MQTT] locsys_broker
         password: "issel.sensors"
 end
 
-Connect ParkingDistance
-    power:
+CONNECT ParkingDistance WITH
+    POWER
         GND_1 -- GND,
         power_5v_a -- VCC
-    data:
+    DATA
         gpio[mode="input"] GPIO24 -- echo,
         gpio[mode="output"] GPIO23 -- trigger
-    // remote: ...
-end
+    @ "my_raspi.sensors.distance.srf05";

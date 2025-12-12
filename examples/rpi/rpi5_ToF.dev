@@ -25,48 +25,43 @@ Broker[MQTT] MyBroker
         password: "guest"
 end
 
-Connect MyToF
-    power:
+CONNECT MyToF WITH
+    POWER
         GND_3 -- GND,
         power_3v3_a -- VIN
-    data:
+    DATA
         i2c[slave_address=0x29] sda GPIO2 -- SDA, scl GPIO3 -- SCL
-    remote: "my_raspi.sensors.tof.vl53l1x"
-end
+    @ "my_raspi.sensors.tof.vl53l1x";
 
-Connect MyTracker
-    power:
+CONNECT MyTracker WITH
+    POWER
         GND_1 -- GND,
         power_5v_a -- VCC
-    data:
+    DATA
         gpio[mode="input"] GPIO4 -- D0
-    remote: "my_raspi.sensors.tracker.TCRT5000"
-end
+    @ "my_raspi.sensors.tracker.TCRT5000";
 
-Connect MyTFMini
-    power:
+CONNECT MyTFMini WITH
+    POWER
         GND_4 -- GND,
         power_5v_b -- VCC
-    data:
+    DATA
         uart[baudrate=115200] tx GPIO14 -- RXD, rx GPIO15 -- TXD
-    remote: "my_raspi.sensors.tfmini"
-end
+    @ "my_raspi.sensors.tfmini";
 
-Connect MyBME
-    power:
+CONNECT MyBME WITH
+    POWER
         GND_3 -- gnd,
         power_5v_a -- vcc
-    data:
+    DATA
         i2c[slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
-    remote: "my_raspi.sensors.env.bme680"
-end
+    @ "my_raspi.sensors.env.bme680";
 
-Connect MySRF
-    power:
+CONNECT MySRF WITH
+    POWER
         GND_2 -- GND,
         power_5v_b -- VCC
-    data:
+    DATA
         gpio[mode="input"] GPIO24 -- echo,
         gpio[mode="output"] GPIO23 -- trigger
-    remote: "my_raspi.sensors.distance.srf05"
-end 
+    @ "my_raspi.sensors.distance.srf05"; 

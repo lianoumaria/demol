@@ -22,11 +22,10 @@ Components
     peripherals: BME680(BME)
 end
 
-Connect BME
-    power:
+CONNECT BME WITH
+    POWER
         gnd -- gnd,
         power_5v -- vcc
-    data:
+    DATA
         i2c[slave_address=0x78] sda d2 -- sda, scl d1 -- scl
-    remote: "my_wemos.actuators.visual.ledstrip"
-end
+    @ "my_wemos.actuators.visual.ledstrip";

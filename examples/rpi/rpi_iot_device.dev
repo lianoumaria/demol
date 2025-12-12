@@ -24,11 +24,10 @@ Broker[MQTT] MyMqttBroker
         password: "guest"
 end
 
-Connect MyBME
-    power:
+CONNECT MyBME WITH
+    POWER
         gnd_1 -- gnd,
         power_5v -- vcc
-    data:
+    DATA
         i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
-    remote: "my_esp.sensors.env.bme680"
-end
+    @ "my_esp.sensors.env.bme680";

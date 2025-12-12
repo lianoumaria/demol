@@ -100,11 +100,11 @@ BoolAttribute:
 ;
 
 ListAttribute:
-    name=ID '[' type='list' ']' ('=' '[' default*=VALUE[','] ']')?
+    name=ID '[' type='list' ']' ('=' default=ListValue)?
 ;
 
 DictAttribute:
-    name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')?
+    name=ID '[' type='dict' ']' ('=' default=DictValue)?
 ;
 
 OperatingSystem:

@@ -30,20 +30,18 @@ Broker[MQTT] locsys_broker
         password: "issel.sensors"
 end
 
-Connect TempSensor
-    power:
+CONNECT TempSensor WITH
+    POWER
         GND_1 -- gnd,
         power_5v_a -- vcc
-    data:
+    DATA
         i2c[slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
-    // remote: ...
-end
+;
 
-Connect WindowController
-    power:
+CONNECT WindowController WITH
+    POWER
         GND_2 -- GND_1,
         power_5v_b -- VCC_1
-    data:
+    DATA
         i2c[slave_address=0x64] sda GPIO2 -- SDA_1, scl GPIO3 -- SCL_1
-    // remote: ...
-end
+;

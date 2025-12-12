@@ -145,11 +145,6 @@ Memory:
     )#
 ;
 
-NetworkInterface:
-    WifiInterface   |
-    EthernetInterface
-;
-
 WifiInterface:
 	(
         ("name:" name=ID)

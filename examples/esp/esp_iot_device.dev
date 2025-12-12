@@ -23,21 +23,19 @@ Components
     peripherals: SonarSRF04(MySonar), BME680(MyBME)
 end
 
-Connect MySonar
-    power:
+CONNECT MySonar WITH
+    POWER
         gnd_1 -- gnd,
         power_5v -- vcc
-    data:
-        gpio pin p_13 -- trigger,
-        gpio pin p_14 -- echo
-    remote: "my_esp.sensors.distance.srf04_02"
-end
+    DATA
+        gpio p_13 -- trigger,
+        gpio p_14 -- echo
+    @ "my_esp.sensors.distance.srf04_02";
 
-Connect MyBME
-    power:
+CONNECT MyBME WITH
+    POWER
         gnd_1 -- gnd,
         power_5v -- vcc
-    data:
+    DATA
         i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
-    remote: "my_esp.sensors.env.bme680"
-end
+    @ "my_esp.sensors.env.bme680";

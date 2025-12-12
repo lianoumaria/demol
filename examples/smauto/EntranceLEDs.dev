@@ -24,21 +24,19 @@ Broker[MQTT] locsys_broker
         password: "issel.sensors"
 end
 
-Connect EntranceSRF
-    power:
+CONNECT EntranceSRF WITH
+    POWER
         GND_1 -- GND,
         power_5v_a -- VCC
-    data:
+    DATA
         gpio[mode="input"] GPIO24 -- echo,
         gpio[mode="output"] GPIO23 -- trigger
-    // remote: ...
-end
+;
 
-Connect RoomLights
-    power:
+CONNECT RoomLights WITH
+    POWER
         GND_2 -- GND,
         power_5v_b -- VCC
-    data:
+    DATA
         gpio[mode="output"] GPIO10 -- DIN
-    // remote: ...
-end
+;

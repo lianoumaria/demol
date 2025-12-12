@@ -24,11 +24,10 @@ Broker[MQTT] MyBroker
         password: "guest"
 end
 
-Connect MyBME
-    power:
+CONNECT MyBME WITH
+    POWER
         GND_3 -- gnd,
         power_5v_a -- vcc
-    data:
+    DATA
         i2c[slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
-    remote: "my_raspi.sensors.env.bme680"
-end
+    @ "my_raspi.sensors.env.bme680";
