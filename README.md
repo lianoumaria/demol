@@ -119,15 +119,14 @@ The DeMoL DSL is built using the [textX](http://textx.github.io/textX/) framewor
 
 ### Grammar Structure
 
-The grammar is modular and split into **5 interconnected files** located in `demol/grammar/`:
+The grammar is modular and split into **4 interconnected files** located in `demol/grammar/`:
 
 | File               | Purpose                           | Key Concepts                        |
 | ------------------ | --------------------------------- | ----------------------------------- |
-| `device.tx`        | Main device model definition      | DeviceModel, Connection, Settings   |
+| `device.tx`        | Main device model definition      | DeviceModel, Connect                |
 | `component.tx`     | Board & peripheral hardware specs | Board, Sensor, Actuator, Pins       |
 | `communication.tx` | Message broker configurations     | AMQPBroker, MQTTBroker, RedisBroker |
-| `common.tx`        | Common utilities                  | FQN, Import, Comments               |
-| `utils.tx`         | Additional utilities              | FQN handling, Keywords              |
+| `common.tx`        | Common utilities & types          | AttributeSet, VALUE, Imports        |
 
 ### Core Concepts
 
@@ -136,7 +135,7 @@ The language is built around these fundamental concepts:
 - **Device** - Complete IoT device definition with metadata and configuration
 - **Board** - Microcontroller/SBC hardware (ESP32, Raspberry Pi, etc.)
 - **Peripheral** - External sensors and actuators (BME680, SRF04, etc.)
-- **Connection** - Defines how peripherals connect to boards (power + IO)
+- **Connect** - Defines how peripherals connect to boards (power + data + remote)
 - **MessageBroker** - Communication infrastructure (MQTT, AMQP, Redis)
 - **Network** - WiFi configuration
 
@@ -153,7 +152,7 @@ Metadata
     name: "DeviceName"
     description: "Device description"
     author: "author_name"
-    os: Raspbian  // or RiotOS
+    os: raspbian  // or riotos
 end
 
 Network
@@ -163,7 +162,7 @@ Network
     channel: "6"  // optional
 end
 
-Broker<MQTT> BrokerName
+Broker[MQTT] BrokerName
     host: "mqtt.example.com"
     port: 1883
     ssl: False
@@ -174,23 +173,16 @@ end
 
 Components
     board: BoardModelName
-    peripherals:
-        - PeripheralModel(InstanceName1)
-        - PeripheralModel(InstanceName2)
+    peripherals: PeripheralModel1(InstanceName1), PeripheralModel2(InstanceName2)
 end
 
-Connection
-    peripheral: InstanceName1
-    powerConnections:
-        - board_pin -- peripheral_pin
-    ioConnections:
-        - type: gpio
-          pin: board_pin -- peripheral_pin
-    endpoint:
-        topic: "device/sensor/topic"
-        type: Publisher
-    settings:
-        - setting_name: type = value
+Connect InstanceName1
+    power:
+        board_pin -- peripheral_pin,
+        board_pin2 -- peripheral_pin2
+    data:
+        gpio[mode="output"] board_pin -- peripheral_pin
+    remote: "device/sensor/topic"  // optional
 end
 ```
 
@@ -203,13 +195,14 @@ Metadata
     name: "SmartSensor"
     description: "Environmental monitoring sensor"
     author: "developer_name"
-    os: Raspbian  // Raspbian or RiotOS
+    os: raspbian  // raspbian or riotos
 end
 ```
 
 **Target Operating Systems:**
-- `Raspbian` - For Raspberry Pi devices
-- `RiotOS` - For embedded systems (ESP32, ESP8266, etc.)
+- `raspbian` - For Raspberry Pi devices
+- `riotos` - For embedded systems (ESP32, ESP8266, etc.)
+- `freertos`, `arduino`, `esp-idf`, `esp-idf-rtos` - Other embedded platforms
 
 #### Network Configuration
 
@@ -231,10 +224,9 @@ Specifies the hardware composition:
 ```
 Components
     board: RaspberryPi_4B_4GB
-    peripherals:
-        - BME680(EnvSensor)
-        - SonarSRF04(DistanceSensor)
-        - WS2812(StatusLED)
+    peripherals: BME680(EnvSensor) [
+        poll_period = 5
+    ], SonarSRF04(DistanceSensor), WS2812(StatusLED)
 end
 ```
 
@@ -243,6 +235,31 @@ end
 - Peripheral models are loaded from `demol/builtin_models/peripherals/`
 - Supports multi-file imports using FQN (Fully Qualified Names)
 - Named peripheral instances for easy reference in connections
+- **Attributes can be overridden** using square bracket syntax
+
+#### Attributes in Components
+
+Peripheral attributes can be customized when declaring instances in the Components block:
+
+```
+Components
+    board: RaspberryPi_4B_4GB
+    peripherals: BME680(EnvSensor) [
+        poll_period = 5,
+        filter_size = 7
+    ], SonarSRF04(DistanceSensor) [
+        max_distance = 300
+    ]
+end
+```
+
+**Key Points:**
+- Attributes override peripheral default values
+- Use square brackets `[ ]` after the instance name
+- Comma-separated attribute assignments within square brackets
+- Comma-separated peripheral instances in the peripherals list
+- Only override attributes you need to change
+- Supports lists and dictionaries: `colors = ['0xFF0000', '0x00FF00']` or `config = {timeout = 5000}`
 
 ### Hardware Components
 
@@ -254,6 +271,8 @@ Boards are defined in `.hwd` files and describe microcontroller/SBC specificatio
 Board[RPI] RaspberryPi_4B_4GB
     operational
         vcc: 5V
+        ioVcc: 3V3
+        energy: 1.4 W, 7.6 W, 3.5 W  // min, max, avg power consumption
         memory:
             flash: 16 gb
             ram: 4 gb
@@ -265,13 +284,12 @@ Board[RPI] RaspberryPi_4B_4GB
             name: wifi_0
             freq: 2.4 ghz
         bluetooth: BT5
-        ioVcc: 3V3
     end
     pins
-        PPIN power_5v[5V] @ 2;
-        PPIN gnd_1[GND] @ 6;
-        DPIN p_21[gpio,sda-1] @ 40;
-        DPIN p_22[gpio,scl-1] @ 38;
+        power_5v[5V] @ 2,
+        gnd_1[GND] @ 6,
+        p_21[gpio,sda-1] @ 40,
+        p_22[gpio,scl-1] @ 38
     end
 end
 ```
@@ -279,8 +297,8 @@ end
 **Board Types:** `RPI` (Raspberry Pi), `ESP` (ESP32/ESP8266), `ARDUINO`
 
 **Pin Syntax:**
-- `PPIN` - Power pins (VCC, GND)
-- `DPIN` - Digital/IO pins with functions
+- `name [type] @ number` - Power pins (VCC, GND)
+- `name [funcs] @ number` - Digital/IO pins with functions
 
 **Pin Functions:** `gpio`, `adc`, `dac`, `pwm-<channel>`, `sda-<bus>`, `scl-<bus>`, `mosi-<bus>`, `miso-<bus>`, `sck-<bus>`, `cs-<bus>`, `tx-<bus>`, `rx-<bus>`
 
@@ -295,20 +313,23 @@ Sensor[Env] BME680
     operational
         vcc: 5V
         ioVcc: 3V3
-        energy: 0.01 mW, 39.6 mW, 3 mW
-        piTpl: "bme680"  // optional - RaspberryPi template
-        riotTpl: "bme680"  // optional - RiotOS template
+        energy: 0.01 mW, 39.6 mW, 3 mW  // min, max, avg power consumption
     end
     pins
-        PPIN vcc[5V] @ 1;
-        PPIN gnd[GND] @ 5;
-        DPIN sda[sda-0] @ 2;
-        DPIN scl[scl-0] @ 3;
+        vcc[5V] @ 1,
+        gnd[GND] @ 5,
+        sda[sda-0] @ 2,
+        scl[scl-0] @ 3
+    end
+    templates
+        raspbian: "bme680.py.tmpl",
+        riotos: "bme680.c.tmpl"
     end
     attributes
-        ATTR poll_period[int] = 10;
-        ATTR humidity_oversample[int] = 2;
-        ATTR temperature_oversample[int] = 8;
+        poll_period[int] = 10,
+        humidity_oversample[int] = 2,
+        temperature_oversample[int] = 8,
+        filter_size[int] = 3
     end
 end
 ```
@@ -328,14 +349,14 @@ Actuator[ServoController] PCA9685
         ioVcc: 5V
     end
     pins
-        PPIN GND_1[GND] @ 1;
-        DPIN SCL_1[scl-0] @ 2;
-        DPIN SDA_1[sda-0] @ 3;
-        PPIN VCC_1[5V] @ 4;
+        GND_1[GND] @ 1,
+        SCL_1[scl-0] @ 2,
+        SDA_1[sda-0] @ 3,
+        VCC_1[5V] @ 4
     end
     attributes
-        ATTR num_servos[int] = 16;
-        ATTR frequency[int] = 50;
+        num_servos[int] = 16,
+        frequency[int] = 50
     end
 end
 ```
@@ -357,125 +378,72 @@ Connections define how peripherals connect to the board through power and IO pin
 #### GPIO Connection
 
 ```
-Connection
-    peripheral: DistanceSensor
-    powerConnections:
-        - gnd_1 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: gpio
-          name: trigger  // optional
-          pin: p_13 -- trigger
-          input: False  // optional mode
-          output: True
-          pullup: False
-          pulldown: False
-          open_drain: False
-        - type: gpio
-          name: echo
-          pin: p_14 -- echo
-    endpoint:
-        topic: "sensors/distance"
-        type: Publisher
+Connect DistanceSensor
+    power:
+        gnd_1 -- gnd,
+        power_5v -- vcc
+    data:
+        gpio[mode="output"] p_13 -- trigger,
+        gpio[mode="input"] p_14 -- echo
+    remote: "sensors/distance"
 end
 ```
 
 #### I2C Connection
 
 ```
-Connection
-    peripheral: EnvSensor
-    powerConnections:
-        - gnd_1 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: i2c
-          name: env_i2c  // optional
-          slave_address: 0x76
-          pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
-    endpoint:
-        topic: "sensors/environment"
-        type: Publisher
-    settings:
-        - poll_period: int = 5
-        - enable_gas: bool = True
+Connect EnvSensor
+    power:
+        gnd_1 -- GND,
+        power_5v -- VCC
+    data:
+        i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
+    remote: "sensors/environment"
 end
 ```
 
 #### SPI Connection
 
 ```
-Connection
-    peripheral: DisplayModule
-    powerConnections:
-        - gnd_1 -- GND
-        - power_3v3 -- VCC
-    ioConnections:
-        - type: spi
-          name: display_spi  // optional
-          pins:
-              mosi: p_23 -- mosi
-              miso: p_19 -- miso
-              sck: p_18 -- sck
-              cs: p_5 -- cs
-    endpoint:
-        type: Subscriber
+Connect DisplayModule
+    power:
+        gnd_1 -- GND,
+        power_3v3 -- VCC
+    data:
+        spi[bus_speed=1000000, mode=0] mosi p_23 -- mosi, miso p_19 -- miso, sck p_18 -- sck, cs p_5 -- cs
 end
 ```
 
 #### UART Connection
 
 ```
-Connection
-    peripheral: GPSModule
-    powerConnections:
-        - gnd_1 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: uart
-          name: gps_uart  // optional
-          pins:
-              tx: p_1 -- tx
-              rx: p_3 -- rx
-              baudrate: 115200
-    endpoint:
-        topic: "sensors/gps"
-        type: Publisher
+Connect GPSModule
+    power:
+        gnd_1 -- GND,
+        power_5v -- VCC
+    data:
+        uart[baudrate=115200] tx p_1 -- RXD, rx p_3 -- TXD
+    remote: "sensors/gps"
 end
 ```
 
-#### Endpoint Types
+**Note:** UART connections require TX→RX and RX→TX crossover (board TX connects to peripheral RX, and vice versa).
+
+#### Remote Topics
+
+The `remote` field in connections specifies the MQTT/AMQP/Redis topic for this peripheral:
 
 ```
-endpoint:
-    topic: "device/sensor/data"  // optional, auto-generated if omitted
-    type: Publisher  // Publisher, Subscriber, RPC, Action
-```
-
-**Auto-generated Topics:** If topic is omitted, it's generated as `<device_name>.<peripheral_type>.<peripheral_msg>.<instance_name>` (e.g., `mydevice.sensor.env.mysensor`)
-
-#### Connection Settings
-
-Define peripheral-specific runtime configurations:
-
-```
-settings:
-    - poll_rate: int = 10
-    - threshold: float = 25.5
-    - sensor_name: str = "BME680"
-    - enable_filter: bool = True
-    - thresholds: list = [10, 20, 30, 40]
-    - config: dict = {
-        timeout: int = 5000,
-        retry: bool = True,
-        max_attempts: int = 3
-      }
+Connect MySensor
+    power: ...
+    data: ...
+    remote: "device/sensor/data"  // optional
 end
 ```
 
-**Setting Types:** `int`, `float`, `str`, `bool`, `list`, `dict`
+**Auto-generated Topics:** If `remote` is omitted, topics may be auto-generated based on device and peripheral names.
+
+
 
 ### Message Brokers
 
@@ -484,7 +452,7 @@ DeMoL supports three message broker types:
 #### MQTT Broker
 
 ```
-Broker<MQTT> MyMqttBroker
+Broker[MQTT] MyMqttBroker
     host: "mqtt.example.com"
     port: 1883
     ssl: False
@@ -500,7 +468,7 @@ end
 #### AMQP Broker
 
 ```
-Broker<AMQP> MyAmqpBroker
+Broker[AMQP] MyAmqpBroker
     host: "rabbitmq.example.com"
     port: 5672
     vhost: "/"  // optional
@@ -516,7 +484,7 @@ end
 #### Redis Broker
 
 ```
-Broker<Redis> MyRedisBroker
+Broker[Redis] MyRedisBroker
     host: "redis.example.com"
     port: 6379
     db: 0  // optional
@@ -541,7 +509,7 @@ Metadata
     name: "SmartEnvironmentMonitor"
     description: "Multi-sensor environmental monitoring device"
     author: "john_doe"
-    os: Raspbian
+    os: raspbian
 end
 
 Network
@@ -549,7 +517,7 @@ Network
     passwd: "secure_password"
 end
 
-Broker<MQTT> SmartHomeBroker
+Broker[MQTT] SmartHomeBroker
     host: "mqtt.smarthome.local"
     port: 1883
     ssl: True
@@ -560,66 +528,41 @@ end
 
 Components
     board: RaspberryPi_4B_4GB
-    peripherals:
-        - BME680(EnvSensor)
-        - SonarSRF04(DistanceSensor)
-        - WS2812(StatusLED)
+    peripherals: BME680(EnvSensor) [
+        poll_period = 5
+    ], SonarSRF04(DistanceSensor), WS2812(StatusLED) [
+        colors = ['0xFF0000', '0x00FF00', '0x0000FF']
+    ]
 end
 
-Connection
-    peripheral: EnvSensor
-    powerConnections:
-        - gnd_1 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: i2c
-          slave_address: 0x76
-          pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
-    endpoint:
-        topic: "home/environment/living_room"
-        type: Publisher
-    settings:
-        - poll_period: int = 5
-        - humidity_oversample: int = 2
-        - pressure_oversample: int = 4
-        - temperature_oversample: int = 8
+Connect EnvSensor
+    power:
+        gnd_1 -- GND,
+        power_5v -- VCC
+    data:
+        i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
+    remote: "home/environment/living_room"
 end
 
-Connection
-    peripheral: DistanceSensor
-    powerConnections:
-        - gnd_2 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: gpio
-          name: trigger
-          pin: p_23 -- trigger
-        - type: gpio
-          name: echo
-          pin: p_24 -- echo
-    endpoint:
-        topic: "home/distance/entrance"
-        type: Publisher
+Connect DistanceSensor
+    power:
+        gnd_2 -- gnd,
+        power_5v -- vcc
+    data:
+        gpio[mode="output"] p_23 -- trigger,
+        gpio[mode="input"] p_24 -- echo
+    remote: "home/distance/entrance"
 end
 
-Connection
-    peripheral: StatusLED
-    powerConnections:
-        - gnd_3 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: gpio
-          name: LedControl
-          pin: GPIO10 -- DIN
-    endpoint:
-        type: Subscriber
-    settings:
-        - colors: list = ['0xFF0000', '0x00FF00', '0x0000FF']
-        - brightness: int = 128
-        - num_leds: int = 12
+Connect StatusLED
+    power:
+        gnd_3 -- GND,
+        power_5v -- VCC
+    data:
+        gpio[mode="output"] GPIO10 -- DIN
+    remote: "home/status/led"
 end
+```
 
 
 ## 🔌 Supported Sensors & Actuators
@@ -906,30 +849,44 @@ Otherwise, the parser will raise an error:
 textx.exceptions.TextXSemanticError: rpi_iot_device.dev:29:17: Unknown object "MyBME2" of class "PeripheralDef"
 ```
 
-### Development & Validation Scripts
+### Code Generation
 
-The repository includes several utility scripts in the `scripts/` directory for validation and code generation testing:
+DeMoL supports automated code generation for multiple platforms using a model-driven architecture.
 
-#### Validate Builtin Models
-Validates all builtin board and peripheral models (`.hwd` files) to ensure they comply with the DeMoL grammar and semantics.
+#### Architecture
 
-```sh
-python scripts/validate_builtin_models.py
+The code generation system uses an abstract `BaseCodeGenerator` class that provides common model querying capabilities. Platform-specific generators inherit from this base class to implement target-specific logic.
+
+```
+Device Model → BaseCodeGenerator (abstract)
+                    ↓
+            ┌───────┴────────┐
+            ↓                ↓
+    RPiCodeGenerator    ESPCodeGenerator (future)
+            ↓                ↓
+        Templates        Templates
 ```
 
-#### Generate RPI Examples
-Generates Raspberry Pi code for all example models in `examples/`, validating the code generation pipeline.
+#### Supported Generators
+
+- **Raspberry Pi (Python)**: Generates Python code using `RPi.GPIO`, `smbus2`, and `spidev`.
+- **RiotOS (C)**: (In development) Generates C code for RiotOS-supported boards.
+
+#### Running Code Generation
+
+To generate code for a device model:
 
 ```sh
+# Generate Raspberry Pi code
 python scripts/generate_rpi_examples.py
 ```
 
-#### Validate Examples
-Validates all example models in `examples/` against the grammar.
-
-```sh
-python scripts/validate_examples.py
-```
+This will:
+1. Parse the device model
+2. Validate semantics
+3. Resolve platform-specific templates
+4. Generate peripheral classes and main application code
+5. Output to the specified directory
 
 ### REST API
 
