@@ -7,7 +7,9 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals: SRF05(MySRF), WS2812(MyLedRing)
+    peripherals: SRF05(MySRF), WS2812(MyLedRing) [
+        colors = ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']
+    ]
 end
 
 Network
@@ -41,6 +43,4 @@ Connect MyLedRing
     data:
         gpio[mode="output"] GPIO4 -- DIN
     // remote: ...
-    settings:
-        - colors [list] = ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']
 end

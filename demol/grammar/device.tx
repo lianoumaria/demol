@@ -57,7 +57,6 @@ Connect:
 	    ("power:" powerConns*=PowerConnection[','])?
         ("data:" dataConns+=DataConnection[','])?
 	    ("remote:" remote=STRING)?
-        ("settings:" "-" settings*=Attribute['-'])?
     )#
     'end'
 ;

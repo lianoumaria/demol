@@ -31,6 +31,4 @@ Connect WarningLights
     data:
         gpio[mode="output"] GPIO18 -- DIN
     // remote: ...
-    settings:
-        - colors [list] = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']
 end

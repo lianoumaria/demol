@@ -64,11 +64,6 @@ def get_peripherals_info(device_model):
             if attribute.name == "frequency":
                 per_frequency = attribute.default
                 peripheral_data = peripheral_data | {"per_frequency": per_frequency}
-        #In a peripheral model a default frequency might be given, but it must be overwritten if a new one is given in the device model.
-        for setting in device_model.connections[i].settings:
-            if setting.name == "frequency":
-                per_frequency = setting.default
-                peripheral_data["per_frequency"] = per_frequency
  
         # Create a dictionary for each peripheral and append it to the list
         peripherals_data.append(peripheral_data)

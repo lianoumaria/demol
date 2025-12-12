@@ -306,19 +306,7 @@ class BaseCodeGenerator(ABC):
             result[item.key] = item.value
         return result
     
-    def _apply_settings(self, attributes: Dict[str, Any], settings: List) -> None:
-        """Apply settings to override attribute values.
-        
-        Args:
-            attributes: Dictionary of attributes to update
-            settings: List of setting objects from model
-        """
-        for setting in settings:
-            # Settings have .value property (not .default like attributes)
-            if hasattr(setting, 'value'):
-                attributes[setting.name] = setting.value
-            elif hasattr(setting, 'default'):
-                attributes[setting.name] = setting.default
+
     
     # ===== Abstract Methods (Platform-Specific) =====
     

@@ -7,7 +7,9 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals: BME680(RoomSensor), WS2812(LedWarning)
+    peripherals: BME680(RoomSensor), WS2812(LedWarning) [
+        colors = ['0xFF0000','0x00FF00','0x0000FF','0xFFFF00','0xFF00FF','0x00FFFF','0xFFFFFF','0x800000','0x008000','0x000080','0xFFA500','0x800080']
+    ]
 end
 
 Network
@@ -40,6 +42,5 @@ Connect LedWarning
     data:
         gpio[mode="output"] GPIO18 -- DIN
     // remote: "..."
-    settings:
-        - colors [list] = ['0xFF0000','0x00FF00','0x0000FF','0xFFFF00','0xFF00FF','0x00FFFF','0xFFFFFF','0x800000','0x008000','0x000080','0xFFA500','0x800080']
 end
+

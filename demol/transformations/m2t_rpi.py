@@ -117,9 +117,6 @@ class RPiCodeGenerator(BaseCodeGenerator):
         pins = self.get_pin_mappings(connection.dataConns, board)
         attributes = self.get_peripheral_attributes(peripheral_ref)
         
-        # Apply settings to override attributes
-        self._apply_settings(attributes, connection.settings)
-        
         # Build base context
         context = {
             "name": peripheral_ref.name,

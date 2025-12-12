@@ -96,9 +96,6 @@ class DeviceModelExtractor:
             if "uart_port" in pins:
                 peripheral_info["uart_port"] = pins["uart_port"]
             
-            # Apply settings (override attributes)
-            self._apply_settings(peripheral_info["attributes"], conn.settings)
-            
             self.peripherals.append(peripheral_info)
     
     def _extract_pins(self, data_conns) -> Dict[str, Any]:
@@ -245,13 +242,5 @@ class DeviceModelExtractor:
         
         return result
     
-    def _apply_settings(self, attributes: Dict[str, Any], settings) -> None:
-        """Apply settings to attributes (in-place modification)."""
-        for setting in settings:
-            setting_type = type(setting).__name__
-            
-            if setting_type == "DictSetting":
-                attributes[setting.name] = self._convert_dict_attribute(setting)
-            else:
-                attributes[setting.name] = setting.default
+
 

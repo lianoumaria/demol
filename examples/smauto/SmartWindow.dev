@@ -7,7 +7,13 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals: BME680(TempSensor), PCA9685(WindowController)
+    peripherals: BME680(TempSensor), PCA9685(WindowController) [
+        channel = 7,
+        initial_angle = 0.0,
+        final_angle = 0.0,
+        angular_speed = 9.0,
+        angular_step = 1.0
+    ]
 end
 
 Network
@@ -40,10 +46,4 @@ Connect WindowController
     data:
         i2c[slave_address=0x64] sda GPIO2 -- SDA_1, scl GPIO3 -- SCL_1
     // remote: ...
-    settings:
-        - channel [int] = 7
-        - initial_angle [float] = 0.0
-        - final_angle [float] = 0.0
-        - angular_speed [float] = 9.0
-        - angular_step [float] = 1.0
 end

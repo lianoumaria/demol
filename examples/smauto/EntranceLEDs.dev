@@ -41,6 +41,4 @@ Connect RoomLights
     data:
         gpio[mode="output"] GPIO10 -- DIN
     // remote: ...
-    settings:
-        - colors [list] = ['0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000', '0x000000']
 end

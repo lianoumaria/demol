@@ -7,7 +7,7 @@ end
 
 Components
     board: RaspberryPi_5_8GB
-    peripherals: SRF05(ParkingDistance)
+    peripherals: SRF05(ParkingDistance) [frequency = 20.0]
 end
 
 Network
@@ -32,6 +32,4 @@ Connect ParkingDistance
         gpio[mode="input"] GPIO24 -- echo,
         gpio[mode="output"] GPIO23 -- trigger
     // remote: ...
-    settings:
-        - frequency [float] = 20.0
 end

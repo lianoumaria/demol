@@ -354,7 +354,7 @@ def validate_spi_connection(board_pins: Dict[str, object], peripheral_pins: Dict
 
 
 def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
-                            baudrate: int, connection) -> None:
+                            baudrate, connection) -> None:
     """
     Validate UART connection.
     
@@ -381,7 +381,21 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
             )
         
         if prop.name == 'baudrate':
-            if not isinstance(prop.value, int) or prop.value <= 0:
+            # Accept both int and float (as long as it's a whole number and positive)
+            if isinstance(prop.value, (int, float)):
+                if isinstance(prop.value, float) and not prop.value.is_integer():
+                    raise_validation_error(
+                        connection,
+                        f"[Conn-UART] Property 'baudrate' must be a whole number, got {prop.value}.",
+                        "InvalidValueError"
+                    )
+                if prop.value <= 0:
+                    raise_validation_error(
+                        connection,
+                        f"[Conn-UART] Property 'baudrate' must be positive, got {prop.value}.",
+                        "InvalidValueError"
+                    )
+            else:
                 raise_validation_error(
                     connection,
                     f"[Conn-UART] Property 'baudrate' must be a positive integer.",
@@ -410,6 +424,10 @@ def validate_uart_connection(board_tx, board_rx, peripheral_tx, peripheral_rx,
                 )
 
     # Validate baudrate
+    # Convert to int if it's a float representing a whole number
+    if isinstance(baudrate, float):
+        baudrate = int(baudrate)
+    
     valid_baudrates = [9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600]
     if baudrate not in valid_baudrates:
         raise_validation_error(
