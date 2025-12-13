@@ -43,18 +43,48 @@
     - [Grammar Structure](#grammar-structure)
     - [Core Concepts](#core-concepts)
     - [Device Model Structure](#device-model-structure)
-    - [Hardware Components](#hardware-components)
+      - [Device Configuration](#device-configuration)
+      - [Network Configuration](#network-configuration)
+      - [Hardware Components](#hardware-components)
+      - [Attributes in Components](#attributes-in-components)
+    - [Hardware Components](#hardware-components-1)
+      - [Board Models](#board-models)
+      - [Peripheral Models (Sensors)](#peripheral-models-sensors)
+      - [Peripheral Models (Actuators)](#peripheral-models-actuators)
     - [Connections](#connections)
+      - [GPIO Connection](#gpio-connection)
+      - [I2C Connection](#i2c-connection)
+      - [SPI Connection](#spi-connection)
+      - [UART Connection](#uart-connection)
+      - [Remote Topics](#remote-topics)
     - [Message Brokers](#message-brokers)
+      - [MQTT Broker](#mqtt-broker)
+      - [AMQP Broker](#amqp-broker)
+      - [Redis Broker](#redis-broker)
     - [Complete Example](#complete-example)
-  - [🔌 Supported Sensors \u0026 Actuators](#-supported-sensors--actuators)
+  - [🔌 Supported Sensors \& Actuators](#-supported-sensors--actuators)
+    - [Sensor Categories](#sensor-categories)
+    - [Actuator Categories](#actuator-categories)
+    - [Message Schemas](#message-schemas)
   - [📐 Formal Semantics](#-formal-semantics)
   - [🔍 Semantic Validations](#-semantic-validations)
+    - [Validation Categories](#validation-categories)
+      - [1. **Power Connection Validation**](#1-power-connection-validation)
+      - [2. **IO Connection Validation**](#2-io-connection-validation)
+      - [3. **Safety Properties**](#3-safety-properties)
+      - [4. **Well-Formedness Rules**](#4-well-formedness-rules)
+    - [Validation Workflow](#validation-workflow)
+    - [Running Validations](#running-validations)
+    - [Validation Output](#validation-output)
+    - [Implementation](#implementation)
   - [🔧 Usage](#-usage)
-    - [CLI](#cli)
-    - [Model Validation](#model-validation)
     - [Code Generation](#code-generation)
+      - [Architecture](#architecture)
+      - [Supported Generators](#supported-generators)
+      - [Running Code Generation](#running-code-generation)
     - [REST API](#rest-api)
+      - [`POST /validate`](#post-validate)
+      - [`POST /generate`](#post-generate)
   - [📜 License](#-license)
   - [🎩 Acknowledgments](#-acknowledgments)
   - [🌟 Star History](#-star-history)
@@ -71,10 +101,11 @@ DeMoL employs a model-driven engineering (MDE) approach to facilitate the genera
 
 |      |        Feature        | Summary                                                                                                                                                                                                                                                                     |
 | :--- | :-------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ⚙️    | **Protocol-Agnostic** | <ul><li>Protocol/Transport-level abstraction</li><li>Currently supports Redis, AMQP and MQTT</li></ul>                                                                                                                                                                      |
-| 📄    |   **Documentation**   | <ul><li>Rich documentation in various formats (YAML, TOML, Markdown)</li><li>Includes detailed installation commands for different package managers</li><li>Utilizes MkDocs for generating documentation</li></ul>                                                          |
-| 🧩    |    **Modularity**     | <ul><li>Well-structured codebase with clear separation of concerns</li><li>Encourages code reusability and maintainability</li></ul>                                                                                                                                        |
-| 📦    |   **Dependencies**    | <ul><li>Manages dependencies with Poetry and dependency lock files</li><li>Includes a variety of libraries for different functionalities</li><li>Dependency management with conda for environment setup</li><li>Dynamic imports of underlying transport libraries</li></ul> |
+| 🔌    | **Hardware-Aware**    | <ul><li>Explicit modeling of board specifications (pins, voltages, frequencies)</li><li>Peripheral component definitions (sensors, actuators)</li><li>Electrical compatibility checks (voltage levels, power constraints)</li></ul>                                         |
+| 🛡️    | **Semantic Safety**   | <ul><li>Rigorous validation of pin configurations and conflicts</li><li>Protocol constraint enforcement (I2C addresses, UART baudrates)</li><li>Prevention of short-circuits and invalid connections</li></ul>                                                              |
+| �    | **Automated Synthesis**| <ul><li>Generation of platform-specific code (Python/RiotOS) from abstract models</li><li>Automatic boilerplate generation for communication and hardware initialization</li><li>Consistent and error-free implementation artifacts</li></ul>                               |
+| 🌐    | **Protocol-Agnostic** | <ul><li>Abstract definition of communication logic</li><li>Seamless switching between MQTT, AMQP, and Redis brokers</li><li>Decoupled application logic from transport implementation</li></ul>                                                                             |
+| 🧩    | **Declarative Design**| <ul><li>High-level syntax for defining device composition</li><li>Separation of concerns between hardware, logic, and communication</li><li>Model-Driven Engineering (MDE) principles</li></ul>                                                                             |
 
 ---
 
@@ -97,7 +128,7 @@ Download this repository and either use the CLI and the API of the DSL directly 
 1. Pull this repository locally
 
 ```sh
-git clone https://github.com/lianoumaria/demol.git
+git clone https://github.com/robotics-4-all/demol.git
 ```
 
 2. Create a Virtual environment (Optional Step)
@@ -109,7 +140,7 @@ python -m venv venv && source ./venv/bin/activate
 3. Install the DSL package in `develop` mode
 
 ```sh
-python setup.py develop
+pip install -e .
 ```
 
 
