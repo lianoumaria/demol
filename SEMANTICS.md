@@ -21,6 +21,7 @@ This document outlines the formal semantics and validation rules implemented in 
     - [Voltage Limits (Safety-Voltage-Limits)](#53-voltage-limits-safety-voltage-limits)
     - [IO Voltage Compatibility](#54-io-voltage-compatibility)
     - [Common Ground](#55-common-ground)
+    - [Topic Format Validation (Safety-Topic-Format)](#56-topic-format-validation-safety-topic-format)
 6.  [Well-Formedness Rules](#6-well-formedness-rules)
     - [All Peripherals Connected (WF-All-Peripherals-Connected)](#61-all-peripherals-connected-wf-all-peripherals-connected)
     - [Broker Requirements (Inv-Broker-Connection)](#62-broker-requirements-inv-broker-connection)
@@ -261,7 +262,95 @@ Safety properties are invariants that must hold to prevent hardware damage and e
 -   **Rule**: Every peripheral must share a common ground (`GND`) connection with the board.
 -   **Warning**: If a peripheral has no defined power connections or lacks a `GND` connection, a warning is issued. A common ground is essential for creating a complete electrical circuit and ensuring signal integrity.
 
----
+### 5.6. Topic Format Validation (Safety-Topic-Format)
+
+-   **Rule**: Remote topics specified in connections must conform to the format requirements of the configured broker type.
+-   **Validation**: Topics are validated based on the broker protocol to prevent runtime errors and ensure compatibility with the message broker.
+
+#### MQTT Topic Validation
+
+When using an **MQTT broker** (`Broker[MQTT]`), topics must follow MQTT protocol specifications:
+
+**Requirements:**
+-   Use forward slashes (`/`) as level separators
+-   Cannot start with `$` (reserved for system topics like `$SYS`)
+-   Maximum length: 1000 characters
+-   No null characters (`\x00`)
+-   Wildcards (for subscriptions):
+    -   `+` : Single-level wildcard (must be alone in its level)
+    -   `#` : Multi-level wildcard (must be last level and alone)
+
+**Valid Examples:**
+```
+sensors/temperature/room1
+home/living_room/light
+devices/+/status
+sensor/#
+```
+
+**Invalid Examples:**
+```
+$SYS/broker/stats          // System topic (starts with $)
+sensors/temp+/room         // Wildcard not alone
+sensors/room/#/temp        // # must be last level
+```
+
+#### AMQP Routing Key Validation
+
+When using an **AMQP broker** (`Broker[AMQP]`), routing keys must follow AMQP topic exchange rules:
+
+**Requirements:**
+-   Use dots (`.`) as word separators
+-   Maximum length: 255 characters
+-   Allowed characters: alphanumeric, underscore (`_`), hyphen (`-`)
+-   No empty segments (double dots `..`)
+-   Wildcards (for bindings):
+    -   `*` : Matches exactly one word
+    -   `#` : Matches zero or more words
+
+**Valid Examples:**
+```
+sensors.temperature.room1
+home.living_room.light
+devices.*.status
+sensor.#
+```
+
+**Invalid Examples:**
+```
+sensors/temperature/room   // Uses slashes instead of dots
+sensors..room              // Empty segment (double dots)
+sensors.temp@.room         // Invalid character (@)
+```
+
+#### Redis Channel Validation
+
+When using a **Redis broker** (`Broker[Redis]`), channels have flexible naming:
+
+**Requirements:**
+-   Cannot be empty
+-   Maximum length: 512 characters
+-   Supports glob-style pattern matching (`*`, `?`)
+-   Convention: Use colons (`:`) or dots (`.`) as separators
+
+**Valid Examples:**
+```
+sensors:temperature:room1
+home.living_room.light
+device:*:status
+sensor*
+```
+
+**Implementation:**
+The validation is performed in `demol/lang/semantics.py` via the `validate_topic_format()` function, which automatically selects the appropriate validator based on the broker type defined in the device model.
+
+**Error Example:**
+```
+[TopicValidationError] [Topic-Validation] Invalid MQTT topic at 
+ParkingSensor.dev:27: Peripheral 'Sensor1' has topic '$SYS/broker/stats'. 
+MQTT topic cannot start with '$' (reserved for system topics)
+```
+
 
 ## 6. Well-Formedness Rules
 

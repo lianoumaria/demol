@@ -148,55 +148,30 @@ The language is built around these fundamental concepts:
 Every `.dev` file follows this structure:
 
 ```
-Metadata
-    name: "DeviceName"
-    description: "Device description"
-    author: "author_name"
-    os: raspbian  // or riotos
-end
+DEVICE DeviceName WITH description="Device description", author="author_name", os=raspbian;
 
-Network
-    ssid: "WiFi_SSID"
-    passwd: "password"
-    address: 192.168.1.100  // optional
-    channel: "6"  // optional
-end
+NETWORK[WiFi] WITH ssid="WiFi_SSID", password="password";
 
-Broker[MQTT] BrokerName
-    host: "mqtt.example.com"
-    port: 1883
-    ssl: False
-    auth:
-        username: "user"
-        password: "pass"
-end
+BROKER[MQTT] BrokerName WITH host="mqtt.example.com", port=1883, auth.username="user", auth.password="pass";
 
-Components
-    board: BoardModelName
-    peripherals: PeripheralModel1(InstanceName1), PeripheralModel2(InstanceName2)
-end
+USE BoardModelName;
+USE PeripheralModel1(InstanceName1), PeripheralModel2(InstanceName2);
 
-Connect InstanceName1
-    power:
+CONNECT InstanceName1 WITH
+    POWER
         board_pin -- peripheral_pin,
         board_pin2 -- peripheral_pin2
-    data:
+    DATA
         gpio[mode="output"] board_pin -- peripheral_pin
-    remote: "device/sensor/topic"  // optional
-end
+    @ "device/sensor/topic";
 ```
 
-#### Metadata Block
+#### Device Configuration
 
-Describes the device and target platform:
+Describes the device and target platform using the `DEVICE` statement:
 
 ```
-Metadata
-    name: "SmartSensor"
-    description: "Environmental monitoring sensor"
-    author: "developer_name"
-    os: raspbian  // raspbian or riotos
-end
+DEVICE SmartSensor WITH description="Environmental monitoring sensor", author="developer_name", os=raspbian;
 ```
 
 **Target Operating Systems:**
@@ -206,31 +181,25 @@ end
 
 #### Network Configuration
 
-WiFi network settings:
+WiFi network settings using the `NETWORK` statement:
 
 ```
-Network
-    ssid: "IoT_Network"
-    passwd: "secure_password"
-    address: 192.168.1.50  // optional static IP
-    channel: "11"  // optional WiFi channel
-end
+NETWORK[WiFi] WITH ssid="IoT_Network", password="secure_password";
 ```
 
-#### Components
+#### Hardware Components
 
-Specifies the hardware composition:
+Specifies the hardware composition using `USE` statements:
 
 ```
-Components
-    board: RaspberryPi_4B_4GB
-    peripherals: BME680(EnvSensor) [
-        poll_period = 5
-    ], SonarSRF04(DistanceSensor), WS2812(StatusLED)
-end
+USE RaspberryPi_4B_4GB;
+USE BME680(EnvSensor) [poll_period = 5], SonarSRF04(DistanceSensor);
+USE WS2812(StatusLED);
 ```
 
 **Features:**
+- `USE <BoardName>;` defines the main board.
+- `USE <Peripheral>(<Name>);` defines peripherals.
 - Board references are resolved from the global repository in `demol/builtin_models/boards/`
 - Peripheral models are loaded from `demol/builtin_models/peripherals/`
 - Supports multi-file imports using FQN (Fully Qualified Names)
@@ -239,18 +208,17 @@ end
 
 #### Attributes in Components
 
-Peripheral attributes can be customized when declaring instances in the Components block:
+Peripheral attributes can be customized when declaring instances:
 
 ```
-Components
-    board: RaspberryPi_4B_4GB
-    peripherals: BME680(EnvSensor) [
-        poll_period = 5,
-        filter_size = 7
-    ], SonarSRF04(DistanceSensor) [
-        max_distance = 300
-    ]
-end
+USE BME680(EnvSensor) [
+    poll_period = 5,
+    filter_size = 7
+];
+
+USE SonarSRF04(DistanceSensor) [
+    max_distance = 300
+];
 ```
 
 **Key Points:**
@@ -378,70 +346,65 @@ Connections define how peripherals connect to the board through power and IO pin
 #### GPIO Connection
 
 ```
-Connect DistanceSensor
-    power:
+CONNECT DistanceSensor WITH
+    POWER
         gnd_1 -- gnd,
         power_5v -- vcc
-    data:
+    DATA
         gpio[mode="output"] p_13 -- trigger,
         gpio[mode="input"] p_14 -- echo
-    remote: "sensors/distance"
-end
+    @ "sensors/distance";
 ```
 
 #### I2C Connection
 
 ```
-Connect EnvSensor
-    power:
+CONNECT EnvSensor WITH
+    POWER
         gnd_1 -- GND,
         power_5v -- VCC
-    data:
+    DATA
         i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
-    remote: "sensors/environment"
-end
+    @ "sensors/environment";
 ```
 
 #### SPI Connection
 
 ```
-Connect DisplayModule
-    power:
+CONNECT DisplayModule WITH
+    POWER
         gnd_1 -- GND,
         power_3v3 -- VCC
-    data:
-        spi[bus_speed=1000000, mode=0] mosi p_23 -- mosi, miso p_19 -- miso, sck p_18 -- sck, cs p_5 -- cs
-end
+    DATA
+        spi[bus_speed=1000000, mode=0] mosi p_23 -- mosi, miso p_19 -- miso, sck p_18 -- sck, cs p_5 -- cs;
 ```
 
 #### UART Connection
 
 ```
-Connect GPSModule
-    power:
+CONNECT GPSModule WITH
+    POWER
         gnd_1 -- GND,
         power_5v -- VCC
-    data:
+    DATA
         uart[baudrate=115200] tx p_1 -- RXD, rx p_3 -- TXD
-    remote: "sensors/gps"
-end
+    @ "sensors/gps";
 ```
 
 **Note:** UART connections require TX→RX and RX→TX crossover (board TX connects to peripheral RX, and vice versa).
 
 #### Remote Topics
 
-The `remote` field in connections specifies the MQTT/AMQP/Redis topic for this peripheral:
+The `@` symbol in connections specifies the MQTT/AMQP/Redis topic for this peripheral:
 
 ```
-Connect MySensor
-    power: ...
-    data: ...
-    remote: "device/sensor/data"  // optional
-end
+CONNECT MySensor WITH
+    POWER ...
+    DATA ...
+    @ "device/sensor/data";  // optional
 ```
 
-**Auto-generated Topics:** If `remote` is omitted, topics may be auto-generated based on device and peripheral names.
+**Auto-generated Topics:** If `@` is omitted, topics may be auto-generated based on device and peripheral names.
 
 
 
@@ -452,116 +415,91 @@ DeMoL supports three message broker types:
 #### MQTT Broker
 
 ```
-Broker[MQTT] MyMqttBroker
-    host: "mqtt.example.com"
-    port: 1883
-    ssl: False
-    basePath: "/mqtt"  // optional
-    webPath: "/ws"  // optional
-    webPort: 8080  // optional
-    auth:
-        username: "sensor_client"
-        password: "secure_pass"
-end
+BROKER[MQTT] MyMqttBroker WITH
+    host="mqtt.example.com",
+    port=1883,
+    ssl=False,
+    basePath="/mqtt",  // optional
+    webPath="/ws",  // optional
+    webPort=8080,  // optional
+    auth.username="sensor_client",
+    auth.password="secure_pass";
 ```
 
 #### AMQP Broker
 
 ```
-Broker[AMQP] MyAmqpBroker
-    host: "rabbitmq.example.com"
-    port: 5672
-    vhost: "/"  // optional
-    topicExchange: "amq.topic"  // optional
-    rpcExchange: "amq.rpc"  // optional
-    ssl: False
-    auth:
-        username: "guest"
-        password: "guest"
-end
+BROKER[AMQP] MyAmqpBroker WITH
+    host="rabbitmq.example.com",
+    port=5672,
+    vhost="/",  // optional
+    topicExchange="amq.topic",  // optional
+    rpcExchange="amq.rpc",  // optional
+    ssl=False,
+    auth.username="guest",
+    auth.password="guest";
 ```
 
 #### Redis Broker
 
 ```
-Broker[Redis] MyRedisBroker
-    host: "redis.example.com"
-    port: 6379
-    db: 0  // optional
-    ssl: False
-    auth:
-        username: "default"
-        password: "redis_pass"
-end
+BROKER[Redis] MyRedisBroker WITH
+    host="redis.example.com",
+    port=6379,
+    db=0,  // optional
+    ssl=False,
+    auth.username="default",
+    auth.password="redis_pass";
 ```
 
 **Authentication Methods:**
-- **Username/Password:** `auth: username: "user" password: "pass"`
-- **API Key:** `auth: key: "api_key_value"`
-- **Certificate:** `auth: cert: "cert_string"` or `certPath: "/path/to/cert"`
+- **Username/Password:** `auth.username="user", auth.password="pass"`
+- **API Key:** `auth.key="api_key_value"`
 
 ### Complete Example
 
 Here's a complete device model demonstrating all features:
 
 ```
-Metadata
-    name: "SmartEnvironmentMonitor"
-    description: "Multi-sensor environmental monitoring device"
-    author: "john_doe"
-    os: raspbian
-end
+DEVICE SmartEnvironmentMonitor WITH description="Multi-sensor environmental monitoring device", author="john_doe", os=raspbian;
 
-Network
-    ssid: "IoT_Network"
-    passwd: "secure_password"
-end
+NETWORK[WiFi] WITH ssid="IoT_Network", password="secure_password";
 
-Broker[MQTT] SmartHomeBroker
-    host: "mqtt.smarthome.local"
-    port: 1883
-    ssl: True
-    auth:
-        username: "sensor_node"
-        password: "node_pass"
-end
+BROKER[MQTT] SmartHomeBroker WITH
+    host="mqtt.smarthome.local",
+    port=1883,
+    ssl=True,
+    auth.username="sensor_node",
+    auth.password="node_pass";
 
-Components
-    board: RaspberryPi_4B_4GB
-    peripherals: BME680(EnvSensor) [
-        poll_period = 5
-    ], SonarSRF04(DistanceSensor), WS2812(StatusLED) [
-        colors = ['0xFF0000', '0x00FF00', '0x0000FF']
-    ]
-end
+USE RaspberryPi_4B_4GB;
+USE BME680(EnvSensor) [poll_period = 5], SonarSRF04(DistanceSensor);
+USE WS2812(StatusLED) [colors = ['0xFF0000', '0x00FF00', '0x0000FF']];
 
-Connect EnvSensor
-    power:
+CONNECT EnvSensor WITH
+    POWER
         gnd_1 -- GND,
         power_5v -- VCC
-    data:
+    DATA
         i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
-    remote: "home/environment/living_room"
-end
+    @ "home/environment/living_room";
 
-Connect DistanceSensor
-    power:
+CONNECT DistanceSensor WITH
+    POWER
         gnd_2 -- gnd,
         power_5v -- vcc
-    data:
+    DATA
         gpio[mode="output"] p_23 -- trigger,
         gpio[mode="input"] p_24 -- echo
-    remote: "home/distance/entrance"
-end
+    @ "home/distance/entrance";
 
-Connect StatusLED
-    power:
+CONNECT StatusLED WITH
+    POWER
         gnd_3 -- GND,
         power_5v -- VCC
-    data:
+    DATA
         gpio[mode="output"] GPIO10 -- DIN
-    remote: "home/status/led"
-end
+    @ "home/status/led";
 ```
 
 
