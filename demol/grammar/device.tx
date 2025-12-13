@@ -8,43 +8,51 @@ import common
 DeviceModel:
     imports*=Import
     (
-        metadata=Metadata
+        metadata=Device
         network=Network
-        components=Components
+        uses+=Use
         (broker=MessageBroker)?
         connections+=Connect
     )#
 ;
 
-Metadata:
-    'Metadata'
+Device:
+    'DEVICE' name=ID 'WITH'
     (
-        ('name:' name=STRING)
-        ('description:' description=STRING)
-        ('author:' author=STRING)
-        ('os:' os=OperatingSystem)?
-    )#
-    'end'
+        ('description' '=' description=STRING)
+        ('author' '=' author=STRING)
+        ('os' '=' os=OperatingSystem)?
+    )#[',']
+    ';'
 ;
 
-Network:
-    "Network"
-	(
-	    ("ssid:" ssid=STRING)
-	    ("passwd:" passwd=STRING)
-	    ("address:" address=IP_ADDR)?
-	    ("channel:" channel=STRING)?
-    )#
-    "end"
+Network: WiFiNetwork | EthNetwork;
+
+WiFiNetwork:
+    /[Nn][Ee][Tt][Ww][Oo][Rr][Kk]/ '[' 'WiFi' ']' /[Ww][Ii][Tt][Hh]/
+    (
+        ('ssid' '=' ssid=STRING)
+        ('password' '=' passwd=STRING)
+        ('address' '=' address=IP_ADDR)?
+        ('channel' '=' channel=STRING)?
+    )#[',']
+    ';'
 ;
 
-Components:
-	"Components"
-	(
-        ('board:' board=[Board:FQN|+m:component])
-        ('peripherals:' peripherals*=PeripheralDef[','])
-    )#
-    'end'
+EthNetwork:
+    /[Nn][Ee][Tt][Ww][Oo][Rr][Kk]/ '[' 'Eth' ']'
+    (
+        /[Ww][Ii][Tt][Hh]/
+        (
+            ('address' '=' address=IP_ADDR)?
+        )#[',']
+    )?
+    ';'
+;
+
+
+Use:
+    "USE" (peripherals+=PeripheralDef[','] | board=[Board:FQN|+m:component]) ';'
 ;
 
 PeripheralDef:
@@ -52,7 +60,7 @@ PeripheralDef:
 ;
 
 Connect:
-	/[Cc][Oo][Nn][Nn][Ee][Cc][Tt]/ peripheral=[PeripheralDef:FQN|~components.peripherals] /[Ww][Ii][Tt][Hh]/
+	/[Cc][Oo][Nn][Nn][Ee][Cc][Tt]/ peripheral=[PeripheralDef:FQN|~uses.peripherals] /[Ww][Ii][Tt][Hh]/
 	(
 	    (/[Pp][Oo][Ww][Ee][Rr]/ powerConns*=PowerConnection[','])?
         (/[Dd][Aa][Tt][Aa]/ dataConns+=DataConnection[','])?

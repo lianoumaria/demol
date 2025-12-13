@@ -1,26 +1,11 @@
-Metadata
-    name: "MyWemos"
-    description: "My WemosD1Mini IoT device"
-    author: "klpanagi"
-end
+DEVICE MyWemos WITH description="My WemosD1Mini IoT device", author="klpanagi";
 
-Network
-    ssid: "Wifi_2.4GHz"
-    passwd: "guest"
-end
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
 
-Broker[MQTT] MyMqttBroker
-    host: "node.mqtt.local"
-    port: 1883
-    auth:
-        username: "guest"
-        password: "guest"
-end
+BROKER[MQTT] MyMqttBroker WITH host="node.mqtt.local", port=1883, auth.username="guest", auth.password="guest";
 
-Components
-    board: WemosD1Mini
-    peripherals: BME680(BME)
-end
+USE WemosD1Mini;
+USE BME680(BME);
 
 CONNECT BME WITH
     POWER

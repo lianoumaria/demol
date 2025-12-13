@@ -1,30 +1,13 @@
-Metadata
-    name: "my_raspi"
-    description: "My Embedded Device"
-    author: "maria"
-    os: raspbian
-end
+DEVICE my_raspi WITH description="My Embedded Device", author="maria", os=raspbian;
 
-Components
-    board: RaspberryPi_5_8GB
-    peripherals: SRF05(MySRF), WS2812(MyLedRing) [
+USE RaspberryPi_5_8GB;
+USE SRF05(MySRF), WS2812(MyLedRing) [
         colors = ['0xFF0000', '0x00FF00', '0x0000FF', '0xFFFF00', '0xFF00FF', '0x00FFFF', '0xFFFFFF', '0x800000', '0x008000', '0x000080', '0xFFA500', '0x800080']
-    ]
-end
+    ];
 
-Network
-    ssid: "Wifi_2.4GHz"
-    passwd: "guest"
-end
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
 
-Broker[MQTT] locsys_broker
-    host: "locsys.issel.ee.auth.gr"
-    port: 1883
-    ssl: False
-    auth:
-        username: "sensors"
-        password: "issel.sensors"
-end
+BROKER[MQTT] locsys_broker WITH host="locsys.issel.ee.auth.gr", port=1883, auth.username="sensors", auth.password="issel.sensors", ssl=False;
 
 CONNECT MySRF WITH
     POWER

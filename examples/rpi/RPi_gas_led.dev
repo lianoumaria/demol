@@ -1,30 +1,13 @@
-Metadata
-    name: "RpiRoom"
-    description: "My RaspberryPi 5 with a BME680 and a LedRing"
-    author: "maria"
-    os: raspbian
-end
+DEVICE RpiRoom WITH description="My RaspberryPi 5 with a BME680 and a LedRing", author="maria", os=raspbian;
 
-Components
-    board: RaspberryPi_5_8GB
-    peripherals: BME680(RoomSensor), WS2812(LedWarning) [
+USE RaspberryPi_5_8GB;
+USE BME680(RoomSensor), WS2812(LedWarning) [
         colors = ['0xFF0000','0x00FF00','0x0000FF','0xFFFF00','0xFF00FF','0x00FFFF','0xFFFFFF','0x800000','0x008000','0x000080','0xFFA500','0x800080']
-    ]
-end
+    ];
 
-Network
-    ssid: "Wifi_2.4GHz"
-    passwd: "guest"
-end
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
 
-Broker[MQTT] MyBroker
-    host: "localhost"
-    port: 1883
-    ssl: False
-    auth:
-        username: "guest"
-        password: "guest"
-end
+BROKER[MQTT] MyBroker WITH host="localhost", port=1883, auth.username="guest", auth.password="guest", ssl=False;
 
 CONNECT RoomSensor WITH
     POWER

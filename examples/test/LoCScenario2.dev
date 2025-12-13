@@ -1,35 +1,18 @@
-Metadata
-    name: "Scenario2"
-    description: "My RaspberryPi 5 with increasing number of peripherals"
-    author: "maria"
-    os: raspbian
-end
+DEVICE Scenario2 WITH description="My RaspberryPi 5 with increasing number of peripherals", author="maria", os=raspbian;
 
-Components
-    board: RaspberryPi_5_8GB
-    peripherals: VL53L1X(MyToF)
+USE RaspberryPi_5_8GB;
+USE VL53L1X(MyToF)
         /*- TCRT5000(MyTracker)
         - TFMini(MyTFMini)
         - BME680(MyBME)
         - SRF05(MySRF)
         - ADCDifferentialPi(MyADC)
         - WS2812(MyLedRing)
-        - PCA9685(MyServoController)*/
-end
+        - PCA9685(MyServoController)*/;
 
-Network
-    ssid: "Wifi_2.4GHz"
-    passwd: "guest"
-end
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
 
-Broker[MQTT] locsys_broker
-    host: "locsys.issel.ee.auth.gr"
-    port: 1883
-    ssl: False
-    auth:
-        username: "sensors"
-        password: "issel.sensors"
-end
+BROKER[MQTT] locsys_broker WITH host="locsys.issel.ee.auth.gr", port=1883, auth.username="sensors", auth.password="issel.sensors", ssl=False;
 
 CONNECT MyToF WITH
     POWER

@@ -1,27 +1,11 @@
-Metadata
-    name: "MyESP32Device"
-    description: "My ESP32 IoT device"
-    author: "klpanagi"
-    os: riotos
-end
+DEVICE MyESP32Device WITH description="My ESP32 IoT device", author="klpanagi", os=riotos;
 
-Network
-    ssid: "Wifi_2.4GHz"
-    passwd: "guest"
-end
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
 
-Broker[MQTT] MyMqttBroker
-    host: "node.mqtt.local"
-    port: 1885
-    auth:
-        username: "guest"
-        password: "guest"
-end
+BROKER[MQTT] MyMqttBroker WITH host="node.mqtt.local", port=1885, auth.username="guest", auth.password="guest";
 
-Components
-    board: ESP32Wroom32
-    peripherals: SonarSRF04(MySonar), BME680(MyBME)
-end
+USE ESP32Wroom32;
+USE SonarSRF04(MySonar), BME680(MyBME);
 
 CONNECT MySonar WITH
     POWER

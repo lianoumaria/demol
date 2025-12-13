@@ -1042,3 +1042,203 @@ def validate_unique_peripheral_names(model) -> None:
                 "DuplicatePeripheralNameError"
             )
         peripheral_names.add(name)
+
+
+def validate_single_board(model) -> None:
+    """
+    Validate that exactly one board is used in the device model.
+    
+    Rule: A device can only have one board.
+    Multiple boards or no boards will raise an error.
+    """
+    boards = [use for use in model.uses if hasattr(use, 'board') and use.board]
+    
+    if len(boards) == 0:
+        raise_validation_error(
+            model,
+            "[WF-Single-Board] No board defined. Device must have exactly one board. "
+            "Use 'USE <BoardModel>' to define the board.",
+            "NoBoardError"
+        )
+    elif len(boards) > 1:
+        board_names = [use.board.name for use in boards]
+        raise_validation_error(
+            boards[1],  # Point to the second board definition
+            f"[WF-Single-Board] Multiple boards defined: {', '.join(board_names)}. "
+            f"Device can only have one board. Remove the extra board definitions.",
+            "MultipleBoardsError"
+        )
+
+
+# ============================================================================
+# Topic Validation
+# ============================================================================
+
+def validate_mqtt_topic(topic: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate MQTT topic format.
+    
+    Rules:
+    - Use forward slashes (/) as level separators
+    - Cannot be empty
+    - Cannot start with $ (reserved for system topics)
+    - Wildcards: + (single level), # (multi-level, must be last)
+    - No null characters
+    - Max level depth (typically 128, but we'll be lenient)
+    
+    Returns:
+        (is_valid, error_message)
+    """
+    if not topic:
+        return False, "MQTT topic cannot be empty"
+    
+    # Check for null characters
+    if '\x00' in topic:
+        return False, "MQTT topic cannot contain null characters"
+    
+    # Check length (MQTT spec allows up to 65535 bytes, but keep reasonable)
+    if len(topic) > 1000:
+        return False, f"MQTT topic too long ({len(topic)} chars), should be under 1000"
+    
+    # System topics start with $, which is reserved
+    if topic.startswith('$'):
+        return False, "MQTT topic cannot start with '$' (reserved for system topics)"
+    
+    # Check each level
+    levels = topic.split('/')
+    
+    for i, level in enumerate(levels):
+        # Single-level wildcard
+        if level == '+':
+            continue
+        
+        # Multi-level wildcard (must be last and alone)
+        if '#' in level:
+            if i != len(levels) - 1:
+                return False, "MQTT wildcard '#' must be the last level"
+            if level != '#':
+                return False, "MQTT wildcard '#' must be alone in its level"
+            continue
+        
+        # Regular level - check for invalid wildcard usage
+        if '+' in level:
+            if level != '+':
+                return False, "MQTT wildcard '+' must be alone in its level"
+    
+    return True, None
+
+
+def validate_amqp_topic(topic: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate AMQP routing key / topic format.
+    
+    Rules:
+    - Use dots (.) as separators
+    - Can use wildcards: * (single word), # (zero or more words)
+    - Alphanumeric and underscore, hyphen, dot
+    - Cannot be empty
+    
+    Returns:
+        (is_valid, error_message)
+    """
+    if not topic:
+        return False, "AMQP routing key cannot be empty"
+    
+    # Check length
+    if len(topic) > 255:
+        return False, f"AMQP routing key too long ({len(topic)} chars), should be under 255"
+    
+    # Split by dots
+    parts = topic.split('.')
+    
+    for part in parts:
+        if not part:
+            return False, "AMQP routing key cannot have empty segments (double dots)"
+        
+        # Allow wildcards
+        if part in ('*', '#'):
+            continue
+        
+        # Check valid characters: alphanumeric, underscore, hyphen
+        if not re.match(r'^[a-zA-Z0-9_-]+$', part):
+            return False, f"AMQP routing key segment '{part}' contains invalid characters. Use alphanumeric, underscore, or hyphen only"
+    
+    return True, None
+
+
+def validate_redis_topic(topic: str) -> Tuple[bool, Optional[str]]:
+    """
+    Validate Redis pub/sub channel pattern.
+    
+    Rules:
+    - Can use pattern matching with * and ?
+    - Typically uses : or . as separators by convention
+    - Cannot be empty
+    - No special restrictions like MQTT
+    
+    Returns:
+        (is_valid, error_message)
+    """
+    if not topic:
+        return False, "Redis channel cannot be empty"
+    
+    # Check length
+    if len(topic) > 512:
+        return False, f"Redis channel too long ({len(topic)} chars), should be under 512"
+    
+    # Redis is quite flexible, just check it's not empty and reasonable length
+    # Pattern matching with glob-style patterns is allowed
+    
+    return True, None
+
+
+def validate_topic_format(model) -> None:
+    """
+    Validate that all connection topics match the broker type.
+    
+    Checks:
+    - MQTT broker: topics use forward slashes
+    - AMQP broker: topics use dots (routing keys)
+    - Redis broker: flexible channel names
+    """
+    import warnings
+    
+    if not hasattr(model, 'broker') or not model.broker:
+        # No broker defined, skip topic validation
+        return
+    
+    broker = model.broker
+    broker_type = broker.__class__.__name__  # AMQPBroker, MQTTBroker, or RedisBroker
+    
+    # Extract the actual type from the class name
+    if 'MQTT' in broker_type.upper():
+        validator = validate_mqtt_topic
+        broker_name = "MQTT"
+    elif 'AMQP' in broker_type.upper():
+        validator = validate_amqp_topic
+        broker_name = "AMQP"
+    elif 'REDIS' in broker_type.upper():
+        validator = validate_redis_topic
+        broker_name = "Redis"
+    else:
+        # Unknown broker type, skip validation
+        return
+    
+    # Validate each connection's topic
+    for connection in model.connections:
+        if not hasattr(connection, 'remote') or not connection.remote:
+            continue
+        
+        topic = connection.remote.strip('"').strip("'")
+        
+        is_valid, error_msg = validator(topic)
+        
+        if not is_valid:
+            location = get_location(connection)
+            warning_msg = (
+                f"[Topic-Validation] Invalid {broker_name} topic at "
+                f"{location.get('filename', 'unknown')}:{location.get('line', '?')}: "
+                f"Peripheral '{connection.peripheral.name}' has topic '{topic}'. "
+                f"{error_msg}"
+            )
+            raise_validation_error(connection, warning_msg, "TopicValidationError")

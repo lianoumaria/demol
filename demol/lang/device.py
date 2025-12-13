@@ -41,6 +41,8 @@ def model_proc(model, metamodel):
         validate_common_ground,
         validate_connections,
         validate_unique_peripheral_names,
+        validate_topic_format,
+        validate_single_board,
     )
     
     device_name = model.metadata.name.strip('"')
@@ -48,9 +50,14 @@ def model_proc(model, metamodel):
     print(f'[*] Processing model: {model._tx_filename}')
     
     # ========================================================================
-    # Model Enrichment
+    # Model Enrichment (including broker property processing)
     # ========================================================================
     enrich_model(model)
+    
+    # ========================================================================
+    # Well-Formedness: Single board
+    # ========================================================================
+    validate_single_board(model)
     
     # ========================================================================
     # Well-Formedness: All peripherals must be connected
@@ -96,18 +103,72 @@ def model_proc(model, metamodel):
     # Safety: Common ground connection
     validate_common_ground(model)
     
+    # ========================================================================
+    # Topic Format Validation (based on broker type)
+    # ========================================================================
+    validate_topic_format(model)
+    
     print("[✓] All validation checks passed!")
 
 
 def enrich_model(model):
     """
     Enrich the model with auto-generated values.
+    Extracts board and peripherals from USE statements.
+    Creates auth object from broker auth properties.
     """
+    from types import SimpleNamespace
+    
+    # ========================================================================
+    # Process Broker Authentication (create auth object)
+    # ========================================================================
+    if hasattr(model, 'broker') and model.broker:
+        auth_attrs = {}
+        
+        # Check for auth properties and collect them
+        if hasattr(model.broker, 'auth_username'):
+            auth_attrs['username'] = model.broker.auth_username
+        if hasattr(model.broker, 'auth_password'):
+            auth_attrs['password'] = model.broker.auth_password
+        if hasattr(model.broker, 'auth_key'):
+            auth_attrs['key'] = model.broker.auth_key
+        
+        # Create auth object if there are auth properties
+        if auth_attrs:
+            auth_obj = SimpleNamespace(**auth_attrs)
+            setattr(model.broker, 'auth', auth_obj)
+    
+    # ========================================================================
+    # Extract board and peripherals from USE statements
+    # ========================================================================
+    board = None
+    peripherals = []
+    
+    for use in model.uses:
+        # Check the type of use - it could be BoardUse or PeripheralUse
+        use_type = use.__class__.__name__
+        
+        if use_type == 'BoardUse':
+            board = use.board
+        elif use_type == 'PeripheralUse':
+            peripherals.extend(use.peripherals)
+        # Fallback for backward compatibility
+        elif hasattr(use, 'board') and use.board:
+            board = use.board
+        elif hasattr(use, 'peripherals') and use.peripherals:
+            peripherals.extend(use.peripherals)
+    
+    # Create a synthetic 'components' object for backward compatibility
+    model.components = SimpleNamespace(
+        board=board,
+        peripherals=peripherals
+    )
+    
     device_name = model.metadata.name.strip('"')
     
     for c in model.connections:
         # Set the board for easy navigation in M2M and M2T transformations
-        setattr(c, 'board', model.components.board)
+        setattr(c, 'board', board)
         
         # ====================================================================
         # Auto-generate topic if not specified
@@ -136,10 +197,10 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
         {
             "*.*": scoping_providers.FQN(),
             "*.*": scoping_providers.FQNImportURI(importAs=True),
-            "Components.peripherals": scoping_providers.FQNGlobalRepo(
+            "Use.peripherals": scoping_providers.FQNGlobalRepo(
                 os.path.join(PERIPHERAL_MODEL_REPO_PATH, '*.hwd')
             ),
-            "Components.board": scoping_providers.FQNGlobalRepo(
+            "Use.board": scoping_providers.FQNGlobalRepo(
                 os.path.join(BOARD_MODEL_REPO_PATH, '*.hwd')
             ),
 

@@ -1,27 +1,17 @@
-Metadata
-    name: "MyWemosDevice_A"
-    description: "My WemosD1Mini IoT device"
-    author: "klpanagi"
-    os: riotos
-end
+DEVICE MyWemosDevice_A WITH 
+    description="My WemosD1Mini IoT device",
+    author="klpanagi", os=riotos;
 
-Network
-    ssid: "Wifi_2.4GHz"
-    passwd: "guest"
-end
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
 
-Broker[MQTT] MyMqttBroker
-    host: "node.mqtt.local"
-    port: 1883
-    auth:
-        username: "guest"
-        password: "guest"
-end
+BROKER[MQTT] MyMqttBroker WITH 
+    host="node.mqtt.local",
+    port=1883,
+    auth.username="guest",
+    auth.password="guest";
 
-Components
-    board: WemosD1Mini
-    peripherals: SonarSRF04(Sonar), WS281X(Ledstrip)
-end
+USE WemosD1Mini;
+USE SonarSRF04(Sonar), WS281X(Ledstrip);
 
 CONNECT Sonar WITH
     POWER
