@@ -61,11 +61,11 @@
 
 ## 📖 Overview
 
-Device Modeling Language (DeMoL) - A DSL for modeling IoT devices.
+**Device Modeling Language (DeMoL)** is a domain-specific language (DSL) designed for the automated synthesis of Internet of Things (IoT) device open-source software, in a hardware-aware manner. It provides a high-level, declarative abstraction for defining hardware configurations, peripheral interconnections, and communication protocols, decoupling the device logic from the underlying platform implementation.
 
-Enables automated source code generation currently for RaspberryPi and RiotOS.
+DeMoL employs a model-driven engineering (MDE) approach to facilitate the generation of platform-specific code (e.g., Python for Raspberry Pi, C for RiotOS) from platform-independent models. By enforcing rigorous semantic validation rules—including electrical compatibility checks, pin conflict detection, and protocol constraints—DeMoL ensures the correctness and safety of the synthesized artifacts, thereby reducing development complexity and mitigating hardware-level errors in IoT system design.
 
-...
+![DeMoL Conceptual Model](assets/DeMoL_Conceptual.png)
 
 ## 👾 Features
 
@@ -302,7 +302,7 @@ Sensor[Env] BME680
 end
 ```
 
-**Available Sensor Types:** `Distance`, `Temperature`, `Humidity`, `Gas`, `Pressure`, `Env`, `AirQuality`, `Light`, `UV`, `Sound`, `Acceleration`, `Gyroscope`, `Magnetometer`, `IMU`, `Tracker`, `Proximity`, `Motion`, `Presence`, `ADC`, `Current`, `Voltage`, `Power`, `Flow`, `Level`, `Weight`, `Force`, `Vibration`, `Camera`, `RFID`, `Fingerprint`, `GPS`, `Color`
+**Available Sensor Types:** `Distance`, `Temperature`, `Humidity`, `Gas`, `Env`, `AirQuality`, `Light`, `UV`, `Sound`, `Acceleration`, `Gyroscope`, `Magnetometer`, `IMU`, `Tracker`, `Proximity`, `Motion`, `Presence`, `ADC`, `Current`, `Voltage`, `Power`, `Flow`, `Level`, `Weight`, `Force`, `Vibration`, `Camera`, `RFID`, `Fingerprint`, `GPS`, `Color`
 
 For complete sensor type documentation and message schemas, see **[SENSORS_ACTUATORS.md](SENSORS_ACTUATORS.md)**.
 
@@ -792,6 +792,8 @@ textx.exceptions.TextXSemanticError: rpi_iot_device.dev:29:17: Unknown object "M
 DeMoL supports automated code generation for multiple platforms using a model-driven architecture.
 
 #### Architecture
+
+![DeMoL Runtime Architecture](assets/DeMoL_Runtime_Conceptual_nobg.png)
 
 The code generation system uses an abstract `BaseCodeGenerator` class that provides common model querying capabilities. Platform-specific generators inherit from this base class to implement target-specific logic.
 
