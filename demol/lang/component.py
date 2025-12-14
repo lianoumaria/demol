@@ -9,11 +9,15 @@ def component_model_proc(model, metamodel):
     """
     Component model processor with validation.
     """
-    from demol.lang.semantics import validate_unique_pin_numbers
+    from demol.lang.semantics import validate_unique_pin_numbers, validate_board_ports
     
     # Validate unique pin numbers for the component
     if hasattr(model, 'component'):
         validate_unique_pin_numbers(model.component)
+        
+        # Validate board ports if it is a board
+        if model.component.__class__.__name__ == 'Board':
+            validate_board_ports(model.component)
 
 
 def get_component_mm(global_repo: bool = False):

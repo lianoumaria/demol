@@ -1,19 +1,15 @@
-Sensor[Distance] TFMini
-    operational
-        vcc: 5V
-        energy: 50 mW, 800 mW, 400 mW
-    end
-    pins
+SENSOR[Distance] TFMini WITH
+    OP
+        vcc=5V,
+        energy=50 mW, 800 mW, 400 mW
+    PINS
         GND[GND] @ 1,
         VCC[5V] @ 2,
         RXD[rx-0] @ 3,
         TXD[tx-0] @ 4
-    end
-    templates
-        raspbian: "tfmini.py.tmpl",
-        riotos: "tfmini_riot.c.tmpl"
-    end
-    attributes
+    TEMPLATES
+        raspbian="tfmini.py.tmpl",
+        riotos="tfmini_riot.c.tmpl"
+    ATTRIBUTES
         serial_port[str] = "/dev/ttyAMA0"
-    end
-end
+;

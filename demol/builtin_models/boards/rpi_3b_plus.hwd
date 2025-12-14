@@ -1,16 +1,21 @@
-Board[RPI] RaspberryPi_3B_Plus
-    operational
-    vcc: 5V
-    memory:
-        flash: 16 gb
-        ram: 1 gb
-    cpu:
-        cpu_family: PiArmCortex
-        max_freq: 1400 mhz
-        fpu: true
-    energy: 1.8 W, 5.1 W, 2.9 W
-    end
-    pins
+BOARD[RPI] RaspberryPi_3B_Plus WITH
+    OP
+        vcc=5V,
+        memory.flash=16 gb,
+        memory.ram=1 gb,
+        cpu.family=PiArmCortex,
+        cpu.freq=1400 mhz,
+        cpu.fpu=true,
+        wifi.name=RPi3_WiFi,
+        wifi.version=5,
+        wifi.bands=[2.4GHz, 5GHz],
+        energy=1.8 W, 5.1 W, 2.9 W
+    PORTS
+        spi=2,
+        i2c=2,
+        uart=1,
+        gpio=28
+    PINS
         power_3v3_a[3V3] @ 1,
         power_5v_a[5V] @ 2,
         GPIO2[gpio,sda-0] @ 3,
@@ -51,5 +56,4 @@ Board[RPI] RaspberryPi_3B_Plus
         GPIO20[gpio,miso-1] @ 38,
         GND_8[GND] @ 39,
         GPIO21[gpio,sck-1] @ 40
-    end
-end
+;

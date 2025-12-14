@@ -4,7 +4,7 @@ DeMoL supports a comprehensive range of IoT sensors and actuators based on indus
 
 ## Sensor Types (35 Types)
 
-All sensors use the syntax: `Sensor[Type] ComponentName`
+All sensors use the syntax: `SENSOR[Type] ComponentName`
 
 ### Environmental Sensors
 
@@ -60,7 +60,7 @@ All sensors use the syntax: `Sensor[Type] ComponentName`
 
 ## Actuator Types (23 Types)
 
-All actuators use the syntax: `Actuator[Type] ComponentName`
+All actuators use the syntax: `ACTUATOR[Type] ComponentName`
 
 ### Basic Actuators
 
@@ -127,42 +127,36 @@ All message schemas include a `timestamp` field (Unix epoch in milliseconds) for
 
 ### Environmental Sensor
 ```
-Sensor[Env] BME680
-    operational
-        vcc: 5V
-        ioVcc: 3V3
-        energy: 0.01 mW, 39.6 mW, 3 mW
-    end
-    pins
-        PPIN vcc[5V] @ 1;
-        PPIN gnd[GND] @ 5;
-        DPIN sda[sda-0] @ 2;
-        DPIN scl[scl-0] @ 3;
-    end
-    attributes
-        ATTR poll_period[int] = 10;
-        ATTR gas_status[str] = "ENABLE_GAS_MEAS";
-    end
-end
+SENSOR[Env] BME680 WITH
+    OP
+        vcc=5V,
+        ioVcc=3V3,
+        energy=0.01 mW, 39.6 mW, 3 mW
+    PINS
+        vcc[5V] @ 1,
+        gnd[GND] @ 5,
+        sda[sda-0] @ 2,
+        scl[scl-0] @ 3
+    ATTRIBUTES
+        poll_period[int] = 10,
+        gas_status[str] = "ENABLE_GAS_MEAS"
+;
 ```
 
 ### Addressable LED Actuator
 ```
-Actuator[NeoPixel] WS2812
-    operational
-        vcc: 5V
-    end
-    pins
-        PPIN VCC[5V] @ 1;
-        PPIN GND[GND] @ 2;
-        DPIN DIN[gpio,mosi-0] @ 3;
-    end
-    attributes
-        ATTR num_leds[int] = 12;
-        ATTR color_format[str] = "GRB";
-        ATTR brightness[float] = 0.5;
-    end
-end
+ACTUATOR[NeoPixel] WS2812 WITH
+    OP
+        vcc=5V
+    PINS
+        VCC[5V] @ 1,
+        GND[GND] @ 2,
+        DIN[gpio,mosi-0] @ 3
+    ATTRIBUTES
+        num_leds[int] = 12,
+        color_format[str] = "GRB",
+        brightness[float] = 0.5
+;
 ```
 
 ## Adding Custom Types

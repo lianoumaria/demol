@@ -1,21 +1,23 @@
-Board[RPI] RaspberryPi_3A_Plus
-    operational
-        vcc: 5V
-        memory:
-            flash: 16 gb
-            ram: 512 mb
-        cpu:
-            cpu_family: PiArmCortex
-            max_freq: 1400 mhz
-            fpu: true
-        wifi:
-            name: wifi_1
-            freq: 5 ghz
-        bluetooth: BT4
-        ioVcc: 3V3
-        energy: 1.5 W, 4.5 W, 2.5 W
-    end
-    pins
+BOARD[RPI] RaspberryPi_3A_Plus WITH
+    OP
+        vcc=5V,
+        memory.flash=16 gb,
+        memory.ram=512 mb,
+        cpu.family=PiArmCortex,
+        cpu.freq=1400 mhz,
+        cpu.fpu=true,
+        wifi.name=RPi3_WiFi,
+        wifi.version=5,
+        wifi.bands=[2.4GHz, 5GHz],
+        bluetooth=BT4,
+        ioVcc=3V3,
+        energy=1.5 W, 4.5 W, 2.5 W
+    PORTS
+        spi=1,
+        i2c=2,
+        uart=1,
+        gpio=28
+    PINS
         power_3v3_a[3V3] @ 1,
         power_5v_a[5V] @ 2,
         GPIO2[gpio,sda-0] @ 3,
@@ -48,7 +50,7 @@ Board[RPI] RaspberryPi_3A_Plus
         GND_6[GND] @ 30,
         GPIO6[gpio] @ 31,
         GPIO12[gpio,pwm-0] @ 32,
-        GPIO13[gpio] @ 33,
+        GPIO13[gpio,pwm-1] @ 33,
         GND_7[GND] @ 34,
         GPIO19[gpio] @ 35,
         GPIO16[gpio] @ 36,
@@ -56,5 +58,4 @@ Board[RPI] RaspberryPi_3A_Plus
         GPIO20[gpio] @ 38,
         GND_8[GND] @ 39,
         GPIO21[gpio] @ 40
-    end
-end
+;

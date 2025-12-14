@@ -1,9 +1,9 @@
-Actuator[ServoController] PCA9685
-    operational
-    vcc: 5V    ioVcc: 5V
-    energy: 10 mW, 500 mW, 100 mW
-    end
-    pins
+ACTUATOR[ServoController] PCA9685 WITH
+    OP
+        vcc=5V,
+        ioVcc=5V,
+        energy=10 mW, 500 mW, 100 mW
+    PINS
         GND_1[GND] @ 1,
         SCL_1[scl-0] @ 2,
         SDA_1[sda-0] @ 3,
@@ -64,13 +64,10 @@ Actuator[ServoController] PCA9685
         PWM_CH15[pwm-15] @ 58,
         Vplus_CH15[5V] @ 59,
         GND_CH15[GND] @ 60
-    end
-    templates
-        raspbian: "pca9685.py.tmpl",
-        riotos: "pca9685_riot.c.tmpl"
-    end
-    attributes
+    TEMPLATES
+        raspbian="pca9685.py.tmpl",
+        riotos="pca9685_riot.c.tmpl"
+    ATTRIBUTES
         channels[int] = 16,
         frequency[int] = 50
-    end
-end
+;

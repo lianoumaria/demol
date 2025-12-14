@@ -1,21 +1,17 @@
 // Model of NeoPixel_Ring_12
-Actuator[LedArray] WS2812
-    operational
-        vcc: 5V
-        energy: 5 mW, 3600 mW, 1800 mW
-    end
-    pins
+ACTUATOR[LedArray] WS2812 WITH
+    OP
+        vcc=5V,
+        energy=5 mW, 3600 mW, 1800 mW
+    PINS
         VCC[5V] @ 1,
         GND[GND] @ 2,
         DIN[gpio,mosi-0] @ 3
-    end
-    templates
-        raspbian: "ws2812.py.tmpl",
-        riotos: "ws2812_riot.c.tmpl"
-    end
-    attributes
+    TEMPLATES
+        raspbian="ws2812.py.tmpl",
+        riotos="ws2812_riot.c.tmpl"
+    ATTRIBUTES
         num_leds[int] = 12,
         color_format[str] = "GRB",
         brightness[float] = 0.5
-    end
-end
+;

@@ -1,9 +1,8 @@
-Sensor[ADC] ADCDifferentialPi
-    operational
-    vcc: 5V
-    energy: 5 mW, 50 mW, 20 mW
-    end
-    pins
+SENSOR[ADC] ADCDifferentialPi WITH
+    OP
+        vcc=5V,
+        energy=5 mW, 50 mW, 20 mW
+    PINS
         VCC[5V] @ 1,
         GND[GND] @ 2,
         SDA[sda-1] @ 3,
@@ -24,15 +23,12 @@ Sensor[ADC] ADCDifferentialPi
         CH7_MINUS[adc-6] @ 18,
         CH8_PLUS[adc-7] @ 19,
         CH8_MINUS[adc-7] @ 20
-    end
-    templates
-        raspbian: "adafruit_adc_diff.py.tmpl",
-        riotos: "adafruit_adc_diff.c.tmpl"
-    end
-    attributes
+    TEMPLATES
+        raspbian="adafruit_adc_diff.py.tmpl",
+        riotos="adafruit_adc_diff.c.tmpl"
+    ATTRIBUTES
         num_channels[int] = 8,
         resolution[list] = [12, 14, 16, 18],
         gain[list] = [1, 2, 4, 8],
         voltage_reference[float] = 2.048
-    end
-end
+;

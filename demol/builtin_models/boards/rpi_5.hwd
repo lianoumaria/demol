@@ -1,16 +1,21 @@
-Board[RPI] RaspberryPi_5_8GB
-    operational
-        vcc: 5V
-        memory:
-            flash: 16 gb
-            ram: 8 gb
-        cpu:
-            cpu_family: PiArmCortex
-            max_freq: 2400 mhz
-            fpu: true
-        energy: 3.0 W, 8.0 W, 4.5 W
-    end
-    pins
+BOARD[RPI] RaspberryPi_5_8GB WITH
+    OP
+        vcc=5V,
+        memory.flash=16 gb,
+        memory.ram=8 gb,
+        cpu.family=PiArmCortex,
+        cpu.freq=2400 mhz,
+        cpu.fpu=true,
+        wifi.name=RPi5_WiFi,
+        wifi.version=5,
+        wifi.bands=[2.4GHz, 5GHz],
+        energy=3.0 W, 8.0 W, 4.5 W
+    PORTS
+        spi=1,
+        i2c=1,
+        uart=1,
+        gpio=28
+    PINS
         power_3v3_a[3V3] @ 1,
         power_5v_a[5V] @ 2,
         GPIO2[gpio,sda-0] @ 3,
@@ -51,5 +56,4 @@ Board[RPI] RaspberryPi_5_8GB
         GPIO20[gpio,din] @ 38,
         GND_8[GND] @ 39,
         GPIO21[gpio,dout] @ 40
-    end
-end
+;

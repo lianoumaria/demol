@@ -1,18 +1,15 @@
 // RIOT Configuration for ws2812 neopixel led strip
 
-Actuator[LedArray] WS281X
-    operational
-        vcc: 5V
-        energy: 5 mW, 300 mW, 150 mW
-    end
-    pins
+ACTUATOR[LedArray] WS281X WITH
+    OP
+        vcc=5V,
+        energy=5 mW, 300 mW, 150 mW
+    PINS
         vcc[5V] @ 1,
         gnd[GND] @ 2,
         data_in[gpio] @ 3,
         data_out[gpio] @ 4
-    end
-    templates
-        raspbian: "ws281x.py.tmpl",
-        riotos: "ws281x_riot.c.tmpl"
-    end
-end
+    TEMPLATES
+        raspbian="ws281x.py.tmpl",
+        riotos="ws281x_riot.c.tmpl"
+;

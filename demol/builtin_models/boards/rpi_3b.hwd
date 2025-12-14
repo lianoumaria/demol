@@ -1,16 +1,18 @@
-Board[RPI] RaspberryPi_3B
-    operational
-    vcc: 5V
-    memory:
-        flash: 16 gb
-        ram: 1 gb
-    cpu:
-        cpu_family: PiArmCortex
-        max_freq: 1400 mhz
-        fpu: true
-    energy: 1.7 W, 5.0 W, 2.8 W
-    end
-    pins
+BOARD[RPI] RaspberryPi_3B WITH
+    OP
+        vcc=5V,
+        memory.flash=16 gb,
+        memory.ram=1 gb,
+        cpu.family=PiArmCortex,
+        cpu.freq=1400 mhz,
+        cpu.fpu=true,
+        energy=1.7 W, 5.0 W, 2.8 W
+    PORTS
+        spi=2,
+        i2c=1,
+        uart=1,
+        gpio=28
+    PINS
         power_3v3_a[3V3] @ 1,
         power_5v_a[5V] @ 2,
         GPIO2[gpio,sda-0] @ 3,
@@ -51,5 +53,4 @@ Board[RPI] RaspberryPi_3B
         GPIO20[gpio,mosi-1] @ 38,
         GND_8[GND] @ 39,
         GPIO21[gpio,sck-1] @ 40
-    end
-end
+;

@@ -1242,3 +1242,66 @@ def validate_topic_format(model) -> None:
                 f"{error_msg}"
             )
             raise_validation_error(connection, warning_msg, "TopicValidationError")
+
+def validate_board_ports(board) -> None:
+    """
+    Validate that the board's declared ports match the pin definitions.
+    
+    For each port type defined in the PORTS section (e.g., spi=2),
+    verifies that there are corresponding pins defined with that function
+    and bus index.
+    """
+    if not hasattr(board, 'ports') or not board.ports:
+        return
+
+    # Count available interfaces based on pin definitions
+    available_interfaces = {
+        'spi': set(),
+        'i2c': set(),
+        'uart': set(),
+        'gpio': 0
+    }
+
+    for pin in board.pins:
+        if hasattr(pin, 'funcs'):
+            for func in pin.funcs:
+                # Check for GPIO
+                if hasattr(func, 'ptype') and func.ptype == 'gpio':
+                    available_interfaces['gpio'] += 1
+                
+                # Check for SPI
+                # SPI rule: ptype=SPIPinType "-" bus=INT
+                if func.__class__.__name__ == 'SPI':
+                    available_interfaces['spi'].add(func.bus)
+                
+                # Check for I2C
+                elif func.__class__.__name__ == 'I2C':
+                    available_interfaces['i2c'].add(func.bus)
+                
+                # Check for UART
+                elif func.__class__.__name__ == 'UART':
+                    available_interfaces['uart'].add(func.bus)
+
+    # Validate declared ports against available interfaces
+    for port in board.ports:
+        port_name = port.name.lower()
+        required_count = port.count
+
+        if port_name == 'gpio':
+            if available_interfaces['gpio'] < required_count:
+                raise_validation_error(
+                    board,
+                    f"[WF-Board-Ports] Declared {required_count} GPIO pins, but only found {available_interfaces['gpio']} in PINS section.",
+                    "PortCountMismatch"
+                )
+        elif port_name in ['spi', 'i2c', 'uart']:
+            found_buses = len(available_interfaces[port_name])
+            if found_buses < required_count:
+                raise_validation_error(
+                    board,
+                    f"[WF-Board-Ports] Declared {required_count} {port_name.upper()} interfaces, but only found pins for {found_buses} buses in PINS section.",
+                    "PortCountMismatch"
+                )
+        else:
+            # For other custom ports, we might not have specific validation logic yet
+            pass

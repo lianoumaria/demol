@@ -1,20 +1,16 @@
-Sensor[Proximity] TCRT5000
-    operational
-        vcc: 5V
-        ioVcc: 5V
-        energy: 10 mW, 100 mW, 50 mW
-    end
-    pins
+SENSOR[Proximity] TCRT5000 WITH
+    OP
+        vcc=5V,
+        ioVcc=5V,
+        energy=10 mW, 100 mW, 50 mW
+    PINS
         VCC[5V] @ 1,
         GND[GND] @ 2,
         D0[gpio] @ 3,
         A0[gpio] @ 4
-    end
-    templates
-        raspbian: "tcrt5000.py.tmpl",
-        riotos: "tcrt5000.c.tmpl"
-    end
-    attributes
+    TEMPLATES
+        raspbian="tcrt5000.py.tmpl",
+        riotos="tcrt5000.c.tmpl"
+    ATTRIBUTES
         frequency[int] = 100
-    end
-end    
+;

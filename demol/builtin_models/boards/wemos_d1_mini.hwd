@@ -1,16 +1,20 @@
-
-Board[ESP] WemosD1Mini
-    operational
-      vcc: 3V3
-      memory:
-        flash: 16 mb
-      cpu:
-        cpu_family: ESP8266
-        max_freq: 160 mhz
-        fpu: false
-      energy: 2 mW, 500 mW, 80 mW
-    end
-    pins
+BOARD[ESP] WemosD1Mini WITH
+    OP
+        vcc=3V3,
+        memory.flash=16 mb,
+        cpu.family=ESP8266,
+        cpu.freq=160 mhz,
+        cpu.fpu=false,
+        wifi.name=Wemos_WiFi,
+        wifi.version=4,
+        wifi.bands=[2.4GHz],
+        energy=2 mW, 500 mW, 80 mW
+    PORTS
+        spi=1,
+        i2c=1,
+        uart=1,
+        gpio=9
+    PINS
         rst[] @ 1,
         a0[adc] @ 2,
         d0[gpio] @ 3,
@@ -27,5 +31,4 @@ Board[ESP] WemosD1Mini
         d4[gpio] @ 14,
         gnd[GND] @ 15,
         power_5v[5V] @ 16
-    end
-end
+;

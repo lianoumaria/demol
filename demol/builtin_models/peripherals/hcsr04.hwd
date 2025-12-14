@@ -1,20 +1,16 @@
-Sensor[Distance] HCSR04
-    operational
-        vcc: 5V
-        ioVcc: 5V
-        energy: 10 mW, 100 mW, 75 mW
-    end
-    pins
+SENSOR[Distance] HCSR04 WITH
+    OP
+        vcc=5V,
+        ioVcc=5V,
+        energy=10 mW, 100 mW, 75 mW
+    PINS
         GND[GND] @ 1,
         echo[gpio] @ 2,
         trigger[gpio] @ 3,
         VCC[5V] @ 4
-    end
-    templates
-        raspbian: "hcsr04.py.tmpl",
-        riotos: "hcsr04.c.tmpl"
-    end
-    attributes
+    TEMPLATES
+        raspbian="hcsr04.py.tmpl",
+        riotos="hcsr04.c.tmpl"
+    ATTRIBUTES
         frequency[float] = 10
-    end
-end
+;

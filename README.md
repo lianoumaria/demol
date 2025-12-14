@@ -267,30 +267,31 @@ USE SonarSRF04(DistanceSensor) [
 Boards are defined in `.hwd` files and describe microcontroller/SBC specifications using the `Board[Type] name` syntax:
 
 ```
-Board[RPI] RaspberryPi_4B_4GB
-    operational
-        vcc: 5V
-        ioVcc: 3V3
-        energy: 1.4 W, 7.6 W, 3.5 W  // min, max, avg power consumption
-        memory:
-            flash: 16 gb
-            ram: 4 gb
-        cpu:
-            cpu_family: PiArmCortex
-            max_freq: 1500 mhz
-            fpu: true
-        wifi:
-            name: wifi_0
-            freq: 2.4 ghz
-        bluetooth: BT5
-    end
-    pins
+BOARD[RPI] RaspberryPi_4B_4GB WITH
+    OP
+        vcc=5V,
+        ioVcc=3V3,
+        energy=1.4 W, 7.6 W, 3.5 W,  // min, max, avg power consumption
+        memory.flash=16 gb,
+        memory.ram=4 gb,
+        cpu.family=PiArmCortex,
+        cpu.freq=1500 mhz,
+        cpu.fpu=true,
+        wifi.name=RPi4_WiFi,
+        wifi.version=5,
+        wifi.bands=[2.4GHz, 5GHz],
+        bluetooth=BT5
+    PORTS
+        spi=2,
+        i2c=2,
+        uart=2,
+        gpio=28
+    PINS
         power_5v[5V] @ 2,
         gnd_1[GND] @ 6,
         p_21[gpio,sda-1] @ 40,
         p_22[gpio,scl-1] @ 38
-    end
-end
+;
 ```
 
 **Board Types:** `RPI` (Raspberry Pi), `ESP` (ESP32/ESP8266), `ARDUINO`
@@ -308,29 +309,25 @@ end
 Sensors use the `Sensor[Type] name` syntax where Type indicates the sensor category and its message schema:
 
 ```
-Sensor[Env] BME680
-    operational
-        vcc: 5V
-        ioVcc: 3V3
-        energy: 0.01 mW, 39.6 mW, 3 mW  // min, max, avg power consumption
-    end
-    pins
+SENSOR[Env] BME680 WITH
+    OP
+        vcc=5V,
+        ioVcc=3V3,
+        energy=0.01 mW, 39.6 mW, 3 mW  // min, max, avg power consumption
+    PINS
         vcc[5V] @ 1,
         gnd[GND] @ 5,
         sda[sda-0] @ 2,
         scl[scl-0] @ 3
-    end
-    templates
-        raspbian: "bme680.py.tmpl",
-        riotos: "bme680.c.tmpl"
-    end
-    attributes
+    TEMPLATES
+        raspbian="bme680.py.tmpl",
+        riotos="bme680.c.tmpl"
+    ATTRIBUTES
         poll_period[int] = 10,
         humidity_oversample[int] = 2,
         temperature_oversample[int] = 8,
         filter_size[int] = 3
-    end
-end
+;
 ```
 
 **Available Sensor Types:** `Distance`, `Temperature`, `Humidity`, `Gas`, `Env`, `AirQuality`, `Light`, `UV`, `Sound`, `Acceleration`, `Gyroscope`, `Magnetometer`, `IMU`, `Tracker`, `Proximity`, `Motion`, `Presence`, `ADC`, `Current`, `Voltage`, `Power`, `Flow`, `Level`, `Weight`, `Force`, `Vibration`, `Camera`, `RFID`, `Fingerprint`, `GPS`, `Color`
@@ -342,22 +339,19 @@ For complete sensor type documentation and message schemas, see **[SENSORS_ACTUA
 Actuators use the `Actuator[Type] name` syntax:
 
 ```
-Actuator[ServoController] PCA9685
-    operational
-        vcc: 5V
-        ioVcc: 5V
-    end
-    pins
+ACTUATOR[ServoController] PCA9685 WITH
+    OP
+        vcc=5V,
+        ioVcc=5V
+    PINS
         GND_1[GND] @ 1,
         SCL_1[scl-0] @ 2,
         SDA_1[sda-0] @ 3,
         VCC_1[5V] @ 4
-    end
-    attributes
+    ATTRIBUTES
         num_servos[int] = 16,
         frequency[int] = 50
-    end
-end
+;
 ```
 
 **Available Actuator Types:** `MotorController`, `ServoController`, `Relay`, `Switch`, `Led`, `LedArray`, `NeoPixel`, `Display`, `LCD`, `OLED`, `Buzzer`, `Speaker`, `Stepper`, `DCMotor`, `Pump`, `Valve`, `Heater`, `Cooler`, `Fan`
