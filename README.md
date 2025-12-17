@@ -914,6 +914,62 @@ Generates code or documentation from a DeMoL model file.
     -   `501 Not Implemented`: If the target is valid but not yet implemented (e.g., `rpi`, `docs`).
     -   `500 Internal Server Error`: If code generation fails.
 
+## Tests
+
+This directory contains tests for the DeMoL DSL, covering parsing, semantic validation, and model transformations.
+
+### Running Tests
+
+To run the tests, ensure you have the virtual environment activated and `pytest` installed.
+
+```bash
+# Install test dependencies (if not already installed)
+pip install pytest
+
+# Run all tests
+pytest tests/
+
+# Run specific test file
+pytest tests/test_board_semantics.py
+```
+
+### Test Coverage
+
+- **test_board_semantics.py**: Validates Board model semantics.
+    - Port count consistency.
+    - Nested operational properties.
+    - Unique pin numbers.
+
+- **test_component_semantics.py**: Validates Component (Sensor/Actuator) semantics.
+    - Valid Sensor/Actuator definitions.
+    - Attribute parsing.
+    - Template parsing.
+
+- **test_device_semantics.py**: Validates Device model semantics.
+    - IO Voltage compatibility (Warning).
+    - Common ground connection (Warning).
+    - MQTT topic format validation.
+    - Pin function compatibility.
+
+- **test_power_gpio_semantics.py**: Validates Power and GPIO connection semantics.
+    - Power voltage compatibility.
+    - Ground connection rules.
+    - GPIO mode validation (input/output).
+    - GPIO property validation.
+
+- **test_i2c_spi_semantics.py**: Validates I2C and SPI connection semantics.
+    - I2C address range and uniqueness.
+    - I2C bus speed validation.
+    - Pin function checks (SDA/SCL).
+
+- **test_uart_safety_semantics.py**: Validates UART and Safety semantics.
+    - UART baudrate validation.
+    - Pin conflict detection (Safety-Unique-Pins).
+    - Unique peripheral names.
+    - Unconnected peripheral detection.
+    - Broker requirement validation.
+
+
 ## 📜 License
 
 DeMoL is protected under the [MIT ](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [MIT LICENSE](https://choosealicense.com/licenses/mit/) uri.
