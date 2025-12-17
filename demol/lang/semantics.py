@@ -796,7 +796,7 @@ def validate_broker_requirements(model) -> None:
         for conn in model.connections
     )
     
-    if has_endpoint and not hasattr(model, 'broker'):
+    if has_endpoint and (not hasattr(model, 'broker') or model.broker is None):
         raise_validation_error(
             model,
             "[WF-Broker-Requirements] Broker configuration required: One or more connections define remote endpoints "
