@@ -1,6 +1,6 @@
 import click
 from demol.lang import build_model
-from demol.transformations import m2t_device_plantuml, m2t_device_json
+from demol.transformations import m2t_device_plantuml, m2t_device_json, m2t_device_svg
 
 
 @click.group("demol")
@@ -25,14 +25,17 @@ def validate(ctx, model_filepath):
 @click.argument("model_filepath")
 @click.pass_context
 def gen(ctx, generator, model_filepath):
-    if generator == 'plantuml':
-        print(f'[*] Running Generator [PlanUML] for model {model_filepath}')
+    if generator == 'pi':
+        print(f'[*] Running Generator [RPI] for model {model_filepath}')
         model = build_model(model_filepath)
-        a = m2t_device_plantuml(model)
+        m2t_rpi(model)
     elif generator == 'json':
         print(f'[*] Running Generator [JSON] for model {model_filepath}')
         model = build_model(model_filepath)
-        a = m2t_device_json(model)
+    elif generator == 'svg':
+        print(f'[*] Running Generator [SVG] for model {model_filepath}')
+        model = build_model(model_filepath)
+        m2t_device_svg(model)
     elif generator == 'src':
         ## TODO: Integrate raspi and riot code generation
         print(f'[*] Running Generator [Source] for model {model_filepath}')

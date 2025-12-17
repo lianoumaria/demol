@@ -784,8 +784,25 @@ Commands:
 
 ```
 
-The `gen` command provides means of executing M2T transformations and provides subcommands, while the `validate` is used to validate input models.
+The `gen` command allows you to execute Model-to-Text (M2T) transformations to generate code, documentation, or diagrams.
 
+**Usage:**
+```sh
+demol gen [GENERATOR] [MODEL_FILE]
+```
+
+**Available Generators:**
+- `svg`: Generates a professional schematic SVG diagram of the device connections.
+- `pi`: Generates Python code for Raspberry Pi (using RPi.GPIO).
+- `riot`: Generates C code for RiotOS (using RIOT-OS).
+
+**Example - Generate SVG Diagram:**
+```sh
+demol gen svg examples/rpi_iot_device.dev
+```
+This command will generate an SVG file (e.g., `SmartEnvironmentMonitor.svg`) in the current directory, visualizing the pin-level connections between the board and peripherals.
+
+The `validate` command is used to validate input models.
 To validate a device model, for example the `./examples/raspi_iot_device.dev`, head to the `examples` directory and execute:
 
 ```sh
@@ -843,15 +860,14 @@ To generate code for a device model:
 
 ```sh
 # Generate Raspberry Pi code
-python scripts/generate_rpi_examples.py
+demol gen pi examples/rpi_iot_device.dev
 ```
 
 This will:
 1. Parse the device model
 2. Validate semantics
 3. Resolve platform-specific templates
-4. Generate peripheral classes and main application code
-5. Output to the specified directory
+4. Generate the runtime software for the device
 
 ### REST API
 
