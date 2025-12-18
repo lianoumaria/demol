@@ -1,55 +1,58 @@
-Board[ESP] ESP32Wroom32
-    operational
-        vcc: 3V3
-        memory:
-            flash: 4 mb
-        cpu:
-            cpu_family: ESP32
-            max_freq: 240 mhz
-            fpu: false
-        wifi:
-            name: wifi_1
-            freq: 2.5 ghz
-        bluetooth: BT4
-    end
-    pins
-        PPIN power_3v3[3V3] @ 1;
-        DPIN en_rst[gpio] @ 2;
-        DPIN svp[gpio,adc] @ 3;
-        DPIN svn[gpio,adc] @ 4;
-        DPIN p_34[gpio,adc] @ 5;
-        DPIN p_35[gpio,adc] @ 6;
-        DPIN p_32[gpio,pwm-1,adc] @ 7;
-        DPIN p_33[gpio,pwm-1,adc] @ 8;
-        DPIN p_25[gpio,dac,adc] @ 9;
-        DPIN p_26[gpio,dac,adc] @ 10;
-        DPIN p_27[gpio,pwm-1,adc] @ 11;
-        DPIN p_14[gpio,sck-1,adc] @ 12;
-        DPIN p_12[gpio,miso-1,adc] @ 13;
-        PPIN gnd_1[GND] @ 14;
-        DPIN p_13[gpio,mosi-1,adc] @ 15;
-        DPIN p_9[gpio,rx-1] @ 16;
-        DPIN p_10[gpio,tx-1] @ 17;
-        DPIN p_11[gpio] @ 18;
-        PPIN power_5v[5V] @ 19;
-        PPIN gnd_2[GND] @ 20;
-        DPIN p_23[gpio,mosi-0] @ 21;
-        DPIN p_22[gpio,scl-0] @ 22;
-        DPIN p_1[gpio,tx-0] @ 23;
-        DPIN p_3[gpio,rx-0] @ 24;
-        DPIN p_21[gpio,sda-0] @ 25;
-        PPIN gnd_3[GND] @ 26;
-        DPIN p_19[gpio,miso-0] @ 27;
-        DPIN p_18[gpio,sck-0] @ 28;
-        DPIN p_5[gpio,cs-0] @ 29;
-        DPIN p_17[gpio,pwm-0] @ 30;
-        DPIN p_16[gpio,pwm-0] @ 31;
-        DPIN p_4[gpio,pwm-0,adc] @ 32;
-        DPIN p_0[gpio,pwm-0,adc] @ 33;
-        DPIN p_2[gpio,pwm-0,adc] @ 34;
-        DPIN p_15[gpio,cs-1,adc] @ 35;
-        DPIN p_8[gpio] @ 36;
-        DPIN p_7[gpio] @ 37;
-        DPIN p_6[gpio] @ 38;
-    end
-end
+BOARD[ESP] ESP32Wroom32 WITH
+    OP
+        vcc=3V3,
+        ioVcc=3V3,
+        memory.flash=4 mb,
+        cpu.family=ESP32,
+        cpu.freq=240 mhz,
+        cpu.fpu=false,
+        wifi.name=wlan0,
+        wifi.version=4,
+        wifi.bands=[2.4GHz],
+        bluetooth=BT4,
+        energy=2.64 mW, 792 mW, 100 mW
+    PORTS
+        spi=2,
+        i2c=1,
+        uart=2,
+        gpio=33
+    PINS
+        VCC_3V3[3V3] @ 1,
+        EN[gpio] @ 2,
+        GPIO36[gpio,adc] @ 3,
+        GPIO39[gpio,adc] @ 4,
+        GPIO34[gpio,adc] @ 5,
+        GPIO35[gpio,adc] @ 6,
+        GPIO32[gpio,pwm-1,adc] @ 7,
+        GPIO33[gpio,pwm-1,adc] @ 8,
+        GPIO25[gpio,dac,adc] @ 9,
+        GPIO26[gpio,dac,adc] @ 10,
+        GPIO27[gpio,pwm-1,adc] @ 11,
+        GPIO14[gpio,sck-1,adc] @ 12,
+        GPIO12[gpio,miso-1,adc] @ 13,
+        GND_1[GND] @ 14,
+        GPIO13[gpio,mosi-1,adc] @ 15,
+        GPIO9[gpio,rx-1] @ 16,
+        GPIO10[gpio,tx-1] @ 17,
+        GPIO11[gpio] @ 18,
+        VCC_5V[5V] @ 19,
+        GND_2[GND] @ 20,
+        GPIO23[gpio,mosi-0] @ 21,
+        GPIO22[gpio,scl-0] @ 22,
+        GPIO1[gpio,tx-0] @ 23,
+        GPIO3[gpio,rx-0] @ 24,
+        GPIO21[gpio,sda-0] @ 25,
+        GND_3[GND] @ 26,
+        GPIO19[gpio,miso-0] @ 27,
+        GPIO18[gpio,sck-0] @ 28,
+        GPIO5[gpio,cs-0] @ 29,
+        GPIO17[gpio,pwm-0] @ 30,
+        GPIO16[gpio,pwm-0] @ 31,
+        GPIO4[gpio,pwm-0,adc] @ 32,
+        GPIO0[gpio,pwm-0,adc] @ 33,
+        GPIO2[gpio,pwm-0,adc] @ 34,
+        GPIO15[gpio,cs-1,adc] @ 35,
+        GPIO8[gpio] @ 36,
+        GPIO7[gpio] @ 37,
+        GPIO6[gpio] @ 38
+;

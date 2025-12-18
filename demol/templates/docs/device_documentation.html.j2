@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ model.metadata.name }} - Hardware Documentation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        h1 { text-align: center; margin-bottom: 30px; }
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        tr:hover { background-color: #f5f5f5; }
+        .diagram-container {
+            text-align: center;
+            margin: 20px 0;
+            overflow: auto;
+        }
+        .diagram-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .meta-info {
+            display: flex;
+            justify-content: space-between;
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .badge-board { background-color: #E3F2FD; color: #1565C0; }
+        .badge-sensor { background-color: #E8F5E9; color: #2E7D32; }
+        .badge-actuator { background-color: #FCE4EC; color: #C2185B; }
+    </style>
+</head>
+<body>
+
+    <h1>{{ model.metadata.name }}</h1>
+    
+    <div class="meta-info">
+        <div><strong>Version:</strong> {{ model.metadata.version }}</div>
+        <div><strong>Author:</strong> {{ model.metadata.author }}</div>
+        {% if model.metadata.os %}
+        <div><strong>OS:</strong> {{ model.metadata.os }}</div>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>Description</h2>
+        <p>{{ model.metadata.description }}</p>
+    </div>
+
+    <div class="section">
+        <h2>System Diagram</h2>
+        <div class="diagram-container">
+            {% if system_diagram_b64 %}
+            <img src="data:image/png;base64,{{ system_diagram_b64 }}" alt="System Diagram">
+            {% else %}
+            <p><em>System diagram not available.</em></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Wiring Diagram</h2>
+        <div class="diagram-container">
+            {% if wiring_diagram_b64 %}
+            <img src="data:image/png;base64,{{ wiring_diagram_b64 }}" alt="Wiring Diagram">
+            {% else %}
+            <p><em>Wiring diagram not available.</em></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Bill of Materials (BOM)</h2>
+        <h3>Main Board</h3>
+        <ul>
+            <li><strong>Name:</strong> {{ model.components.board.name }}</li>
+            <li><strong>Type:</strong> <span class="badge badge-board">{{ model.components.board.type }}</span></li>
+        </ul>
+
+        <h3>Peripherals</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Class</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for conn in model.connections %}
+                {% set periph = conn.peripheral.ref %}
+                <tr>
+                    <td>{{ periph.name }}</td>
+                    <td>{{ periph.__class__.__name__ }}</td>
+                    <td>
+                        {% if periph.__class__.__name__ == 'Sensor' %}
+                        <span class="badge badge-sensor">{{ periph.type }}</span>
+                        {% else %}
+                        <span class="badge badge-actuator">{{ periph.type }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ periph.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Wiring Instructions</h2>
+        <p>Connect the peripherals to the main board as detailed below. Ensure all power connections are secure before powering on the device.</p>
+
+        {% for conn in model.connections %}
+        {% set periph = conn.peripheral.ref %}
+        <h3>{{ periph.name }} ({{ periph.type }})</h3>
+
+        <h4>Power Connections</h4>
+        {% if conn.powerConns %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Board Pin</th>
+                    <th>Peripheral Pin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pc in conn.powerConns %}
+                <tr>
+                    <td>{{ pc.boardPin }}</td>
+                    <td>{{ pc.peripheralPin }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p><em>No explicit power connections defined.</em></p>
+        {% endif %}
+
+        <h4>IO Connections</h4>
+        {% if conn.ioConns %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Board Pin</th>
+                    <th>Peripheral Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for io in conn.ioConns %}
+                    {% for pin in io.pins %}
+                    <tr>
+                        <td>{{ io.type }}</td>
+                        <td>{{ pin.boardPin }}</td>
+                        <td>{{ pin.peripheralPin }}</td>
+                        <td>{{ pin.function }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p><em>No IO connections defined.</em></p>
+        {% endif %}
+        <hr>
+        {% endfor %}
+    </div>
+
+    {% if model.network or model.broker %}
+    <div class="section">
+        <h2>Infrastructure Configuration</h2>
+        
+        {% if model.network %}
+        <h3>Network</h3>
+        <ul>
+            <li><strong>SSID:</strong> {{ model.network.ssid }}</li>
+            <li><strong>Password:</strong> {{ model.network.password }}</li>
+        </ul>
+        {% endif %}
+
+        {% if model.broker %}
+        <h3>MQTT Broker</h3>
+        <ul>
+            <li><strong>Name:</strong> {{ model.broker.name }}</li>
+            <li><strong>Type:</strong> {{ model.broker.__class__.__name__.replace('Broker', '') }}</li>
+            <li><strong>Host:</strong> {{ model.broker.host }}</li>
+            <li><strong>Port:</strong> {{ model.broker.port }}</li>
+        </ul>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</body>
+</html>

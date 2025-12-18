@@ -1,13 +1,15 @@
 // RIOT Configuration for MPL3115A2 pressure sensor
 
-Sensor[Env] Mpl3115a2
-    operational
-        vcc: 3V3
-    end
-    pins
-        PPIN vcc[3V3] @ 1;
-        PPIN gnd[GND] @ 2;
-        DPIN scl[scl-0] @ 5;
-        DPIN sda[sda-0] @ 6;
-    end
-end
+SENSOR[Env] Mpl3115a2 WITH
+    OP
+        vcc=3V3,
+        energy=0.01 mW, 10 mW, 2 mW
+    PINS
+        vcc[3V3] @ 1,
+        gnd[GND] @ 2,
+        scl[scl-0] @ 5,
+        sda[sda-0] @ 6
+    TEMPLATES
+        raspbian="mpl3115a2.py.tmpl",
+        riotos="mpl3115a2_riot.c.tmpl"
+;

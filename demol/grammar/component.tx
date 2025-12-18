@@ -16,34 +16,36 @@ BoardType:
 ;
 
 Board:
-    'Board' '[' type=BoardType ']' name=ID
-	(
-        ('operational' operational=OperationalBoard 'end')
-	    ('pins' pins*=Pin 'end')
-     )#
-    'end'
+    'BOARD' '[' type=BoardType ']' name=ID 'WITH'
+	  'OP' operational=OperationalBoard
+      ('PORTS' ports*=Port[','])?
+	  'PINS' pins*=Pin[',']
+    ';'
+;
+
+Port:
+    name=ID '=' count=INT
 ;
 
 Peripheral: Sensor | Actuator;
 
+
 Actuator:
-    'Actuator' '[' type=ActuatorType ']' name=ID
-	(
-	  ('operational' operational=OperationalActuator 'end')
-	  ('pins' pins*=Pin 'end')
-	  ('attributes' attributes*=Attribute 'end')?
-    )#
-    'end'
+    'ACTUATOR' '[' type=ActuatorType ']' name=ID 'WITH'
+	  'OP' operational=OperationalActuator
+	  'PINS' pins*=Pin[',']
+	  ('TEMPLATES' templates*=TemplateMapping[','])?
+      ('ATTRIBUTES' attributes*=Attribute[','])?
+    ';'
 ;
 
 Sensor:
-    'Sensor' '[' type=SensorType ']' name=ID
-	(
-	  ('operational' operational=OperationalSensor 'end')
-	  ('pins' pins*=Pin 'end')
-	  ('attributes' attributes*=Attribute 'end')?
-    )#
-    'end'
+    'SENSOR' '[' type=SensorType ']' name=ID 'WITH'
+	  'OP' operational=OperationalSensor
+	  'PINS' pins*=Pin[',']
+	  ('TEMPLATES' templates*=TemplateMapping[','])?
+      ('ATTRIBUTES' attributes*=Attribute[','])?
+    ';'
 ;
 
 Pin:
@@ -51,7 +53,7 @@ Pin:
 ;
 
 PowerPin:
-	'PPIN' name=ID '[' ptype=PowerType ']' '@' number=INT ';'
+	name=ID '[' ptype=PowerType ']' '@' number=INT
 ;
 
 PowerType:
@@ -67,7 +69,7 @@ Custom:
 ;
 
 IOPin:
-	'DPIN' name=ID '[' funcs*=PinFunction[","] ']' '@' number=INT ';'
+	name=ID '[' funcs*=PinFunction[","] ']' '@' number=INT
 ;
 
 PinFunction:
@@ -103,62 +105,28 @@ UARTPinType:
 ;
 
 PWM:
-	ptype="pwm" "-" channel=INT
+	ptype="pwm" ("-" channel=INT)?
 ;
 
 ADC:
-	ptype="adc"
+	ptype="adc" ("-" bus=INT)?
 ;
 
 DAC:
-	ptype="dac"
+	ptype="dac" ("-" bus=INT)?
 ;
 
 PCM:
-    ptype=PCMType
+    ptype=PCMType ("-" bus=INT)?
 ;
 
 PCMType:
     "fs" | "din" | "dout"
 ;
 
-CPU:
-	(
-        ("cpu_family:" cpu_family=CPUFamilyType)
-	    ("max_freq:" max_freq=NUMBER unit=FrequencyUnit)
-	    ("fpu:" fpu=BOOL)
-    )#
-;
-
 
 CPUFamilyType:
 	("ESP32" | "ESP8266" | "PiArmCortex")
-;
-
-Memory:
-	(
-        ("ram:" ram=NUMBER UNITS)?
-        ("rom:" rom=NUMBER UNITS)?
-        ("flash:" flash=NUMBER UNITS)?
-    )#
-;
-
-NetworkInterface:
-    WifiInterface   |
-    EthernetInterface
-;
-
-WifiInterface:
-	(
-        ("name:" name=ID)
-	    ("freq:" freq=NUMBER unit=FrequencyUnit)?
-    )#
-;
-
-EthernetInterface:
-	(
-        ("name:" name=ID)
-    )#
 ;
 
 Bluetooth:
@@ -199,6 +167,7 @@ ActuatorType:
     "ServoController"   |
     "Relay"             |
     "Switch"            |
+    "Button"            |
     
     // Display & Light Actuators
     "LedArray"          |
@@ -218,98 +187,68 @@ ActuatorType:
     "Fan"
 ;
 
-Attribute:
-    NumericAttribute    |
-    BoolAttribute       |
-    StringAttribute     |
-    ListAttribute       |
-    DictAttribute
-;
 
-NumericAttribute:
-    IntAttribute | FloatAttribute
-;
-
-IntAttribute:
-    'ATTR' name=ID '[' type='int' ']' ('=' default=INT)? ';'
-;
-
-FloatAttribute:
-    'ATTR' name=ID '[' type='float' ']' ('=' default=FLOAT)? ';'
-;
-
-StringAttribute:
-    'ATTR' name=ID '[' type='str' ']' ('=' default=STRING)? ';'
-;
-
-BoolAttribute:
-    'ATTR' name=ID '[' type='bool' ']' ('=' default=BOOL)? ';'
-;
-
-ListAttribute:
-    'ATTR' name=ID '[' type='list' ']' ('=' '[' default*=OBJECT[','] ']')? ';'
-;
-
-DictAttribute:
-    'ATTR' name=ID '[' type='dict' ']' ('=' '{' items*=Attribute[','] '}')? ';'
-;
 
 // Operational blocks
 OperationalBoard:
     (
-        ("cpu" ":" cpu=CPU)
-        ("memory" ":" memory=Memory)
-        ("vcc" ":" vcc=PowerType)
-        ("wifi" ":" wifi=WifiInterface)?
-        ("ethernet" ":" ethernet=EthernetInterface)?
-        ("bluetooth" ":" bluetooth=Bluetooth)?
-        ("ioVcc" ":" iovcc=PowerType)?
-        ("riotName" ":" riotName=STRING)?
+        ("vcc" "=" vcc=PowerType ","?)
+        ("ioVcc" "=" iovcc=PowerType ","?)?
+        
+        ("cpu.family" "=" cpu_family=CPUFamilyType ","?)?
+        ("cpu.freq" "=" cpu_freq=NUMBER cpu_freq_unit=FrequencyUnit ","?)?
+        ("cpu.fpu" "=" cpu_fpu=BOOL ","?)?
+        
+        ("memory.ram" "=" memory_ram=NUMBER memory_ram_unit=UNITS ","?)?
+        ("memory.flash" "=" memory_flash=NUMBER memory_flash_unit=UNITS ","?)?
+        ("memory.rom" "=" memory_rom=NUMBER memory_rom_unit=UNITS ","?)?
+        
+        ("wifi.name" "=" wifi_name=ID ","?)?
+        ("wifi.version" "=" wifi_version=WifiVersion ","?)?
+        ("wifi.bands" "=" "[" wifi_bands+=WifiBand[','] "]" ","?)?
+        
+        ("ethernet.name" "=" ethernet_name=ID ","?)?
+        
+        ("bluetooth" "=" bluetooth=Bluetooth ","?)?
+        ("riotName" "=" riotName=STRING ","?)?
+        
+        ("energy" "=" min=PowerConsumption ',' max=PowerConsumption ',' avg=PowerConsumption ","?)?
     )#
+;
+
+WifiVersion:
+    '3' | '4' | '5' | '6' | '7'
+;
+
+WifiBand:
+    '2.4GHz' | '5GHz' | '2.4Ghz' | '5Ghz'
 ;
 
 OperationalSensor:
     (
-        ("vcc" ":" vcc=PowerType)
-        ("ioVcc" ":" iovcc=PowerType)?
-        ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
-        ("riotTpl" ":" riotTpl=STRING)?
-        ("piTpl" ":" piTpl=STRING)?
+        ("vcc" "=" vcc=PowerType ","?)
+        ("ioVcc" "=" iovcc=PowerType ","?)?
+        ("energy" "=" min=PowerConsumption ',' max=PowerConsumption ',' avg=PowerConsumption ","?)?
+        ("riotTpl" "=" riotTpl=STRING ","?)?
+        ("piTpl" "=" piTpl=STRING ","?)?
     )#
 ;
 
 OperationalActuator:
     (
-        ("vcc" ":" vcc=PowerType)
-        ("ioVcc" ":" iovcc=PowerType)?
-        ("powerConsumption" ":" power=NUMBER unit=PowerUnit)?
-        ("riotTpl" ":" riotTpl=STRING)?
-        ("piTpl" ":" piTpl=STRING)?
+        ("vcc" "=" vcc=PowerType ","?)
+        ("ioVcc" "=" iovcc=PowerType ","?)?
+        ("energy" "=" min=PowerConsumption ',' max=PowerConsumption ',' avg=PowerConsumption ","?)?
+        ("riotTpl" "=" riotTpl=STRING ","?)?
+        ("piTpl" "=" piTpl=STRING ","?)?
     )#
 ;
 
-
-UNITS:
-    ("kb" | "mb" | "gb" | "b")
+PowerConsumption:
+    value=NUMBER unit=PowerUnit
 ;
 
-FrequencyUnit:
-	"ghz" | "mhz" | "khz" | "hz"
-;
-
-DistanceUnit:
-	"m" | "cm" | "mm"
-;
-
-TimeUnit:
-    "h" | "min" | "s" | "ms" | "us" | "ns"
-;
-
-PowerUnit:
-	"W" | "mW" | "uW"
-;
-
-OBJECT: 
-	INT | STRING | FLOAT | BOOL 
+TemplateMapping:
+    os=OperatingSystem '=' template=STRING
 ;
 

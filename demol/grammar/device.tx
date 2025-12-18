@@ -3,64 +3,70 @@
 
 import component
 import communication
-import utils
+import common
 
 DeviceModel:
     imports*=Import
     (
-        metadata=Metadata
+        metadata=Device
         network=Network
-        components=Components
+        uses+=Use
         (broker=MessageBroker)?
-        connections+=Connection
+        connections+=Connect
     )#
 ;
 
-Metadata:
-    'Metadata'
+Device:
+    'DEVICE' name=ID 'WITH'
     (
-        ('name:' name=STRING)
-        ('description:' description=STRING)
-        ('author:' author=STRING)
-        ('os:' os=OperatingSystem)?
-    )#
-    'end'
+        ('description' '=' description=STRING)
+        ('author' '=' author=STRING)
+        ('os' '=' os=OperatingSystem)?
+    )#[',']
+    ';'
 ;
 
-Network:
-    "Network"
-	(
-	    ("ssid:" ssid=STRING)
-	    ("passwd:" passwd=STRING)
-	    ("address:" address=IP_ADDR)?
-	    ("channel:" channel=STRING)?
-    )#
-    "end"
+Network: WiFiNetwork | EthNetwork;
+
+WiFiNetwork:
+    /[Nn][Ee][Tt][Ww][Oo][Rr][Kk]/ '[' 'WiFi' ']' /[Ww][Ii][Tt][Hh]/
+    (
+        ('ssid' '=' ssid=STRING)
+        ('password' '=' passwd=STRING)
+        ('address' '=' address=IP_ADDR)?
+        ('channel' '=' channel=STRING)?
+    )#[',']
+    ';'
 ;
 
-Components:
-	"Components"
-	(
-        ('board:' board=[Board:FQN|+m:component])
-        ('peripherals:' '-' peripherals*=PeripheralDef['-'])
-    )#
-    'end'
+EthNetwork:
+    /[Nn][Ee][Tt][Ww][Oo][Rr][Kk]/ '[' 'Eth' ']'
+    (
+        /[Ww][Ii][Tt][Hh]/
+        (
+            ('address' '=' address=IP_ADDR)?
+        )#[',']
+    )?
+    ';'
+;
+
+
+Use:
+    "USE" (peripherals+=PeripheralDef[','] | board=[Board:FQN|+m:component]) ';'
 ;
 
 PeripheralDef:
-    ref=[Peripheral:FQN|+m:component] '(' name=ID ')'
+    ref=[Peripheral:FQN|+m:component] '(' name=ID ')' ('[' attributes*=AttributeSet[','] ']')?
 ;
 
-Connection:
-	"Connection"
+Connect:
+	/[Cc][Oo][Nn][Nn][Ee][Cc][Tt]/ peripheral=[PeripheralDef:FQN|~uses.peripherals] /[Ww][Ii][Tt][Hh]/
 	(
-	    ("peripheral:" peripheral=[PeripheralDef:FQN|~components.peripherals])
-	    ("ioConnections:" '-' ioConns+=IOConnection['-'])
-        ("powerConnections:" '-' powerConns*=PowerConnection['-'])?
-	    ("endpoint:" endpoint=Endpoint)?
-        ("settings" ":" "-" settings*=Settings["-"])?
+	    (/[Pp][Oo][Ww][Ee][Rr]/ powerConns*=PowerConnection[','])?
+        (/[Dd][Aa][Tt][Aa]/ dataConns+=DataConnection[','])?
+	    ("@" remote=STRING)?
     )#
-    'end'
+    ';'
 ;
 
 PinConnection:
@@ -69,116 +75,26 @@ PinConnection:
 
 PowerConnection: PinConnection;
 
-IOConnection:
-	GPIOConnection | I2CConnection | SPIConnection | UARTConnection
+DataConnection:
+    GPIOConnection | I2CConnection | SPIConnection | UARTConnection
 ;
 
 GPIOConnection:
-	"type" ":"  type="gpio"
-    ('name:' name=ID)?
-    (mode=GPIOMode)?
-    ('pin:' pinConn=PinConnection)
-;
-
-GPIOMode:
-    ('input' ':' input=BOOL)?
-    ('output' ':' output=BOOL)?
-    ('pullup' ':' pullup=BOOL)?
-    ('pulldown' ':' pulldown=BOOL)?
-    ('open_drain' ':' openDrain=BOOL)?
-;
-
-SPIConnection:
-	"type" ":" type="spi"
-    ('name:' name=ID)?
-    ('pins:')
-    (
-        ("mosi" ":" mosi=PinConnection)
-        ("miso" ":" miso=PinConnection)
-        ("sck" ":" sck=PinConnection)
-        ("cs" ":" cs=PinConnection)
-    )#
+    type='gpio' ('[' props*=AttributeSet[','] ']')? pins+=PinConnection[',']
 ;
 
 I2CConnection:
-	"type" ":" type="i2c"
-    (
-    ('name:' name=ID)?
-    ("slave_address:" "0x" slaveAddr=INT)
-    ('pins:')
-    (
-        ("sda" ":" sda=PinConnection)
-        ("scl" ":" scl=PinConnection)
-    )#
-    )#
+    type='i2c' ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
+;
+
+SPIConnection:
+    type='spi' ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
 ;
 
 UARTConnection:
-	"type" ":" type="uart"
-    ('name:' name=ID)?
-    ('pins:')
-    (
-        ("tx" ":" tx=PinConnection)
-        ("rx" ":" rx=PinConnection)
-        ("baudrate:" baudrate=INT)
-    )#
+    type='uart' ('[' props*=AttributeSet[','] ']')? pins+=PinMapping[',']
 ;
 
-Endpoint:
-	(
-        ("topic:" topic=STRING)?
-        ("type:" type=EndpointType)?
-    )#
-;
-
-EndpointType:
-    "Publisher"     |
-    "Subscriber"    |
-    "RPC"           |
-    "Action"
-;
-
-OperatingSystem:
-    'Raspbian' |
-    'RiotOS'
-;
-
-Settings:
-    NumericSetting    |
-    BoolSetting       |
-    StringSetting     |
-    ListSetting       |
-    DictSetting
-;
-
-NumericSetting:
-    IntSetting | FloatSetting
-;
-
-IntSetting:
-    name=ID ':' type='int' ('=' default=INT)?
-;
-
-FloatSetting:
-    name=ID ':' type='float' ('=' default=FLOAT)?
-;
-
-StringSetting:
-    name=ID ':' type='str' ('=' default=STRING)?
-;
-
-BoolSetting:
-    name=ID ':' type='bool' ('=' default=BOOL)?
-;
-
-ListSetting:
-    name=ID ':' type='list' ('=' '[' default*=OBJECT[','] ']')?
-;
-
-DictSetting:
-    name=ID ':' type='dict' ('=' '{' items*=Settings[','] '}')?
-;
-
-OBJECT: 
-	INT | STRING | FLOAT | BOOL 
+PinMapping:
+    (function=ID boardPin=ID '--' peripheralPin=ID)
 ;

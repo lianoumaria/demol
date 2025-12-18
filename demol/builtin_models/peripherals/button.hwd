@@ -1,0 +1,13 @@
+// Single Tactile Button model
+
+ACTUATOR[Button] TactileButton WITH
+    OP
+        vcc=5V,
+        energy=0 mW, 1 mW, 0.5 mW
+    PINS
+        gnd[GND] @ 1,
+        state[gpio] @ 2
+    TEMPLATES
+        raspbian="button.py.tmpl",
+        riotos="button.c.tmpl"
+;

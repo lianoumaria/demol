@@ -52,8 +52,8 @@ def conn2dict(conn):
     board = board2dict(conn.board)
     peripheral = peripheral2dict(conn.peripheral.ref)
     endpoint = {
-        'topic': conn.endpoint.topic,
-        'type': conn.endpoint.type,
+        'topic': conn.remote,
+        'type': None,
     }
     power_conns = []
     io_conns = []
@@ -63,54 +63,19 @@ def conn2dict(conn):
             'peripheralPin': con.peripheralPin,
         }
         power_conns.append(c)
-    for con in conn.ioConns:
-        if con.__class__.__name__ == 'GPIOConnection':
-            c = {
-                'type': con.type,
-                'name': con.name,
-                'pinConn': {
-                    'boardPin': con.pinConn.boardPin,
-                    'peripheralPin': con.pinConn.peripheralPin
-                },
-            }
-            io_conns.append(c)
-        elif con.__class__.__name__ == 'SPIConnection':
-            c = {
-                'type': con.type,
-                'name': con.name,
-                'mosi': {
-                    'boardPin': con.mosi.boardPin,
-                    'peripheralPin': con.mosi.peripheralPin
-                },
-                'miso': {
-                    'boardPin': con.miso.boardPin,
-                    'peripheralPin': con.miso.peripheralPin
-                },
-                'sck': {
-                    'boardPin': con.sck.boardPin,
-                    'peripheralPin': con.sck.peripheralPin
-                },
-                'cs': {
-                    'boardPin': con.cs.boardPin,
-                    'peripheralPin': con.cs.peripheralPin
-                },
-            }
-            io_conns.append(c)
-        elif con.__class__.__name__ == 'I2CConnection':
-            c = {
-                'type': con.type,
-                'name': con.name,
-                'slaveAddr': con.slaveAddr,
-                'sda': {
-                    'boardPin': con.sda.boardPin,
-                    'peripheralPin': con.sda.peripheralPin
-                },
-                'scl': {
-                    'boardPin': con.scl.boardPin,
-                    'peripheralPin': con.scl.peripheralPin
-                },
-            }
-            io_conns.append(c)
+    for data_conn in conn.dataConns:
+        c = {
+            'type': data_conn.type,
+            'props': {p.name: p.value for p in data_conn.props},
+            'pins': []
+        }
+        for pin in data_conn.pins:
+            c['pins'].append({
+                'function': pin.function,
+                'boardPin': pin.boardPin,
+                'peripheralPin': pin.peripheralPin
+            })
+        io_conns.append(c)
     return {
         'board': board,
         'peripheral': peripheral,

@@ -1,0 +1,70 @@
+@startuml
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam handwritten false
+skinparam backgroundColor white
+
+' Colors
+skinparam component {
+  BackgroundColor<<Board>> #E3F2FD
+  BorderColor<<Board>> #1565C0
+  BackgroundColor<<Sensor>> #E8F5E9
+  BorderColor<<Sensor>> #2E7D32
+  BackgroundColor<<Actuator>> #FCE4EC
+  BorderColor<<Actuator>> #C2185B
+  BackgroundColor<<Broker>> #FFF3E0
+  BorderColor<<Broker>> #EF6C00
+  BackgroundColor<<Network>> #F3E5F5
+  BorderColor<<Network>> #7B1FA2
+}
+
+skinparam databaseBackgroundColor #FFF3E0
+skinparam cloudBackgroundColor #F3E5F5
+
+package "Infrastructure" {
+    {% if model.network %}
+    cloud "Network\n<size:10>SSID: {{ model.network.ssid }}</size>" as net <<Network>>
+    {% endif %}
+
+    {% if model.broker %}
+    database "{{ model.broker.name }}\n<size:10>{{ model.broker.__class__.__name__.replace('Broker', '') }} | {{ model.broker.host }}:{{ model.broker.port }}</size>" as {{ model.broker.name }} <<Broker>>
+    {% endif %}
+}
+
+package "Device: {{ model.metadata.name }}" {
+    {% if model.connections %}
+    component "{{ model.components.board.name }}{% if model.components.board.type %}\n<size:10>[{{ model.components.board.type }}]</size>{% endif %}" as board <<Board>>
+
+    {% for conn in model.connections %}
+    {% set periph = conn.peripheral.ref %}
+    component "{{ periph.name }}\n<size:10>[{{ periph.__class__.__name__ }}:{{ periph.type }}]</size>" as {{ periph.name }} <<{{ periph.__class__.__name__ }}>>
+    {% endfor %}
+    {% endif %}
+}
+
+' Connections
+{% if model.network %}
+board -up-> net : WiFi
+{% endif %}
+
+{% if model.broker %}
+board -up-> {{ model.broker.name }} : Pub/Sub
+{% endif %}
+
+{% for conn in model.connections %}
+{% set periph = conn.peripheral.ref %}
+{% set io_labels = [] %}
+{% for io in conn.ioConns %}
+    {% set _ = io_labels.append(io.type) %}
+{% endfor %}
+{% set conn_label = io_labels|unique|sort|join(', ') %}
+{% if conn_label %}
+board "IO" <--> "{{ conn_label }}" {{ periph.name }}
+{% else %}
+board <--> {{ periph.name }}
+{% endif %}
+{% endfor %}
+
+@enduml

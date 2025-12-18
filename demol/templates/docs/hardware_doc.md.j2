@@ -1,0 +1,70 @@
+# Hardware Construction Guide: {{ model.metadata.name }}
+
+**Description**: {{ model.metadata.description }}
+**Version**: {{ model.metadata.version }}
+
+## 1. Bill of Materials (BOM)
+
+### Main Board
+- **Name**: {{ model.components.board.name }}
+- **Type**: {{ model.components.board.type }}
+
+### Peripherals
+| Name | Type | Subtype | Description |
+|------|------|---------|-------------|
+{% for conn in model.connections %}
+{% set periph = conn.peripheral.ref %}
+| {{ periph.name }} | {{ periph.__class__.__name__ }} | {{ periph.type }} | {{ periph.description }} |
+{% endfor %}
+
+## 2. Wiring Instructions
+
+### Overview
+Connect the peripherals to the main board as detailed below. Ensure all power connections are secure before powering on the device.
+
+{% for conn in model.connections %}
+{% set periph = conn.peripheral.ref %}
+### {{ periph.name }} ({{ periph.type }})
+
+#### Power Connections
+{% if conn.powerConns %}
+| Board Pin | Peripheral Pin |
+|-----------|----------------|
+{% for pc in conn.powerConns %}
+| {{ pc.boardPin }} | {{ pc.peripheralPin }} |
+{% endfor %}
+{% else %}
+*No explicit power connections defined.*
+{% endif %}
+
+#### IO Connections
+{% if conn.ioConns %}
+| Type | Board Pin | Peripheral Pin | Function |
+|------|-----------|----------------|----------|
+{% for io in conn.ioConns %}
+{% for pin in io.pins %}
+| {{ io.type }} | {{ pin.boardPin }} | {{ pin.peripheralPin }} | {{ pin.function }} |
+{% endfor %}
+{% endfor %}
+{% else %}
+*No IO connections defined.*
+{% endif %}
+
+---
+{% endfor %}
+
+## 3. Infrastructure Configuration
+
+{% if model.network %}
+### Network
+- **SSID**: {{ model.network.ssid }}
+- **Password**: {{ model.network.password }}
+{% endif %}
+
+{% if model.broker %}
+### MQTT Broker
+- **Name**: {{ model.broker.name }}
+- **Type**: {{ model.broker.__class__.__name__.replace('Broker', '') }}
+- **Host**: {{ model.broker.host }}
+- **Port**: {{ model.broker.port }}
+{% endif %}

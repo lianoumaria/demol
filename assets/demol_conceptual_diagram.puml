@@ -1,0 +1,52 @@
+@startuml
+!theme vibrant
+
+title Conceptual Architecture of DeMoL (MDE View)
+
+cloud "Conceptual Level" {
+  [Hardware Primitives\n(Sensors, Actuators, Boards)] as Primitives
+}
+
+' M2 Level: Metamodel
+package "Metamodel (M2)" {
+  [DeMoL Metamodel\n(defined in *.tx grammar files)] as Metamodel
+}
+
+' M1 Level: Model
+package "Model (M1)" {
+    [DeMoL Models\n] as DslFile
+    [In-Memory Model\n(AST/Python Objects)] as ModelInstance
+}
+
+' Toolchain components that bridge the levels
+package "DeMoL Toolchain" {
+    [Parser] as Parser
+    [Semantic Validator] as SemanticValidator
+    [M2T & M2M\nTransformations] as Transformations
+}
+
+' M0 Level: Generated Artifacts
+package "Generated Artifacts (M0)" as GeneratedArtifacts {
+  folder "Platform-Specific Code" {
+    [Raspberry Pi (Python)]
+    [RIOT OS (C)]
+  }
+  folder "Documentation" {
+    [Device Docs (HTML)]
+    [Wiring Diagrams (PUML)]
+  }
+  folder "Other DSLs" {
+    [SmAuto Model]
+  }
+}
+
+' Relationships connecting the layers and toolchain
+DslFile -down-> Parser    : "is processed by"
+Parser -right-> SemanticValidator : "and validated by"
+SemanticValidator -down-> ModelInstance : "to produce"
+ModelInstance --up-|> Metamodel : "conforms to"
+
+ModelInstance -down-> Transformations : "is input for"
+Transformations -down-> GeneratedArtifacts : "which produces"
+
+@enduml

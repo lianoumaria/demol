@@ -1,43 +1,16 @@
-Metadata
-    name: "RpiTrackerSensor"
-    description: "My RaspberryPi 5 with a TCRT5000 tracker sensor"
-    author: "maria"
-    os: Raspbian
-end
+DEVICE RpiTrackerSensor WITH description="My RaspberryPi 5 with a TCRT5000 tracker sensor", author="maria", os=raspbian;
 
-Components
-    board: RaspberryPi_5_8GB
-    peripherals:
-        - BME680(MyBME)
-end
+USE RaspberryPi_5_8GB;
+USE BME680(MyBME);
 
-Network
-    ssid: "Wifi_2.4GHz"
-    passwd: "guest"
-end
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
 
-Broker<MQTT> MyBroker
-    host: "localhost"
-    port: 1883
-    ssl: False
-    auth:
-        username: "guest"
-        password: "guest"
-end
+BROKER[MQTT] MyBroker WITH host="localhost", port=1883, auth.username="guest", auth.password="guest", ssl=False;
 
-Connection
-    peripheral: MyBME
-    powerConnections:
-        - GND_3 -- gnd
-        - power_5v_a -- vcc
-    ioConnections:
-        - type: i2c
-          name: env_data
-          slave_address: 0x76
-          pins:
-            sda: GPIO2 -- sda
-            scl: GPIO3 -- scl
-    endpoint:
-        topic: "my_raspi.sensors.env.bme680"
-        type: Publisher 
-end
+CONNECT MyBME WITH
+    POWER
+        GND_3 -- gnd,
+        power_5v_a -- vcc
+    DATA
+        i2c[slave_address=0x76] sda GPIO2 -- sda, scl GPIO3 -- scl
+    @ "my_raspi.sensors.env.bme680";

@@ -43,37 +43,69 @@
     - [Grammar Structure](#grammar-structure)
     - [Core Concepts](#core-concepts)
     - [Device Model Structure](#device-model-structure)
-    - [Hardware Components](#hardware-components)
+      - [Device Configuration](#device-configuration)
+      - [Network Configuration](#network-configuration)
+      - [Hardware Components](#hardware-components)
+      - [Attributes in Components](#attributes-in-components)
+    - [Hardware Components](#hardware-components-1)
+      - [Board Models](#board-models)
+      - [Peripheral Models (Sensors)](#peripheral-models-sensors)
+      - [Peripheral Models (Actuators)](#peripheral-models-actuators)
     - [Connections](#connections)
+      - [GPIO Connection](#gpio-connection)
+      - [I2C Connection](#i2c-connection)
+      - [SPI Connection](#spi-connection)
+      - [UART Connection](#uart-connection)
+      - [Remote Topics](#remote-topics)
     - [Message Brokers](#message-brokers)
+      - [MQTT Broker](#mqtt-broker)
+      - [AMQP Broker](#amqp-broker)
+      - [Redis Broker](#redis-broker)
     - [Complete Example](#complete-example)
-  - [🔌 Supported Sensors \u0026 Actuators](#-supported-sensors--actuators)
+  - [🔌 Supported Sensors \& Actuators](#-supported-sensors--actuators)
+    - [Sensor Categories](#sensor-categories)
+    - [Actuator Categories](#actuator-categories)
+    - [Message Schemas](#message-schemas)
   - [📐 Formal Semantics](#-formal-semantics)
+  - [🔍 Semantic Validations](#-semantic-validations)
+    - [Validation Categories](#validation-categories)
+      - [1. **Power Connection Validation**](#1-power-connection-validation)
+      - [2. **IO Connection Validation**](#2-io-connection-validation)
+      - [3. **Safety Properties**](#3-safety-properties)
+      - [4. **Well-Formedness Rules**](#4-well-formedness-rules)
+    - [Validation Workflow](#validation-workflow)
+    - [Running Validations](#running-validations)
+    - [Validation Output](#validation-output)
+    - [Implementation](#implementation)
   - [🔧 Usage](#-usage)
-    - [CLI](#cli)
-    - [Model Validation](#model-validation)
     - [Code Generation](#code-generation)
+      - [Architecture](#architecture)
+      - [Supported Generators](#supported-generators)
+      - [Running Code Generation](#running-code-generation)
     - [REST API](#rest-api)
+      - [`POST /validate`](#post-validate)
+      - [`POST /generate`](#post-generate)
   - [📜 License](#-license)
   - [🎩 Acknowledgments](#-acknowledgments)
   - [🌟 Star History](#-star-history)
 
 ## 📖 Overview
 
-Device Modeling Language (DeMoL) - A DSL for modeling IoT devices.
+**Device Modeling Language (DeMoL)** is a domain-specific language (DSL) designed for the automated synthesis of Internet of Things (IoT) device open-source software, in a hardware-aware manner. It provides a high-level, declarative abstraction for defining hardware configurations, peripheral interconnections, and communication protocols, decoupling the device logic from the underlying platform implementation.
 
-Enables automated source code generation currently for RaspberryPi and RiotOS.
+DeMoL employs a model-driven engineering (MDE) approach to facilitate the generation of platform-specific code (e.g., Python for Raspberry Pi, C for RiotOS) from platform-independent models. By enforcing rigorous semantic validation rules—including electrical compatibility checks, pin conflict detection, and protocol constraints—DeMoL ensures the correctness and safety of the synthesized artifacts, thereby reducing development complexity and mitigating hardware-level errors in IoT system design.
 
-...
+![DeMoL Conceptual Model](assets/DeMoL_Conceptual.png)
 
 ## 👾 Features
 
 |      |        Feature        | Summary                                                                                                                                                                                                                                                                     |
 | :--- | :-------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ⚙️    | **Protocol-Agnostic** | <ul><li>Protocol/Transport-level abstraction</li><li>Currently supports Redis, AMQP and MQTT</li></ul>                                                                                                                                                                      |
-| 📄    |   **Documentation**   | <ul><li>Rich documentation in various formats (YAML, TOML, Markdown)</li><li>Includes detailed installation commands for different package managers</li><li>Utilizes MkDocs for generating documentation</li></ul>                                                          |
-| 🧩    |    **Modularity**     | <ul><li>Well-structured codebase with clear separation of concerns</li><li>Encourages code reusability and maintainability</li></ul>                                                                                                                                        |
-| 📦    |   **Dependencies**    | <ul><li>Manages dependencies with Poetry and dependency lock files</li><li>Includes a variety of libraries for different functionalities</li><li>Dependency management with conda for environment setup</li><li>Dynamic imports of underlying transport libraries</li></ul> |
+| 🔌    | **Hardware-Aware**    | <ul><li>Explicit modeling of board specifications (pins, voltages, frequencies)</li><li>Peripheral component definitions (sensors, actuators)</li><li>Electrical compatibility checks (voltage levels, power constraints)</li></ul>                                         |
+| 🛡️    | **Semantic Safety**   | <ul><li>Rigorous validation of pin configurations and conflicts</li><li>Protocol constraint enforcement (I2C addresses, UART baudrates)</li><li>Prevention of short-circuits and invalid connections</li></ul>                                                              |
+| �    | **Automated Synthesis**| <ul><li>Generation of platform-specific code (Python/RiotOS) from abstract models</li><li>Automatic boilerplate generation for communication and hardware initialization</li><li>Consistent and error-free implementation artifacts</li></ul>                               |
+| 🌐    | **Protocol-Agnostic** | <ul><li>Abstract definition of communication logic</li><li>Seamless switching between MQTT, AMQP, and Redis brokers</li><li>Decoupled application logic from transport implementation</li></ul>                                                                             |
+| 🧩    | **Declarative Design**| <ul><li>High-level syntax for defining device composition</li><li>Separation of concerns between hardware, logic, and communication</li><li>Model-Driven Engineering (MDE) principles</li></ul>                                                                             |
 
 ---
 
@@ -96,7 +128,7 @@ Download this repository and either use the CLI and the API of the DSL directly 
 1. Pull this repository locally
 
 ```sh
-git clone https://github.com/lianoumaria/demol.git
+git clone https://github.com/robotics-4-all/demol.git
 ```
 
 2. Create a Virtual environment (Optional Step)
@@ -108,7 +140,7 @@ python -m venv venv && source ./venv/bin/activate
 3. Install the DSL package in `develop` mode
 
 ```sh
-python setup.py develop
+pip install -e .
 ```
 
 
@@ -118,15 +150,14 @@ The DeMoL DSL is built using the [textX](http://textx.github.io/textX/) framewor
 
 ### Grammar Structure
 
-The grammar is modular and split into **5 interconnected files** located in `demol/grammar/`:
+The grammar is modular and split into **4 interconnected files** located in `demol/grammar/`:
 
 | File               | Purpose                           | Key Concepts                        |
 | ------------------ | --------------------------------- | ----------------------------------- |
-| `device.tx`        | Main device model definition      | DeviceModel, Connection, Settings   |
+| `device.tx`        | Main device model definition      | DeviceModel, Connect                |
 | `component.tx`     | Board & peripheral hardware specs | Board, Sensor, Actuator, Pins       |
 | `communication.tx` | Message broker configurations     | AMQPBroker, MQTTBroker, RedisBroker |
-| `common.tx`        | Common utilities                  | FQN, Import, Comments               |
-| `utils.tx`         | Additional utilities              | FQN handling, Keywords              |
+| `common.tx`        | Common utilities & types          | AttributeSet, VALUE, Imports        |
 
 ### Core Concepts
 
@@ -135,7 +166,7 @@ The language is built around these fundamental concepts:
 - **Device** - Complete IoT device definition with metadata and configuration
 - **Board** - Microcontroller/SBC hardware (ESP32, Raspberry Pi, etc.)
 - **Peripheral** - External sensors and actuators (BME680, SRF04, etc.)
-- **Connection** - Defines how peripherals connect to boards (power + IO)
+- **Connect** - Defines how peripherals connect to boards (power + data + remote)
 - **MessageBroker** - Communication infrastructure (MQTT, AMQP, Redis)
 - **Network** - WiFi configuration
 
@@ -148,100 +179,86 @@ The language is built around these fundamental concepts:
 Every `.dev` file follows this structure:
 
 ```
-Metadata
-    name: "DeviceName"
-    description: "Device description"
-    author: "author_name"
-    os: Raspbian  // or RiotOS
-end
+DEVICE DeviceName WITH description="Device description", author="author_name", os=raspbian;
 
-Network
-    ssid: "WiFi_SSID"
-    passwd: "password"
-    address: 192.168.1.100  // optional
-    channel: "6"  // optional
-end
+NETWORK[WiFi] WITH ssid="WiFi_SSID", password="password";
 
-Broker<MQTT> BrokerName
-    host: "mqtt.example.com"
-    port: 1883
-    ssl: False
-    auth:
-        username: "user"
-        password: "pass"
-end
+BROKER[MQTT] BrokerName WITH host="mqtt.example.com", port=1883, auth.username="user", auth.password="pass";
 
-Components
-    board: BoardModelName
-    peripherals:
-        - PeripheralModel(InstanceName1)
-        - PeripheralModel(InstanceName2)
-end
+USE BoardModelName;
+USE PeripheralModel1(InstanceName1), PeripheralModel2(InstanceName2);
 
-Connection
-    peripheral: InstanceName1
-    powerConnections:
-        - board_pin -- peripheral_pin
-    ioConnections:
-        - type: gpio
-          pin: board_pin -- peripheral_pin
-    endpoint:
-        topic: "device/sensor/topic"
-        type: Publisher
-    settings:
-        - setting_name: type = value
-end
+CONNECT InstanceName1 WITH
+    POWER
+        board_pin -- peripheral_pin,
+        board_pin2 -- peripheral_pin2
+    DATA
+        gpio[mode="output"] board_pin -- peripheral_pin
+    @ "device/sensor/topic";
 ```
 
-#### Metadata Block
+#### Device Configuration
 
-Describes the device and target platform:
+Describes the device and target platform using the `DEVICE` statement:
 
 ```
-Metadata
-    name: "SmartSensor"
-    description: "Environmental monitoring sensor"
-    author: "developer_name"
-    os: Raspbian  // Raspbian or RiotOS
-end
+DEVICE SmartSensor WITH description="Environmental monitoring sensor", author="developer_name", os=raspbian;
 ```
 
 **Target Operating Systems:**
-- `Raspbian` - For Raspberry Pi devices
-- `RiotOS` - For embedded systems (ESP32, ESP8266, etc.)
+- `raspbian` - For Raspberry Pi devices
+- `riotos` - For embedded systems (ESP32, ESP8266, etc.)
+- `freertos`, `arduino`, `esp-idf`, `esp-idf-rtos` - Other embedded platforms
 
 #### Network Configuration
 
-WiFi network settings:
+WiFi network settings using the `NETWORK` statement:
 
 ```
-Network
-    ssid: "IoT_Network"
-    passwd: "secure_password"
-    address: 192.168.1.50  // optional static IP
-    channel: "11"  // optional WiFi channel
-end
+NETWORK[WiFi] WITH ssid="IoT_Network", password="secure_password";
 ```
 
-#### Components
+#### Hardware Components
 
-Specifies the hardware composition:
+Specifies the hardware composition using `USE` statements:
 
 ```
-Components
-    board: RaspberryPi_4B_4GB
-    peripherals:
-        - BME680(EnvSensor)
-        - SonarSRF04(DistanceSensor)
-        - WS2812(StatusLED)
-end
+USE RaspberryPi_4B_4GB;
+USE BME680(EnvSensor) [poll_period = 5], SonarSRF04(DistanceSensor);
+USE WS2812(StatusLED);
 ```
 
 **Features:**
+- `USE <BoardName>;` defines the main board.
+- `USE <Peripheral>(<Name>);` defines peripherals.
 - Board references are resolved from the global repository in `demol/builtin_models/boards/`
 - Peripheral models are loaded from `demol/builtin_models/peripherals/`
 - Supports multi-file imports using FQN (Fully Qualified Names)
 - Named peripheral instances for easy reference in connections
+- **Attributes can be overridden** using square bracket syntax
+
+#### Attributes in Components
+
+Peripheral attributes can be customized when declaring instances:
+
+```
+USE BME680(EnvSensor) [
+    poll_period = 5,
+    filter_size = 7
+];
+
+USE SonarSRF04(DistanceSensor) [
+    max_distance = 300
+];
+```
+
+**Key Points:**
+- Attributes override peripheral default values
+- Use square brackets `[ ]` after the instance name
+- Comma-separated attribute assignments within square brackets
+- Comma-separated peripheral instances in the peripherals list
+- Only override attributes you need to change
+- Supports lists and dictionaries: `colors = ['0xFF0000', '0x00FF00']` or `config = {timeout = 5000}`
 
 ### Hardware Components
 
@@ -250,36 +267,38 @@ end
 Boards are defined in `.hwd` files and describe microcontroller/SBC specifications using the `Board[Type] name` syntax:
 
 ```
-Board[RPI] RaspberryPi_4B_4GB
-    operational
-        vcc: 5V
-        memory:
-            flash: 16 gb
-            ram: 4 gb
-        cpu:
-            cpu_family: PiArmCortex
-            max_freq: 1500 mhz
-            fpu: true
-        wifi:
-            name: wifi_0
-            freq: 2.4 ghz
-        bluetooth: BT5
-        ioVcc: 3V3
-    end
-    pins
-        PPIN power_5v[5V] @ 2;
-        PPIN gnd_1[GND] @ 6;
-        DPIN p_21[gpio,sda-1] @ 40;
-        DPIN p_22[gpio,scl-1] @ 38;
-    end
-end
+BOARD[RPI] RaspberryPi_4B_4GB WITH
+    OP
+        vcc=5V,
+        ioVcc=3V3,
+        energy=1.4 W, 7.6 W, 3.5 W,  // min, max, avg power consumption
+        memory.flash=16 gb,
+        memory.ram=4 gb,
+        cpu.family=PiArmCortex,
+        cpu.freq=1500 mhz,
+        cpu.fpu=true,
+        wifi.name=RPi4_WiFi,
+        wifi.version=5,
+        wifi.bands=[2.4GHz, 5GHz],
+        bluetooth=BT5
+    PORTS
+        spi=2,
+        i2c=2,
+        uart=2,
+        gpio=28
+    PINS
+        power_5v[5V] @ 2,
+        gnd_1[GND] @ 6,
+        p_21[gpio,sda-1] @ 40,
+        p_22[gpio,scl-1] @ 38
+;
 ```
 
 **Board Types:** `RPI` (Raspberry Pi), `ESP` (ESP32/ESP8266), `ARDUINO`
 
 **Pin Syntax:**
-- `PPIN` - Power pins (VCC, GND)
-- `DPIN` - Digital/IO pins with functions
+- `name [type] @ number` - Power pins (VCC, GND)
+- `name [funcs] @ number` - Digital/IO pins with functions
 
 **Pin Functions:** `gpio`, `adc`, `dac`, `pwm-<channel>`, `sda-<bus>`, `scl-<bus>`, `mosi-<bus>`, `miso-<bus>`, `sck-<bus>`, `cs-<bus>`, `tx-<bus>`, `rx-<bus>`
 
@@ -290,29 +309,28 @@ end
 Sensors use the `Sensor[Type] name` syntax where Type indicates the sensor category and its message schema:
 
 ```
-Sensor[Env] BME680
-    operational
-        vcc: 5V
-        ioVcc: 3V3
-        powerConsumption: 3 mW
-        piTpl: "bme680"  // optional - RaspberryPi template
-        riotTpl: "bme680"  // optional - RiotOS template
-    end
-    pins
-        PPIN vcc[5V] @ 1;
-        PPIN gnd[GND] @ 5;
-        DPIN sda[sda-0] @ 2;
-        DPIN scl[scl-0] @ 3;
-    end
-    attributes
-        ATTR poll_period[int] = 10;
-        ATTR humidity_oversample[int] = 2;
-        ATTR temperature_oversample[int] = 8;
-    end
-end
+SENSOR[Env] BME680 WITH
+    OP
+        vcc=5V,
+        ioVcc=3V3,
+        energy=0.01 mW, 39.6 mW, 3 mW  // min, max, avg power consumption
+    PINS
+        vcc[5V] @ 1,
+        gnd[GND] @ 5,
+        sda[sda-0] @ 2,
+        scl[scl-0] @ 3
+    TEMPLATES
+        raspbian="bme680.py.tmpl",
+        riotos="bme680.c.tmpl"
+    ATTRIBUTES
+        poll_period[int] = 10,
+        humidity_oversample[int] = 2,
+        temperature_oversample[int] = 8,
+        filter_size[int] = 3
+;
 ```
 
-**Available Sensor Types:** `Distance`, `Temperature`, `Humidity`, `Gas`, `Pressure`, `Env`, `AirQuality`, `Light`, `UV`, `Sound`, `Acceleration`, `Gyroscope`, `Magnetometer`, `IMU`, `Tracker`, `Proximity`, `Motion`, `Presence`, `ADC`, `Current`, `Voltage`, `Power`, `Flow`, `Level`, `Weight`, `Force`, `Vibration`, `Camera`, `RFID`, `Fingerprint`, `GPS`, `Color`
+**Available Sensor Types:** `Distance`, `Temperature`, `Humidity`, `Gas`, `Env`, `AirQuality`, `Light`, `UV`, `Sound`, `Acceleration`, `Gyroscope`, `Magnetometer`, `IMU`, `Tracker`, `Proximity`, `Motion`, `Presence`, `ADC`, `Current`, `Voltage`, `Power`, `Flow`, `Level`, `Weight`, `Force`, `Vibration`, `Camera`, `RFID`, `Fingerprint`, `GPS`, `Color`
 
 For complete sensor type documentation and message schemas, see **[SENSORS_ACTUATORS.md](SENSORS_ACTUATORS.md)**.
 
@@ -321,22 +339,19 @@ For complete sensor type documentation and message schemas, see **[SENSORS_ACTUA
 Actuators use the `Actuator[Type] name` syntax:
 
 ```
-Actuator[ServoController] PCA9685
-    operational
-        vcc: 5V
-        ioVcc: 5V
-    end
-    pins
-        PPIN GND_1[GND] @ 1;
-        DPIN SCL_1[scl-0] @ 2;
-        DPIN SDA_1[sda-0] @ 3;
-        PPIN VCC_1[5V] @ 4;
-    end
-    attributes
-        ATTR num_servos[int] = 16;
-        ATTR frequency[int] = 50;
-    end
-end
+ACTUATOR[ServoController] PCA9685 WITH
+    OP
+        vcc=5V,
+        ioVcc=5V
+    PINS
+        GND_1[GND] @ 1,
+        SCL_1[scl-0] @ 2,
+        SDA_1[sda-0] @ 3,
+        VCC_1[5V] @ 4
+    ATTRIBUTES
+        num_servos[int] = 16,
+        frequency[int] = 50
+;
 ```
 
 **Available Actuator Types:** `MotorController`, `ServoController`, `Relay`, `Switch`, `Led`, `LedArray`, `NeoPixel`, `Display`, `LCD`, `OLED`, `Buzzer`, `Speaker`, `Stepper`, `DCMotor`, `Pump`, `Valve`, `Heater`, `Cooler`, `Fan`
@@ -356,125 +371,67 @@ Connections define how peripherals connect to the board through power and IO pin
 #### GPIO Connection
 
 ```
-Connection
-    peripheral: DistanceSensor
-    powerConnections:
-        - gnd_1 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: gpio
-          name: trigger  // optional
-          pin: p_13 -- trigger
-          input: False  // optional mode
-          output: True
-          pullup: False
-          pulldown: False
-          open_drain: False
-        - type: gpio
-          name: echo
-          pin: p_14 -- echo
-    endpoint:
-        topic: "sensors/distance"
-        type: Publisher
-end
+CONNECT DistanceSensor WITH
+    POWER
+        gnd_1 -- gnd,
+        power_5v -- vcc
+    DATA
+        gpio[mode="output"] p_13 -- trigger,
+        gpio[mode="input"] p_14 -- echo
+    @ "sensors/distance";
 ```
 
 #### I2C Connection
 
 ```
-Connection
-    peripheral: EnvSensor
-    powerConnections:
-        - gnd_1 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: i2c
-          name: env_i2c  // optional
-          slave_address: 0x76
-          pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
-    endpoint:
-        topic: "sensors/environment"
-        type: Publisher
-    settings:
-        - poll_period: int = 5
-        - enable_gas: bool = True
-end
+CONNECT EnvSensor WITH
+    POWER
+        gnd_1 -- GND,
+        power_5v -- VCC
+    DATA
+        i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
+    @ "sensors/environment";
 ```
 
 #### SPI Connection
 
 ```
-Connection
-    peripheral: DisplayModule
-    powerConnections:
-        - gnd_1 -- GND
-        - power_3v3 -- VCC
-    ioConnections:
-        - type: spi
-          name: display_spi  // optional
-          pins:
-              mosi: p_23 -- mosi
-              miso: p_19 -- miso
-              sck: p_18 -- sck
-              cs: p_5 -- cs
-    endpoint:
-        type: Subscriber
-end
+CONNECT DisplayModule WITH
+    POWER
+        gnd_1 -- GND,
+        power_3v3 -- VCC
+    DATA
+        spi[bus_speed=1000000, mode=0] mosi p_23 -- mosi, miso p_19 -- miso, sck p_18 -- sck, cs p_5 -- cs;
 ```
 
 #### UART Connection
 
 ```
-Connection
-    peripheral: GPSModule
-    powerConnections:
-        - gnd_1 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: uart
-          name: gps_uart  // optional
-          pins:
-              tx: p_1 -- tx
-              rx: p_3 -- rx
-              baudrate: 115200
-    endpoint:
-        topic: "sensors/gps"
-        type: Publisher
-end
+CONNECT GPSModule WITH
+    POWER
+        gnd_1 -- GND,
+        power_5v -- VCC
+    DATA
+        uart[baudrate=115200] tx p_1 -- RXD, rx p_3 -- TXD
+    @ "sensors/gps";
 ```
 
-#### Endpoint Types
+**Note:** UART connections require TX→RX and RX→TX crossover (board TX connects to peripheral RX, and vice versa).
+
+#### Remote Topics
+
+The `@` symbol in connections specifies the MQTT/AMQP/Redis topic for this peripheral:
 
 ```
-endpoint:
-    topic: "device/sensor/data"  // optional, auto-generated if omitted
-    type: Publisher  // Publisher, Subscriber, RPC, Action
+CONNECT MySensor WITH
+    POWER ...
+    DATA ...
+    @ "device/sensor/data";  // optional
 ```
 
-**Auto-generated Topics:** If topic is omitted, it's generated as `<device_name>.<peripheral_type>.<peripheral_msg>.<instance_name>` (e.g., `mydevice.sensor.env.mysensor`)
+**Auto-generated Topics:** If `@` is omitted, topics may be auto-generated based on device and peripheral names.
 
-#### Connection Settings
 
-Define peripheral-specific runtime configurations:
-
-```
-settings:
-    - poll_rate: int = 10
-    - threshold: float = 25.5
-    - sensor_name: str = "BME680"
-    - enable_filter: bool = True
-    - thresholds: list = [10, 20, 30, 40]
-    - config: dict = {
-        timeout: int = 5000,
-        retry: bool = True,
-        max_attempts: int = 3
-      }
-end
-```
-
-**Setting Types:** `int`, `float`, `str`, `bool`, `list`, `dict`
 
 ### Message Brokers
 
@@ -483,142 +440,92 @@ DeMoL supports three message broker types:
 #### MQTT Broker
 
 ```
-Broker<MQTT> MyMqttBroker
-    host: "mqtt.example.com"
-    port: 1883
-    ssl: False
-    basePath: "/mqtt"  // optional
-    webPath: "/ws"  // optional
-    webPort: 8080  // optional
-    auth:
-        username: "sensor_client"
-        password: "secure_pass"
-end
+BROKER[MQTT] MyMqttBroker WITH
+    host="mqtt.example.com",
+    port=1883,
+    ssl=False,
+    basePath="/mqtt",  // optional
+    webPath="/ws",  // optional
+    webPort=8080,  // optional
+    auth.username="sensor_client",
+    auth.password="secure_pass";
 ```
 
 #### AMQP Broker
 
 ```
-Broker<AMQP> MyAmqpBroker
-    host: "rabbitmq.example.com"
-    port: 5672
-    vhost: "/"  // optional
-    topicExchange: "amq.topic"  // optional
-    rpcExchange: "amq.rpc"  // optional
-    ssl: False
-    auth:
-        username: "guest"
-        password: "guest"
-end
+BROKER[AMQP] MyAmqpBroker WITH
+    host="rabbitmq.example.com",
+    port=5672,
+    vhost="/",  // optional
+    topicExchange="amq.topic",  // optional
+    rpcExchange="amq.rpc",  // optional
+    ssl=False,
+    auth.username="guest",
+    auth.password="guest";
 ```
 
 #### Redis Broker
 
 ```
-Broker<Redis> MyRedisBroker
-    host: "redis.example.com"
-    port: 6379
-    db: 0  // optional
-    ssl: False
-    auth:
-        username: "default"
-        password: "redis_pass"
-end
+BROKER[Redis] MyRedisBroker WITH
+    host="redis.example.com",
+    port=6379,
+    db=0,  // optional
+    ssl=False,
+    auth.username="default",
+    auth.password="redis_pass";
 ```
 
 **Authentication Methods:**
-- **Username/Password:** `auth: username: "user" password: "pass"`
-- **API Key:** `auth: key: "api_key_value"`
-- **Certificate:** `auth: cert: "cert_string"` or `certPath: "/path/to/cert"`
+- **Username/Password:** `auth.username="user", auth.password="pass"`
+- **API Key:** `auth.key="api_key_value"`
 
 ### Complete Example
 
 Here's a complete device model demonstrating all features:
 
 ```
-Metadata
-    name: "SmartEnvironmentMonitor"
-    description: "Multi-sensor environmental monitoring device"
-    author: "john_doe"
-    os: Raspbian
-end
+DEVICE SmartEnvironmentMonitor WITH description="Multi-sensor environmental monitoring device", author="john_doe", os=raspbian;
 
-Network
-    ssid: "IoT_Network"
-    passwd: "secure_password"
-end
+NETWORK[WiFi] WITH ssid="IoT_Network", password="secure_password";
 
-Broker<MQTT> SmartHomeBroker
-    host: "mqtt.smarthome.local"
-    port: 1883
-    ssl: True
-    auth:
-        username: "sensor_node"
-        password: "node_pass"
-end
+BROKER[MQTT] SmartHomeBroker WITH
+    host="mqtt.smarthome.local",
+    port=1883,
+    ssl=True,
+    auth.username="sensor_node",
+    auth.password="node_pass";
 
-Components
-    board: RaspberryPi_4B_4GB
-    peripherals:
-        - BME680(EnvSensor)
-        - SonarSRF04(DistanceSensor)
-        - WS2812(StatusLED)
-end
+USE RaspberryPi_4B_4GB;
+USE BME680(EnvSensor) [poll_period = 5], SonarSRF04(DistanceSensor);
+USE WS2812(StatusLED) [colors = ['0xFF0000', '0x00FF00', '0x0000FF']];
 
-Connection
-    peripheral: EnvSensor
-    powerConnections:
-        - gnd_1 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: i2c
-          slave_address: 0x76
-          pins:
-              sda: p_21 -- sda
-              scl: p_22 -- scl
-    endpoint:
-        topic: "home/environment/living_room"
-        type: Publisher
-    settings:
-        - poll_period: int = 5
-        - humidity_oversample: int = 2
-        - pressure_oversample: int = 4
-        - temperature_oversample: int = 8
-end
+CONNECT EnvSensor WITH
+    POWER
+        gnd_1 -- GND,
+        power_5v -- VCC
+    DATA
+        i2c[slave_address=0x76] sda p_21 -- sda, scl p_22 -- scl
+    @ "home/environment/living_room";
 
-Connection
-    peripheral: DistanceSensor
-    powerConnections:
-        - gnd_2 -- gnd
-        - power_5v -- vcc
-    ioConnections:
-        - type: gpio
-          name: trigger
-          pin: p_23 -- trigger
-        - type: gpio
-          name: echo
-          pin: p_24 -- echo
-    endpoint:
-        topic: "home/distance/entrance"
-        type: Publisher
-end
+CONNECT DistanceSensor WITH
+    POWER
+        gnd_2 -- gnd,
+        power_5v -- vcc
+    DATA
+        gpio[mode="output"] p_23 -- trigger,
+        gpio[mode="input"] p_24 -- echo
+    @ "home/distance/entrance";
 
-Connection
-    peripheral: StatusLED
-    powerConnections:
-        - gnd_3 -- GND
-        - power_5v -- VCC
-    ioConnections:
-        - type: gpio
-          name: LedControl
-          pin: GPIO10 -- DIN
-    endpoint:
-        type: Subscriber
-    settings:
-        - colors: list = ['0xFF0000', '0x00FF00', '0x0000FF']
-        - brightness: int = 128
-        - num_leds: int = 12
-end
+CONNECT StatusLED WITH
+    POWER
+        gnd_3 -- GND,
+        power_5v -- VCC
+    DATA
+        gpio[mode="output"] GPIO10 -- DIN
+    @ "home/status/led";
+```
 
 
 ## 🔌 Supported Sensors & Actuators
@@ -684,7 +591,180 @@ For a complete formal specification of the DeMoL language, see **[SEMANTICS.md](
 
 This formal foundation enables rigorous reasoning about device models, verified code generation, and static analysis tools.
 
+## 🔍 Semantic Validations
+
+DeMoL implements comprehensive semantic validations based on the formal semantics defined in [SEMANTICS.md](SEMANTICS.md). These validations ensure device models are well-formed, safe, and correct before code generation.
+
+### Validation Categories
+
+#### 1. **Power Connection Validation**
+
+Ensures electrical compatibility between board and peripheral power connections:
+
+- **Voltage Compatibility**: Power pins must have compatible voltages (within 0.5V tolerance)
+- **GND Connections**: Both pins must be GND when connecting ground
+- **VCC Connections**: Non-GND voltages must match peripheral requirements
+- **Voltage Limits**: Power supplied must not exceed peripheral's maximum rated voltage
+
+**Example Error:**
+```
+[Conn-Power] Incompatible power connection: board pin power_5v (5.0V) cannot 
+connect to peripheral pin vcc (3.3V). Voltage difference exceeds 0.5V tolerance.
+```
+
+#### 2. **IO Connection Validation**
+
+Validates pin functionality and protocol-specific requirements:
+
+**GPIO Connections:**
+- Both pins must have GPIO functionality
+- Valid properties: `mode` (input/output), `pullup`, `pulldown`
+- Mode must be either 'input' or 'output'
+
+**I2C Connections:**
+- Board and peripheral pins must have SDA/SCL functionality
+- Slave address must be in range 0x00-0x7F
+- Valid properties: `slave_address`, `bus_speed`
+- All I2C addresses on the same bus must be unique
+
+**SPI Connections:**
+- All required pins (MOSI, MISO, SCK, CS) must have SPI functionality
+- Valid properties: `bus_speed`, `mode` (0-3)
+
+**UART Connections:**
+- TX/RX pins must have proper UART functionality
+- Board TX connects to Peripheral RX (and vice versa)
+- Baudrate must be a common value (9600, 115200, etc.)
+- Valid properties: `baudrate`, `parity`, `stop_bits`, `data_bits`
+
+**Example Errors:**
+```
+[Conn-GPIO] Board pin GPIO5 does not have GPIO functionality.
+
+[Conn-I2C] I2C slave address 0x80 out of valid range [0x00-0x7F]
+
+[Conn-UART] Board pin TX connects to Peripheral TX. UART requires 
+connecting Board TX to Peripheral RX.
+```
+
+#### 3. **Safety Properties**
+
+Critical safety validations to prevent hardware damage:
+
+**Pin Conflict Detection:**
+- Each board pin can only be used once (except I2C and power pins)
+- I2C pins (SDA/SCL) can be shared (bus architecture)
+- Power pins (GND/VCC) can be shared (common nets)
+
+**IO Voltage Compatibility:**
+- Board IO voltage must match peripheral IO voltage
+- Prevents communication errors and potential damage
+- Emits warnings for voltage mismatches
+
+**Common Ground Validation:**
+- Each peripheral should have at least one GND connection
+- Ensures proper electrical reference and signal integrity
+- Emits warnings when ground connection is missing
+
+**Example Errors:**
+```
+[Safety-Pin-Conflicts] Pin conflict detected: Board pin 'GPIO4' is already 
+used by peripheral 'Sensor1' as 'GPIO'. Cannot reuse for peripheral 'Sensor2'.
+
+[Safety-I2C-Address] I2C address conflict: Address 0x76 is already used by 
+peripheral(s): BME680. Cannot reuse for peripheral 'TempSensor'.
+
+[Safety-IO-Voltage] IO Voltage Incompatibility: Board 'RaspberryPi_5_8GB' 
+operates at 5.0V (IO), but peripheral 'BME680' operates at 3.3V (IO).
+```
+
+#### 4. **Well-Formedness Rules**
+
+Structural validations ensuring model completeness:
+
+- **All Peripherals Connected**: Every peripheral must have at least one connection
+- **Unique Peripheral Names**: All peripheral instances must have unique names
+- **Unique Pin Numbers**: Pin numbers must be unique within each component
+- **Broker Requirements**: Broker must be configured if remote endpoints are used
+- **Pin Existence**: All referenced pins must exist in component definitions
+
+**Example Errors:**
+```
+[WF-All-Peripherals-Connected] Unconnected peripherals detected: DistanceSensor. 
+All peripherals must have at least one connection defined.
+
+[WF-Unique-Peripheral-Names] Duplicate peripheral name 'MySensor'. Peripheral 
+names must be unique within the device.
+
+[WF-Unique-Pin-Numbers] Duplicate pin number 4 used by pins: GPIO4, SDA1. Pin 
+numbers must be unique within a component.
+```
+
+### Validation Workflow
+
+1. **Syntax Validation**: textX parser validates grammar compliance
+2. **Semantic Validation**: Custom validators check:
+   - Power connection compatibility
+   - IO connection functionality
+   - Safety properties (pin conflicts, voltage limits)
+   - Well-formedness rules
+3. **Warning Generation**: Non-critical issues emit warnings:
+   - IO voltage incompatibility
+   - Missing ground connections
+   - Unusual baudrates
+
+### Running Validations
+
+**Validate a single model:**
+```sh
+demol validate examples/rpi_iot_device.dev
+```
+
+**Validate all examples:**
+```sh
+python scripts/validate_examples.py
+```
+
+**Validate builtin hardware models:**
+```sh
+python scripts/validate_builtin_models.py
+```
+
+### Validation Output
+
+**Successful validation:**
+```
+[*] Processing model: examples/rpi_iot_device.dev
+[✓] All validation checks passed!
+```
+
+**Validation with warnings:**
+```
+[*] Processing model: examples/esp_iot_device.dev
+⚠ [Safety-IO-Voltage] IO Voltage Incompatibility at examples/esp_iot_device.dev:26
+[✓] Validation passed with warnings
+```
+
+**Validation failure:**
+```
+[*] Processing model: examples/invalid_device.dev
+✗ [Conn-Power] Incompatible power connection: board pin power_5v (5.0V) 
+  cannot connect to peripheral pin vcc (3.3V)
+```
+
+### Implementation
+
+All semantic validations are implemented in `demol/lang/semantics.py` based on the formal semantics specification. The validation system uses:
+
+- **Type checking** for pin functionality verification
+- **Constraint validation** for safety properties
+- **Well-formedness rules** for structural correctness
+- **Location tracking** for precise error reporting
+
+For the complete formal specification of validation rules, see [SEMANTICS.md](SEMANTICS.md) sections 4 (Well-Formedness), 7 (Type System), and 8 (Verification Conditions).
+
 ## 🔧 Usage
+
 
 
 The DSL provides a command-line interface (CLI) for operating on models.
@@ -704,8 +784,25 @@ Commands:
 
 ```
 
-The `gen` command provides means of executing M2T transformations and provides subcommands, while the `validate` is used to validate input models.
+The `gen` command allows you to execute Model-to-Text (M2T) transformations to generate code, documentation, or diagrams.
 
+**Usage:**
+```sh
+demol gen [GENERATOR] [MODEL_FILE]
+```
+
+**Available Generators:**
+- `svg`: Generates a professional schematic SVG diagram of the device connections.
+- `pi`: Generates Python code for Raspberry Pi (using RPi.GPIO).
+- `riot`: Generates C code for RiotOS (using RIOT-OS).
+
+**Example - Generate SVG Diagram:**
+```sh
+demol gen svg examples/rpi_iot_device.dev
+```
+This command will generate an SVG file (e.g., `SmartEnvironmentMonitor.svg`) in the current directory, visualizing the pin-level connections between the board and peripherals.
+
+The `validate` command is used to validate input models.
 To validate a device model, for example the `./examples/raspi_iot_device.dev`, head to the `examples` directory and execute:
 
 ```sh
@@ -732,38 +829,166 @@ Otherwise, the parser will raise an error:
 textx.exceptions.TextXSemanticError: rpi_iot_device.dev:29:17: Unknown object "MyBME2" of class "PeripheralDef"
 ```
 
-### Development & Validation Scripts
+### Code Generation
 
-The repository includes several utility scripts in the `scripts/` directory for validation and code generation testing:
+DeMoL supports automated code generation for multiple platforms using a model-driven architecture.
 
-#### Validate Builtin Models
-Validates all builtin board and peripheral models (`.hwd` files) to ensure they comply with the DeMoL grammar and semantics.
+#### Architecture
 
-```sh
-python scripts/validate_builtin_models.py
+![DeMoL Runtime Architecture](assets/DeMoL_Runtime_Conceptual_nobg.png)
+
+The code generation system uses an abstract `BaseCodeGenerator` class that provides common model querying capabilities. Platform-specific generators inherit from this base class to implement target-specific logic.
+
+```
+Device Model → BaseCodeGenerator (abstract)
+                    ↓
+            ┌───────┴────────┐
+            ↓                ↓
+    RPiCodeGenerator    ESPCodeGenerator (future)
+            ↓                ↓
+        Templates        Templates
 ```
 
-#### Generate RPI Examples
-Generates Raspberry Pi code for all example models in `examples/`, validating the code generation pipeline.
+#### Supported Generators
+
+- **Raspberry Pi (Python)**: Generates Python code using `RPi.GPIO`, `smbus2`, and `spidev`.
+- **RiotOS (C)**: (In development) Generates C code for RiotOS-supported boards.
+
+#### Running Code Generation
+
+To generate code for a device model:
 
 ```sh
-python scripts/generate_rpi_examples.py
+# Generate Raspberry Pi code
+demol gen pi examples/rpi_iot_device.dev
 ```
 
-#### Validate Examples
-Validates all example models in `examples/` against the grammar.
-
-```sh
-python scripts/validate_examples.py
-```
+This will:
+1. Parse the device model
+2. Validate semantics
+3. Resolve platform-specific templates
+4. Generate the runtime software for the device
 
 ### REST API
 
-TODO...
+The DeMoL API provides REST endpoints for validating models and generating code. The API is secured with API keys.
+
+**Authentication**
+
+All API requests must include a valid API key in the `X-API-Key` header.
+
+**Endpoints**
+
+#### `POST /validate`
+
+Validates a DeMoL model file (`.dev` or `.hwd`).
+
+-   **Request:** `multipart/form-data`
+    -   `file`: The model file to validate.
+-   **Example Request:**
+    ```bash
+    curl -X POST "http://localhost:8000/validate" \
+         -H "X-API-Key: YOUR_API_KEY" \
+         -F "file=@/path/to/your/model.dev"
+    ```
+-   **Success Response (`200 OK`):**
+    ```json
+    {
+      "status": "success",
+      "message": "Model validation successful"
+    }
+    ```
+-   **Error Response (`400 Bad Request`):**
+    ```json
+    {
+      "detail": "Validation error: ..."
+    }
+    ```
+
+#### `POST /generate`
+
+Generates code or documentation from a DeMoL model file.
+
+-   **Request:** `multipart/form-data`
+    -   `file`: The model file to generate code from.
+    -   `target`: The generation target.
+-   **Supported Targets:**
+    -   `plantuml`: Generates a PlantUML diagram of the device.
+    -   `json`: Generates a JSON representation of the model.
+-   **Example Request:**
+    ```bash
+    curl -X POST "http://localhost:8000/generate" \
+         -H "X-API-Key: YOUR_API_KEY" \
+         -F "file=@/path/to/your/model.dev" \
+         -F "target=plantuml" \
+         --output generated_code.zip
+    ```
+-   **Success Response (`200 OK`):**
+    A zip file containing the generated artifact(s) is returned.
+-   **Error Response:**
+    -   `400 Bad Request`: If the target is invalid.
+    -   `501 Not Implemented`: If the target is valid but not yet implemented (e.g., `rpi`, `docs`).
+    -   `500 Internal Server Error`: If code generation fails.
+
+## Tests
+
+This directory contains tests for the DeMoL DSL, covering parsing, semantic validation, and model transformations.
+
+### Running Tests
+
+To run the tests, ensure you have the virtual environment activated and `pytest` installed.
+
+```bash
+# Install test dependencies (if not already installed)
+pip install pytest
+
+# Run all tests
+pytest tests/
+
+# Run specific test file
+pytest tests/test_board_semantics.py
+```
+
+### Test Coverage
+
+- **test_board_semantics.py**: Validates Board model semantics.
+    - Port count consistency.
+    - Nested operational properties.
+    - Unique pin numbers.
+
+- **test_component_semantics.py**: Validates Component (Sensor/Actuator) semantics.
+    - Valid Sensor/Actuator definitions.
+    - Attribute parsing.
+    - Template parsing.
+
+- **test_device_semantics.py**: Validates Device model semantics.
+    - IO Voltage compatibility (Warning).
+    - Common ground connection (Warning).
+    - MQTT topic format validation.
+    - Pin function compatibility.
+
+- **test_power_gpio_semantics.py**: Validates Power and GPIO connection semantics.
+    - Power voltage compatibility.
+    - Ground connection rules.
+    - GPIO mode validation (input/output).
+    - GPIO property validation.
+
+- **test_i2c_spi_semantics.py**: Validates I2C and SPI connection semantics.
+    - I2C address range and uniqueness.
+    - I2C bus speed validation.
+    - Pin function checks (SDA/SCL).
+
+- **test_uart_safety_semantics.py**: Validates UART and Safety semantics.
+    - UART baudrate validation.
+    - Pin conflict detection (Safety-Unique-Pins).
+    - Unique peripheral names.
+    - Unconnected peripheral detection.
+    - Broker requirement validation.
+
 
 ## 📜 License
 
-Commlib-py is protected under the [MIT ](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [MIT LICENSE](https://choosealicense.com/licenses/mit/) uri.
+DeMoL is protected under the [MIT ](https://choosealicense.com/licenses/mit/) License. For more details, refer to the [MIT LICENSE](https://choosealicense.com/licenses/mit/) uri.
 
 ---
 

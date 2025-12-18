@@ -168,24 +168,24 @@ class GenerationReporter:
 # RPI device examples identified from the examples directory
 RPI_EXAMPLES = [
     # smauto (Smart Automation examples with RPI)
-    ("smauto/EntranceLEDs.dev", "rpi_out/smauto/EntranceLEDs"),
-    ("smauto/ParkingLeds.dev", "rpi_out/smauto/ParkingLeds"),
-    ("smauto/ParkingSensor.dev", "rpi_out/smauto/ParkingSensor"),
-    ("smauto/RPiFan.dev", "rpi_out/smauto/RPiFan"),
-    ("smauto/SmartWindow.dev", "rpi_out/smauto/SmartWindow"),
+    ("examples/smauto/EntranceLEDs.dev", "rpi_out/smauto/EntranceLEDs"),
+    ("examples/smauto/ParkingLeds.dev", "rpi_out/smauto/ParkingLeds"),
+    ("examples/smauto/ParkingSensor.dev", "rpi_out/smauto/ParkingSensor"),
+    ("examples/smauto/RPiFan.dev", "rpi_out/smauto/RPiFan"),
+    ("examples/smauto/SmartWindow.dev", "rpi_out/smauto/SmartWindow"),
     
     # test (Test/Thesis examples)
-    ("test/LoCScenario1.dev", "rpi_out/test/LoCScenario1"),
-    ("test/LoCScenario2.dev", "rpi_out/test/LoCScenario2"),
-    ("test/ThesisExample.dev", "rpi_out/test/ThesisExample"),
+    ("examples/test/LoCScenario1.dev", "rpi_out/test/LoCScenario1"),
+    ("examples/test/LoCScenario2.dev", "rpi_out/test/LoCScenario2"),
+    ("examples/test/ThesisExample.dev", "rpi_out/test/ThesisExample"),
     
     # rpi (Raspberry Pi examples)
-    ("rpi/RPi_ADC.dev", "rpi_out/rpi/RPi_ADC"),
-    ("rpi/RPi_gas_led.dev", "rpi_out/rpi/RPi_gas_led"),
-    ("rpi/rpi5_ToF.dev", "rpi_out/rpi/rpi5_ToF"),
-    ("rpi/rpi_5_TCRT.dev", "rpi_out/rpi/rpi_5_TCRT"),
-    ("rpi/rpi_constraint_bme.dev", "rpi_out/rpi/rpi_constraint_bme"),
-    ("rpi/rpi_iot_device.dev", "rpi_out/rpi/rpi_iot_device"),
+    ("examples/rpi/RPi_ADC.dev", "rpi_out/rpi/RPi_ADC"),
+    ("examples/rpi/RPi_gas_led.dev", "rpi_out/rpi/RPi_gas_led"),
+    ("examples/rpi/rpi5_ToF.dev", "rpi_out/rpi/rpi5_ToF"),
+    ("examples/rpi/rpi_5_TCRT.dev", "rpi_out/rpi/rpi_5_TCRT"),
+    ("examples/rpi/rpi_constraint_bme.dev", "rpi_out/rpi/rpi_constraint_bme"),
+    ("examples/rpi/rpi_iot_device.dev", "rpi_out/rpi/rpi_iot_device"),
 ]
 
 

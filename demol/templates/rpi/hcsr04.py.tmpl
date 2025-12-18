@@ -16,7 +16,7 @@ TRIGGER_PIN = "{{trigger}}"
 ECHO_PIN = "{{echo}}"
 
 
-class Distance_sensor:
+class HCSR04(Sensor):
     #The class that sums up all distance sensors
 
     def __init__(self):
@@ -29,27 +29,24 @@ class Distance_sensor:
             max_distance=self.max_distance,
             threshold_distance=0.3
         )
+        self.msg = DistanceMessage()
     
-    def read_data(self):
-        #The distance is returned in centimeters
+    def read(self):
         data = {
-            #"sensor_name": "{{sensor_type}}",
             "distance": self.sensor.distance * 100,
             "max_distance": self.max_distance,
             "min_distance": self.min_distance
         }
-        return data
+        self.msg = DistanceMessage(**data)
+        return msg
     
     def get_max_frequency(self):
         return self.max_frequency
 
-
     def disconnect(self):
-        #Release used resources
         self.sensor.close()
 
-class SRF05(Distance_sensor):
-    pass
-    
-class HCSR04(Distance_sensor):
-    pass
+
+if __name__ == "__main__":
+    sensor = HCSR04Sensor()
+    sensor.run()

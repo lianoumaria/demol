@@ -1,64 +1,49 @@
-import utils
+import common
 
 MessageBroker: AMQPBroker | MQTTBroker | RedisBroker;
 
-
-Authentication: AuthPlain | AuthApiKey | AuthCert;
-
-AuthPlain:
-    'username' ':' username=STRING
-    'password' ':' password=STRING
-;
-
-AuthApiKey:
-    'key' ':' key=STRING
-;
-
-AuthCert:
-    ('cert' ':' cert=STRING) | ('certPath' ':' certPath=STRING)
-;
-
 AMQPBroker:
-    'Broker<AMQP>' name=ID
+    /[Bb][Rr][Oo][Kk][Ee][Rr]/ '[' 'AMQP' ']' name=ID /[Ww][Ii][Tt][Hh]/
     (
-        ('host:' host=STRING)
-        ('port:' port=INT)
-        ('vhost:' vhost=STRING)?
-        ('topicExchange:' topicE=STRING)?
-        ('rpcExchange:' rpcE=STRING)?
-        ('ssl' ':' ssl=BOOL)?
-        ('auth' ':' auth=Authentication)?
-    )#
-    'end'
+        ('host' '=' host=STRING)
+        ('port' '=' port=INT)
+        ('vhost' '=' vhost=STRING)?
+        ('topicExchange' '=' topicE=STRING)?
+        ('rpcExchange' '=' rpcE=STRING)?
+        ('ssl' '=' ssl=BOOL)?
+        ('auth.username' '=' auth_username=STRING)?
+        ('auth.password' '=' auth_password=STRING)?
+        ('auth.key' '=' auth_key=STRING)?
+    )#[',']
+    ';'
 ;
 
 MQTTBroker:
-    'Broker<MQTT>' name=ID
+    /[Bb][Rr][Oo][Kk][Ee][Rr]/ '[' 'MQTT' ']' name=ID /[Ww][Ii][Tt][Hh]/
     (
-        ('host:' host=STRING)
-        ('port:' port=INT)
-        ('ssl' ':' ssl=BOOL)?
-        ('basePath:' basePath=STRING)?
-        ('webPath:' webPath=STRING)?
-        ('webPort:' webPort=INT)?
-        ('auth' ':' auth=Authentication)?
-    )#
-    'end'
+        ('host' '=' host=STRING)
+        ('port' '=' port=INT)
+        ('ssl' '=' ssl=BOOL)?
+        ('basePath' '=' basePath=STRING)?
+        ('webPath' '=' webPath=STRING)?
+        ('webPort' '=' webPort=INT)?
+        ('auth.username' '=' auth_username=STRING)?
+        ('auth.password' '=' auth_password=STRING)?
+        ('auth.key' '=' auth_key=STRING)?
+    )#[',']
+    ';'
 ;
 
 RedisBroker:
-    'Broker<Redis>' name=ID
+    /[Bb][Rr][Oo][Kk][Ee][Rr]/ '[' 'Redis' ']' name=ID /[Ww][Ii][Tt][Hh]/
     (
-        ('host:' host=STRING)
-        ('port:' port=INT)
-        ('db:' db=INT)?
-        ('ssl' ':' ssl=BOOL)?
-        ('auth' ':' auth=Authentication)?
-    )#
-    'end'
+        ('host' '=' host=STRING)
+        ('port' '=' port=INT)
+        ('db' '=' db=INT)?
+        ('ssl' '=' ssl=BOOL)?
+        ('auth.username' '=' auth_username=STRING)?
+        ('auth.password' '=' auth_password=STRING)?
+        ('auth.key' '=' auth_key=STRING)?
+    )#[',']
+    ';'
 ;
-
-IPv4_ADDR: /([0-9]{1,3}\.){3}[0-9]{1,3}/;
-IPv6_ADDR: /([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}/;
-IP_ADDR: IPv4_ADDR | IPv6_ADDR;
-MAC_ADDR: /([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})/;

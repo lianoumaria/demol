@@ -39,6 +39,10 @@ def model_proc(model, metamodel):
         validate_broker_requirements,
         validate_io_voltage_compatibility,
         validate_common_ground,
+        validate_connections,
+        validate_unique_peripheral_names,
+        validate_topic_format,
+        validate_single_board,
     )
     
     device_name = model.metadata.name.strip('"')
@@ -46,9 +50,24 @@ def model_proc(model, metamodel):
     print(f'[*] Processing model: {model._tx_filename}')
     
     # ========================================================================
+    # Model Enrichment (including broker property processing)
+    # ========================================================================
+    enrich_model(model)
+    
+    # ========================================================================
+    # Well-Formedness: Single board
+    # ========================================================================
+    validate_single_board(model)
+    
+    # ========================================================================
     # Well-Formedness: All peripherals must be connected
     # ========================================================================
     validate_all_peripherals_connected(model)
+
+    # ========================================================================
+    # Well-Formedness: Unique peripheral names
+    # ========================================================================
+    validate_unique_peripheral_names(model)
     
     # ========================================================================
     # Well-Formedness: Broker requirements
@@ -60,175 +79,10 @@ def model_proc(model, metamodel):
     # ========================================================================
     validate_common_ground(model)
     
-    board_name = model.components.board.name
     # ========================================================================
-    # Process each connection
+    # Connection Validation
     # ========================================================================
-    for c in model.connections:
-        board = model.components.board
-        # Set the board for easy navigation in M2M and M2T transformations
-        setattr(c, 'board', model.components.board)
-        peripheral = c.peripheral.ref
-        
-        # Get pin mappings
-        board_pins_map = {p.name: p for p in board.pins}
-        peripheral_pins_map = {p.name: p for p in peripheral.pins}
-        board_pin_names = set(board_pins_map.keys())
-        peripheral_pin_names = set(peripheral_pins_map.keys())
-        
-        # ====================================================================
-        # Validate Power Connections
-        # ====================================================================
-        for pconn in c.powerConns:
-            # Check if pins exist
-            if pconn.boardPin not in board_pin_names:
-                raise_validation_error(
-                    pconn,
-                    f'Board {board.name} does not have a pin named {pconn.boardPin}'
-                )
-            if pconn.peripheralPin not in peripheral_pin_names:
-                raise_validation_error(
-                    pconn,
-                    f'Peripheral {c.peripheral.name} does not have a pin named {pconn.peripheralPin}'
-                )
-            
-            # Enhanced validation: Check power compatibility
-            board_pin = board_pins_map[pconn.boardPin]
-            peripheral_pin = peripheral_pins_map[pconn.peripheralPin]
-            
-            # Only validate if both are power pins
-            if (hasattr(board_pin, 'ptype') and hasattr(peripheral_pin, 'ptype')):
-                validate_power_connection(board_pin, peripheral_pin, pconn)
-        
-        # ====================================================================
-        # Validate IO Connections
-        # ====================================================================
-        for ioconn in c.ioConns:
-            conn_type = ioconn.__class__.__name__
-            
-            if conn_type == 'GPIOConnection':
-                pin_conn = ioconn.pinConn
-                
-                # Check if pins exist
-                if pin_conn.boardPin not in board_pin_names:
-                    raise_validation_error(
-                        pin_conn,
-                        f'Board {board.name} does not have a pin named {pin_conn.boardPin}'
-                    )
-                if pin_conn.peripheralPin not in peripheral_pin_names:
-                    raise_validation_error(
-                        pin_conn,
-                        f'Peripheral {peripheral.name} does not have a pin named {pin_conn.peripheralPin}'
-                    )
-                
-                # Enhanced validation: Check GPIO functionality
-                board_pin = board_pins_map[pin_conn.boardPin]
-                peripheral_pin = peripheral_pins_map[pin_conn.peripheralPin]
-                validate_gpio_connection(board_pin, peripheral_pin, ioconn)
-                
-            elif conn_type == 'I2CConnection':
-                sda = ioconn.sda
-                scl = ioconn.scl
-                
-                # Check if pins exist
-                pin_conns = [sda, scl]
-                for pc in pin_conns:
-                    if pc.boardPin not in board_pin_names:
-                        raise_validation_error(
-                            pc,
-                            f'Board {board.name} does not have a pin named {pc.boardPin}'
-                        )
-                    if pc.peripheralPin not in peripheral_pin_names:
-                        raise_validation_error(
-                            pc,
-                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
-                        )
-                
-                # Enhanced validation: Check I2C functionality and address range
-                board_sda = board_pins_map[sda.boardPin]
-                board_scl = board_pins_map[scl.boardPin]
-                peripheral_sda = peripheral_pins_map[sda.peripheralPin]
-                peripheral_scl = peripheral_pins_map[scl.peripheralPin]
-                validate_i2c_connection(
-                    board_sda, board_scl, peripheral_sda, peripheral_scl,
-                    ioconn.slaveAddr, ioconn
-                )
-                
-            elif conn_type == 'SPIConnection':
-                miso = ioconn.miso
-                mosi = ioconn.mosi
-                sck = ioconn.sck
-                cs = ioconn.cs
-                
-                # Check if pins exist
-                pin_conns = [miso, mosi, sck, cs]
-                for pc in pin_conns:
-                    if pc.boardPin not in board_pin_names:
-                        raise_validation_error(
-                            pc,
-                            f'Board {board.name} does not have a pin named {pc.boardPin}'
-                        )
-                    if pc.peripheralPin not in peripheral_pin_names:
-                        raise_validation_error(
-                            pc,
-                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
-                        )
-                
-                # Enhanced validation: Check SPI functionality
-                board_spi_pins = {
-                    'mosi': board_pins_map[mosi.boardPin],
-                    'miso': board_pins_map[miso.boardPin],
-                    'sck': board_pins_map[sck.boardPin],
-                    'cs': board_pins_map[cs.boardPin]
-                }
-                peripheral_spi_pins = {
-                    'mosi': peripheral_pins_map[mosi.peripheralPin],
-                    'miso': peripheral_pins_map[miso.peripheralPin],
-                    'sck': peripheral_pins_map[sck.peripheralPin],
-                    'cs': peripheral_pins_map[cs.peripheralPin]
-                }
-                validate_spi_connection(board_spi_pins, peripheral_spi_pins, ioconn)
-                
-            elif conn_type == 'UARTConnection':
-                tx = ioconn.tx
-                rx = ioconn.rx
-                
-                # Check if pins exist
-                pin_conns = [tx, rx]
-                for pc in pin_conns:
-                    if pc.boardPin not in board_pin_names:
-                        raise_validation_error(
-                            pc,
-                            f'Board {board.name} does not have a pin named {pc.boardPin}'
-                        )
-                    if pc.peripheralPin not in peripheral_pin_names:
-                        raise_validation_error(
-                            pc,
-                            f'Peripheral {peripheral.name} does not have a pin named {pc.peripheralPin}'
-                        )
-                
-                # Enhanced validation: Check UART functionality and baudrate
-                board_tx = board_pins_map[tx.boardPin]
-                board_rx = board_pins_map[rx.boardPin]
-                peripheral_tx = peripheral_pins_map[tx.peripheralPin]
-                peripheral_rx = peripheral_pins_map[rx.peripheralPin]
-                validate_uart_connection(
-                    board_tx, board_rx, peripheral_tx, peripheral_rx,
-                    ioconn.baudrate, ioconn
-                )
-        
-        # ====================================================================
-        # Auto-generate topic if not specified
-        # ====================================================================
-        if c.endpoint and not c.endpoint.topic:
-            peripheral_def = c.peripheral
-            peripheral_ref = peripheral_def.ref
-            peripheral_def_name = peripheral_def.name
-            peripheral_type = type(peripheral_ref).__name__
-            peripheral_msg = peripheral_ref.type
-            
-            default_topic = f'"{device_name}.{peripheral_type}.{peripheral_msg}.{peripheral_def_name}"'
-            c.endpoint.topic = default_topic.lower().strip('""')
+    validate_connections(model)
     
     # ========================================================================
     # Global Safety Validations
@@ -249,7 +103,85 @@ def model_proc(model, metamodel):
     # Safety: Common ground connection
     validate_common_ground(model)
     
+    # ========================================================================
+    # Topic Format Validation (based on broker type)
+    # ========================================================================
+    validate_topic_format(model)
+    
     print("[✓] All validation checks passed!")
+
+
+def enrich_model(model):
+    """
+    Enrich the model with auto-generated values.
+    Extracts board and peripherals from USE statements.
+    Creates auth object from broker auth properties.
+    """
+    from types import SimpleNamespace
+    
+    # ========================================================================
+    # Process Broker Authentication (create auth object)
+    # ========================================================================
+    if hasattr(model, 'broker') and model.broker:
+        auth_attrs = {}
+        
+        # Check for auth properties and collect them
+        if hasattr(model.broker, 'auth_username'):
+            auth_attrs['username'] = model.broker.auth_username
+        if hasattr(model.broker, 'auth_password'):
+            auth_attrs['password'] = model.broker.auth_password
+        if hasattr(model.broker, 'auth_key'):
+            auth_attrs['key'] = model.broker.auth_key
+        
+        # Create auth object if there are auth properties
+        if auth_attrs:
+            auth_obj = SimpleNamespace(**auth_attrs)
+            setattr(model.broker, 'auth', auth_obj)
+    
+    # ========================================================================
+    # Extract board and peripherals from USE statements
+    # ========================================================================
+    board = None
+    peripherals = []
+    
+    for use in model.uses:
+        # Check the type of use - it could be BoardUse or PeripheralUse
+        use_type = use.__class__.__name__
+        
+        if use_type == 'BoardUse':
+            board = use.board
+        elif use_type == 'PeripheralUse':
+            peripherals.extend(use.peripherals)
+        # Fallback for backward compatibility
+        elif hasattr(use, 'board') and use.board:
+            board = use.board
+        elif hasattr(use, 'peripherals') and use.peripherals:
+            peripherals.extend(use.peripherals)
+    
+    # Create a synthetic 'components' object for backward compatibility
+    model.components = SimpleNamespace(
+        board=board,
+        peripherals=peripherals
+    )
+    
+    device_name = model.metadata.name.strip('"')
+    
+    for c in model.connections:
+        # Set the board for easy navigation in M2M and M2T transformations
+        setattr(c, 'board', board)
+        
+        # ====================================================================
+        # Auto-generate topic if not specified
+        # ====================================================================
+        if not c.remote:
+            peripheral_def = c.peripheral
+            peripheral_ref = peripheral_def.ref
+            peripheral_def_name = peripheral_def.name
+            peripheral_type = type(peripheral_ref).__name__
+            peripheral_msg = peripheral_ref.type
+            
+            default_topic = f'"{device_name}.{peripheral_type}.{peripheral_msg}.{peripheral_def_name}"'
+            c.remote = default_topic.lower().strip('""')
 
 
 def get_device_mm(debug: bool = False, global_repo: bool = False):
@@ -265,10 +197,10 @@ def get_device_mm(debug: bool = False, global_repo: bool = False):
         {
             "*.*": scoping_providers.FQN(),
             "*.*": scoping_providers.FQNImportURI(importAs=True),
-            "Components.peripherals": scoping_providers.FQNGlobalRepo(
+            "Use.peripherals": scoping_providers.FQNGlobalRepo(
                 os.path.join(PERIPHERAL_MODEL_REPO_PATH, '*.hwd')
             ),
-            "Components.board": scoping_providers.FQNGlobalRepo(
+            "Use.board": scoping_providers.FQNGlobalRepo(
                 os.path.join(BOARD_MODEL_REPO_PATH, '*.hwd')
             ),
 

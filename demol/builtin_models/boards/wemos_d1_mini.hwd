@@ -1,30 +1,34 @@
-
-Board[ESP] WemosD1Mini
-    operational
-      vcc: 3V3
-      memory:
-        flash: 16 mb
-      cpu:
-        cpu_family: ESP8266
-        max_freq: 160 mhz
-        fpu: false
-    end
-    pins
-        DPIN rst[] @ 1;
-        DPIN a0[adc] @ 2;
-        DPIN d0[gpio] @ 3;
-        DPIN d5[gpio,sck-0] @ 4;
-        DPIN d6[gpio,miso-0] @ 5;
-        DPIN d7[gpio,mosi-0] @ 6;
-        DPIN d8[gpio,cs-0] @ 7;
-        PPIN power_3v3[3V3] @ 8;
-        DPIN tx[tx-0] @ 9;
-        DPIN rx[rx-0] @ 10;
-        DPIN d1[gpio,scl-0] @ 11;
-        DPIN d2[gpio,sda-0] @ 12;
-        DPIN d3[gpio] @ 13;
-        DPIN d4[gpio] @ 14;
-        PPIN gnd[GND] @ 15;
-        PPIN power_5v[5V] @ 16;
-    end
-end
+BOARD[ESP] WemosD1Mini WITH
+    OP
+        vcc=3V3,
+        memory.flash=16 mb,
+        cpu.family=ESP8266,
+        cpu.freq=160 mhz,
+        cpu.fpu=false,
+        wifi.name=Wemos_WiFi,
+        wifi.version=4,
+        wifi.bands=[2.4GHz],
+        energy=2 mW, 500 mW, 80 mW
+    PORTS
+        spi=1,
+        i2c=1,
+        uart=1,
+        gpio=9
+    PINS
+        rst[] @ 1,
+        a0[adc] @ 2,
+        d0[gpio] @ 3,
+        d5[gpio,sck-0] @ 4,
+        d6[gpio,miso-0] @ 5,
+        d7[gpio,mosi-0] @ 6,
+        d8[gpio,cs-0] @ 7,
+        power_3v3[3V3] @ 8,
+        tx[tx-0] @ 9,
+        rx[rx-0] @ 10,
+        d1[gpio,scl-0] @ 11,
+        d2[gpio,sda-0] @ 12,
+        d3[gpio] @ 13,
+        d4[gpio] @ 14,
+        gnd[GND] @ 15,
+        power_5v[5V] @ 16
+;

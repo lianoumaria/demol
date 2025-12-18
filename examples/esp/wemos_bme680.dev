@@ -1,0 +1,16 @@
+DEVICE MyWemos WITH description="My WemosD1Mini IoT device", author="klpanagi";
+
+NETWORK[WiFi] WITH ssid="Wifi_2.4GHz", password="guest";
+
+BROKER[MQTT] MyMqttBroker WITH host="node.mqtt.local", port=1883, auth.username="guest", auth.password="guest";
+
+USE WemosD1Mini;
+USE BME680(BME);
+
+CONNECT BME WITH
+    POWER
+        gnd -- gnd,
+        power_5v -- vcc
+    DATA
+        i2c[slave_address=0x78] sda d2 -- sda, scl d1 -- scl
+    @ "my_wemos.actuators.visual.ledstrip";

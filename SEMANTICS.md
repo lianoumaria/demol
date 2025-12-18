@@ -1,1291 +1,375 @@
 # Formal Semantics of DeMoL (Device Modeling Language)
 
+This document outlines the formal semantics and validation rules implemented in the DeMoL language, as defined in `demol/lang/semantics.py`. The validation process ensures that device models are well-formed, safe, and logically consistent before code generation or deployment.
+
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Abstract Syntax](#abstract-syntax)
-3. [Formal Grammar](#formal-grammar)
-4. [Static Semantics](#static-semantics)
-5. [Operational Semantics](#operational-semantics)
-6. [Axiomatic Semantics](#axiomatic-semantics)
-7. [Type System](#type-system)
-8. [Verification Conditions](#verification-conditions)
+1.  [Introduction](#1-introduction)
+2.  [Hardware Component Definitions](#2-hardware-component-definitions)
+    - [Energy Property](#21-energy-property)
+    - [Templates Section](#22-templates-section)
+    - [Attributes](#23-attributes)
+3.  [Power Connection Validation](#3-power-connection-validation)
+4.  [Data Connection Validation](#4-data-connection-validation)
+    - [GPIO Connections](#41-gpio-connections)
+    - [I2C Connections](#42-i2c-connections)
+    - [SPI Connections](#43-spi-connections)
+    - [UART Connections](#44-uart-connections)
+5.  [Safety Properties](#5-safety-properties)
+    - [Pin Conflicts (Inv-Unique-Pins)](#51-pin-conflicts-inv-unique-pins)
+    - [I2C Address Uniqueness (Safety-I2C-Address-Unique)](#52-i2c-address-uniqueness-safety-i2c-address-unique)
+    - [Voltage Limits (Safety-Voltage-Limits)](#53-voltage-limits-safety-voltage-limits)
+    - [IO Voltage Compatibility](#54-io-voltage-compatibility)
+    - [Common Ground](#55-common-ground)
+    - [Topic Format Validation (Safety-Topic-Format)](#56-topic-format-validation-safety-topic-format)
+6.  [Well-Formedness Rules](#6-well-formedness-rules)
+    - [All Peripherals Connected (WF-All-Peripherals-Connected)](#61-all-peripherals-connected-wf-all-peripherals-connected)
+    - [Broker Requirements (Inv-Broker-Connection)](#62-broker-requirements-inv-broker-connection)
+    - [Unique Pin Numbers (WF-Unique-Pin-Numbers)](#63-unique-pin-numbers-wf-unique-pin-numbers)
+    - [Unique Peripheral Names (WF-Unique-Peripheral-Names)](#64-unique-peripheral-names-wf-unique-peripheral-names)
 
 ---
 
 ## 1. Introduction
 
-DeMoL is a declarative domain-specific language for modeling IoT devices. This document provides the formal semantics covering:
+The semantic validation in DeMoL is a critical step that checks the correctness of a device model against a set of predefined rules. These rules are derived from electrical engineering principles and software design best practices. The validator, implemented in `demol/lang/semantics.py`, analyzes the abstract syntax tree (AST) of a DeMoL model and raises errors or warnings if any rules are violated.
 
-- **Abstract Syntax**: The mathematical representation of DeMoL programs
-- **Formal Grammar**: BNF/EBNF specification of concrete syntax
-- **Static Semantics**: Type checking and well-formedness rules
-- **Operational Semantics**: Runtime behavior and execution model
-- **Axiomatic Semantics**: Logical properties and verification conditions
+The primary goals of semantic validation are:
 
----
-
-## 2. Abstract Syntax
-
-### 2.1 Syntactic Domains
-
-```
-d ∈ DeviceModel
-m ∈ Metadata
-n ∈ Network
-c ∈ Components
-b ∈ Board
-p ∈ Peripheral ::= Sensor | Actuator
-k ∈ Connection
-br ∈ Broker ::= MQTTBroker | AMQPBroker | RedisBroker
-pin ∈ Pin ::= PowerPin | IOPin
-conn ∈ IOConnection ::= GPIOConn | I2CConn | SPIConn | UARTConn
-e ∈ Endpoint
-s ∈ Setting
-v ∈ Value ::= Int(ℤ) | Float(ℝ) | String(Σ*) | Bool(𝔹) | List([Value]) | Dict({String ↦ Value})
-```
-
-### 2.2 Abstract Syntax Trees
-
-#### Device Model
-
-```
-DeviceModel ::= Device(
-    imports: List[Import],
-    meta: Metadata,
-    network: Network,
-    components: Components,
-    broker: Option[Broker],
-    connections: List[Connection]
-)
-
-Import ::= Imp(uri: FQN, alias: Option[ID])
-```
-
-#### Metadata
-
-```
-Metadata ::= Meta(
-    name: String,
-    description: String,
-    author: String,
-    os: OS
-)
-
-OS ::= Raspbian | RiotOS
-```
-
-#### Network
-
-```
-Network ::= Net(
-    ssid: String,
-    passwd: String,
-    address: Option[IPAddr],
-    channel: Option[String]
-)
-
-IPAddr ::= IPv4(String) | IPv6(String)
-```
-
-#### Components
-
-```
-Components ::= Comp(
-    board: BoardRef,
-    peripherals: List[PeripheralDef]
-)
-
-BoardRef ::= Ref(name: FQN, model: Board)
-
-PeripheralDef ::= PDef(
-    ref: PeripheralRef,
-    instanceName: ID
-)
-
-PeripheralRef ::= Ref(name: FQN, model: Peripheral)
-```
-
-#### Board
-
-```
-Board ::= BoardDef(
-    name: ID,
-    type: Option[BoardType],
-    vcc: PowerType,
-    cpu: CPU,
-    memory: Memory,
-    pins: List[Pin],
-    networking: List[NetworkInterface],
-    bluetooth: BluetoothVersion,
-    ioVcc: Option[PowerType]
-)
-
-CPU ::= CPUSpec(
-    family: CPUFamily,
-    maxFreq: Frequency,
-    fpu: Bool
-)
-
-CPUFamily ::= ESP32 | ESP8266 | PiArmCortex
-
-BoardType ::= RPI | ESP | ARDUINO
-
-Memory ::= MemSpec(
-    ram: Option[Size],
-    rom: Option[Size],
-    flash: Option[Size]
-)
-
-NetworkInterface ::= WiFi(name: ID, freq: Option[Frequency])
-                   | Ethernet(name: ID)
-
-BluetoothVersion ::= NA | BT3 | BT4 | BT5
-```
-
-#### Peripheral
-
-```
-Peripheral ::= Sensor(
-                   name: ID,
-                   vcc: PowerType,
-                   msg: SensorMsgType,
-                   pins: List[Pin],
-                   attributes: List[Attribute],
-                   constraints: List[Constraint],
-                   powerConsumption: Option[Power],
-                   piTpl: Option[String],
-                   riotTpl: Option[String],
-                   ioVcc: Option[PowerType]
-               )
-             | Actuator(
-                   name: ID,
-                   vcc: PowerType,
-                   msg: ActuatorMsgType,
-                   pins: List[Pin],
-                   attributes: List[Attribute],
-                   constraints: List[Constraint],
-                   powerConsumption: Option[Power],
-                   piTpl: Option[String],
-                   riotTpl: Option[String],
-                   ioVcc: Option[PowerType]
-               )
-
-SensorMsgType ::= Distance | Temperature | Humidity | Gas | Pressure 
-                | Env | Acceleration | IMU | Tracker | ADC
-
-ActuatorMsgType ::= MotorController | ServoController | LedArray
-```
-
-#### Pins
-
-```
-Pin ::= PowerPin(name: ID, number: ℕ, type: PowerType)
-      | IOPin(name: ID, number: Option[ℕ], functions: List[PinFunction],
-              vmin: Option[ℝ], vmax: Option[ℝ], signalLevel: Option[ℝ])
-
-PowerType ::= GND | V3_3 | V5 | V12 | Custom(ℝ)
-
-PinFunction ::= GPIO
-              | I2C(type: I2CType, bus: ℕ)
-              | SPI(type: SPIType, bus: ℕ)
-              | UART(type: UARTType, bus: ℕ)
-              | PWM(channel: ℕ)
-              | ADC | DAC
-              | PCM(type: PCMType)
-
-I2CType ::= SDA | SCL
-SPIType ::= MOSI | MISO | SCK | CS
-UARTType ::= TX | RX
-PCMType ::= FS | DIN | DOUT
-```
-
-#### Connection
-
-```
-Connection ::= Conn(
-    peripheral: PeripheralDef,
-    board: BoardRef,  // Implicit in grammar, explicit in resolved model
-    powerConns: List[PowerConnection],
-    ioConns: List[IOConnection],
-    endpoint: Option[Endpoint],
-    settings: List[Setting]
-)
-
-PowerConnection ::= PConn(boardPin: ID, peripheralPin: ID)
-
-IOConnection ::= GPIOConn(name: Option[ID], pin: PinConn, mode: GPIOMode)
-               | I2CConn(name: Option[ID], slaveAddr: ℕ, sda: PinConn, scl: PinConn)
-               | SPIConn(name: Option[ID], mosi: PinConn, miso: PinConn, 
-                        sck: PinConn, cs: PinConn)
-               | UARTConn(name: Option[ID], tx: PinConn, rx: PinConn, baudrate: ℕ)
-
-PinConn ::= PC(boardPin: ID, peripheralPin: ID)
-
-GPIOMode ::= GPIOConfig(
-    input: Option[Bool],
-    output: Option[Bool],
-    pullup: Option[Bool],
-    pulldown: Option[Bool],
-    openDrain: Option[Bool]
-)
-```
-
-#### Endpoint
-
-```
-Endpoint ::= EP(
-    topic: Option[String],
-    type: Option[EndpointType]
-)
-
-EndpointType ::= Publisher | Subscriber | RPC | Action
-```
-
-#### Broker
-
-```
-Broker ::= MQTTBroker(
-               name: ID,
-               host: String,
-               port: ℕ,
-               ssl: Option[Bool],
-               basePath: Option[String],
-               webPath: Option[String],
-               webPort: Option[ℕ],
-               auth: Option[Auth]
-           )
-         | AMQPBroker(
-               name: ID,
-               host: String,
-               port: ℕ,
-               vhost: Option[String],
-               topicExchange: Option[String],
-               rpcExchange: Option[String],
-               ssl: Option[Bool],
-               auth: Option[Auth]
-           )
-         | RedisBroker(
-               name: ID,
-               host: String,
-               port: ℕ,
-               db: Option[ℕ],
-               ssl: Option[Bool],
-               auth: Option[Auth]
-           )
-
-Auth ::= AuthPlain(username: String, password: String)
-       | AuthApiKey(key: String)
-       | AuthCert(cert: String) | AuthCertPath(path: String)
-```
-
-#### Settings and Attributes
-
-```
-Setting ::= IntSetting(name: ID, default: Option[ℤ])
-          | FloatSetting(name: ID, default: Option[ℝ])
-          | StringSetting(name: ID, default: Option[String])
-          | BoolSetting(name: ID, default: Option[Bool])
-          | ListSetting(name: ID, default: Option[List[Value]])
-          | DictSetting(name: ID, default: Option[Dict[String, Setting]])
-
-Attribute ::= IntAttr(name: ID, default: Option[ℤ])
-            | FloatAttr(name: ID, default: Option[ℝ])
-            | StringAttr(name: ID, default: Option[String])
-            | BoolAttr(name: ID, default: Option[Bool])
-            | ListAttr(name: ID, default: Option[List[Value]])
-            | DictAttr(name: ID, default: Option[Dict[String, Attribute]])
-
-Constraint ::= MaxFrequency(value: ℝ, unit: FreqUnit)
-             | MinDistance(value: ℝ, unit: DistUnit)
-             | MaxDistance(value: ℝ, unit: DistUnit)
-             | MaxLatency(value: ℝ, unit: TimeUnit)
-
-TimeUnit ::= H | Min | S | MS | US | NS
-```
+-   **Preventing Hardware Damage**: Ensuring that electrical connections are compatible and do not exceed component ratings.
+-   **Ensuring Correct Functionality**: Verifying that communication protocols are correctly configured and that all components are properly connected.
+-   **Enforcing Best Practices**: Promoting robust and maintainable device designs.
 
 ---
 
-## 3. Formal Grammar
+## 2. Hardware Component Definitions
 
-### 3.1 Context-Free Grammar (Extended BNF)
+Hardware components (boards and peripherals) are defined in `.hwd` files with specific properties that affect validation and code generation.
 
-```ebnf
-(* Device Model *)
-DeviceModel ::= Import* Metadata Network Components Broker? Connection+
+### 2.1. Energy Property
 
-Import ::= 'import' FQN ('as' ID)?
+The `energy` property specifies power consumption characteristics with three values: minimum, maximum, and average power consumption. Each value must include a unit.
 
-FQN ::= ID ('.' ID)*
-
-(* Metadata *)
-Metadata ::= 'Metadata'
-             'name:' STRING
-             'description:' STRING
-             'author:' STRING
-             ('os:' OS)?
-             'end'
-
-OS ::= 'Raspbian' | 'RiotOS'
-
-(* Network *)
-Network ::= 'Network'
-            'ssid:' STRING
-            'passwd:' STRING
-            ('address:' IPAddr)?
-            ('channel:' STRING)?
-            'end'
-
-IPAddr ::= IPv4 | IPv6
-IPv4 ::= Digit{1,3} '.' Digit{1,3} '.' Digit{1,3} '.' Digit{1,3}
-IPv6 ::= (HexDigit{1,4} ':'){7} HexDigit{1,4}
-
-(* Components *)
-Components ::= 'Components'
-               'board:' FQN
-               'peripherals:' '-' PeripheralDef ('-' PeripheralDef)*
-               'end'
-
-PeripheralDef ::= FQN '(' ID ')'
-
-(* Board *)
-Board ::= 'Board' ID
-          ('type:' BoardType)?
-          'cpu:' CPU
-          'memory:' Memory
-          'vcc:' PowerType
-          'pins:' '-' Pin ('-' Pin)*
-          ('networking:' '-' NetworkInterface ('-' NetworkInterface)*)?
-          ('bluetooth:' BluetoothVersion)?
-          ('ioVcc:' PowerType)?
-          'end'
-
-CPU ::= 'cpu_family:' CPUFamily
-        'max_freq:' Number FreqUnit
-        'fpu:' BOOL
-
-CPUFamily ::= 'ESP32' | 'ESP8266' | 'PiArmCortex'
-
-BoardType ::= 'RPI' | 'ESP' | 'ARDUINO'
-
-Memory ::= ('ram:' Number MemUnit)?
-           ('rom:' Number MemUnit)?
-           ('flash:' Number MemUnit)?
-
-MemUnit ::= 'b' | 'kb' | 'mb' | 'gb'
-FreqUnit ::= 'hz' | 'khz' | 'mhz' | 'ghz'
-
-NetworkInterface ::= WiFiInterface | EthernetInterface
-
-WiFiInterface ::= 'wifi:' 'name:' ID ('freq:' Number FreqUnit)?
-
-EthernetInterface ::= 'ethernet:' 'name:' ID
-
-BluetoothVersion ::= 'NA' | 'BT3' | 'BT4' | 'BT5'
-
-(* Peripheral *)
-Peripheral ::= Sensor | Actuator
-
-Sensor ::= 'Sensor' ID
-           'vcc:' PowerType
-           'msg:' SensorMsgType
-           'pins:' '-' Pin ('-' Pin)*
-           ('attributes:' '-' Attribute ('-' Attribute)*)?
-           ('constraints:' '-' Constraint ('-' Constraint)*)?
-           ('powerConsumption:' Number PowerUnit)?
-           ('riotTpl:' STRING)?
-           ('piTpl:' STRING)?
-           ('ioVcc:' PowerType)?
-           'end'
-
-Actuator ::= 'Actuator' ID
-             'vcc:' PowerType
-             'msg:' ActuatorMsgType
-             'pins:' '-' Pin ('-' Pin)*
-             ('attributes:' '-' Attribute ('-' Attribute)*)?
-             ('constraints:' '-' Constraint ('-' Constraint)*)?
-             ('powerConsumption:' Number PowerUnit)?
-             ('riotTpl:' STRING)?
-             ('piTpl:' STRING)?
-             ('ioVcc:' PowerType)?
-             'end'
-
-SensorMsgType ::= 'Distance' | 'Temperature' | 'Humidity' | 'Gas' 
-                | 'Pressure' | 'Env' | 'Acceleration' | 'IMU' 
-                | 'Tracker' | 'ADC'
-
-ActuatorMsgType ::= 'MotorController' | 'ServoController' | 'LedArray'
-
-PowerUnit ::= 'W' | 'mW' | 'uW'
-
-(* Pin *)
-Pin ::= PowerPin | IOPin
-
-PowerPin ::= 'power:'
-             'name:' ID
-             'number:' INT
-             'type:' PowerType
-
-PowerType ::= 'GND' | '3V3' | '5V' | '12V' | CustomVoltage
-
-CustomVoltage ::= Number 'V'
-
-IOPin ::= 'io_pin:'
-          'functions:' PinFunction (',' PinFunction)*
-          'name:' ID
-          ('number:' INT)?
-          ('vmin:' Number)?
-          ('vmax:' Number)?
-          ('signalLevel:' Number)?
-
-PinFunction ::= 'gpio' 
-              | I2CType '-' INT
-              | SPIType '-' INT
-              | UARTType '-' INT
-              | 'pwm-' INT
-              | 'adc' | 'dac'
-              | PCMType
-
-I2CType ::= 'sda' | 'scl'
-SPIType ::= 'mosi' | 'miso' | 'sck' | 'cs'
-UARTType ::= 'tx' | 'rx'
-PCMType ::= 'fs' | 'din' | 'dout'
-
-(* Connection *)
-Connection ::= 'Connection'
-               'peripheral:' FQN
-               'powerConnections:' '-' PowerConnection ('-' PowerConnection)*
-               'ioConnections:' '-' IOConnection ('-' IOConnection)*
-               ('endpoint:' Endpoint)?
-               ('settings:' '-' Setting ('-' Setting)*)?
-               'end'
-
-PowerConnection ::= ID '--' ID
-
-IOConnection ::= GPIOConnection | I2CConnection | SPIConnection | UARTConnection
-
-GPIOConnection ::= 'type:' 'gpio'
-                   ('name:' ID)?
-                   (GPIOMode)?
-                   'pin:' ID '--' ID
-
-GPIOMode ::= ('input:' BOOL)?
-             ('output:' BOOL)?
-             ('pullup:' BOOL)?
-             ('pulldown:' BOOL)?
-             ('open_drain:' BOOL)?
-
-I2CConnection ::= 'type:' 'i2c'
-                  ('name:' ID)?
-                  'slave_address:' '0x' HexInt
-                  'pins:'
-                  'sda:' ID '--' ID
-                  'scl:' ID '--' ID
-
-SPIConnection ::= 'type:' 'spi'
-                  ('name:' ID)?
-                  'pins:'
-                  'mosi:' ID '--' ID
-                  'miso:' ID '--' ID
-                  'sck:' ID '--' ID
-                  'cs:' ID '--' ID
-
-UARTConnection ::= 'type:' 'uart'
-                   ('name:' ID)?
-                   'pins:'
-                   'tx:' ID '--' ID
-                   'rx:' ID '--' ID
-                   'baudrate:' INT
-
-(* Endpoint *)
-Endpoint ::= ('topic:' STRING)?
-             ('type:' EndpointType)?
-
-EndpointType ::= 'Publisher' | 'Subscriber' | 'RPC' | 'Action'
-
-(* Message Broker *)
-Broker ::= MQTTBroker | AMQPBroker | RedisBroker
-
-MQTTBroker ::= 'Broker<MQTT>' ID
-               'host:' STRING
-               'port:' INT
-               ('ssl:' BOOL)?
-               ('basePath:' STRING)?
-               ('webPath:' STRING)?
-               ('webPort:' INT)?
-               ('auth:' Auth)?
-               'end'
-
-AMQPBroker ::= 'Broker<AMQP>' ID
-               'host:' STRING
-               'port:' INT
-               ('vhost:' STRING)?
-               ('topicExchange:' STRING)?
-               ('rpcExchange:' STRING)?
-               ('ssl:' BOOL)?
-               ('auth:' Auth)?
-               'end'
-
-RedisBroker ::= 'Broker<Redis>' ID
-                'host:' STRING
-                'port:' INT
-                ('db:' INT)?
-                ('ssl:' BOOL)?
-                ('auth:' Auth)?
-                'end'
-
-Auth ::= AuthPlain | AuthApiKey | AuthCert
-
-AuthPlain ::= 'username:' STRING 'password:' STRING
-
-AuthApiKey ::= 'key:' STRING
-
-AuthCert ::= ('cert:' STRING) | ('certPath:' STRING)
-
-(* Settings and Attributes *)
-Setting ::= ID ':' Type ('=' Value)?
-Attribute ::= ID ':' Type ('=' Value)?
-
-Type ::= 'int' | 'float' | 'str' | 'bool' | 'list' | 'dict'
-
-Value ::= INT | FLOAT | STRING | BOOL | List | Dict
-
-List ::= '[' Value (',' Value)* ']'
-
-Dict ::= '{' (ID ':' Setting) (',' ID ':' Setting)* '}'
-
-(* Constraint *)
-Constraint ::= 'max_frequency:' Number FreqUnit
-             | 'min_distance:' Number DistUnit
-             | 'max_distance:' Number DistUnit
-             | 'max_latency:' Number TimeUnit
-
-TimeUnit ::= 'h' | 'min' | 's' | 'ms' | 'us' | 'ns'
-
-DistUnit ::= 'm' | 'cm' | 'mm'
-
-(* Lexical Elements *)
-ID ::= Letter (Letter | Digit | '_')*
-STRING ::= '"' (Char)* '"'
-INT ::= Digit+
-FLOAT ::= Digit+ '.' Digit+
-BOOL ::= 'True' | 'False'
-Number ::= INT | FLOAT
-Letter ::= 'a'..'z' | 'A'..'Z'
-Digit ::= '0'..'9'
-HexDigit ::= '0'..'9' | 'a'..'f' | 'A'..'F'
+**Syntax:**
 ```
+energy: <min> <unit>, <max> <unit>, <avg> <unit>
+```
+
+**Example - Board:**
+```
+Board[RPI] RaspberryPi_4B_4GB
+  operational
+    energy: 1.4 W, 7.6 W, 3.5 W
+    vcc: 5V
+    ioVcc: 3V3
+    ...
+  end
+  ...
+end
+```
+
+**Example - Peripheral:**
+```
+Sensor[Env] BME680
+  operational
+    energy: 0.01 mW, 39.6 mW, 3 mW
+    vcc: 3V3
+    ioVcc: 3V3
+    ...
+  end
+  ...
+end
+```
+
+**Validation:**
+- All three values must be positive numbers
+- Values represent: [minimum, maximum, average] power consumption
+- Units must be valid power units (W, mW, uW)
+
+### 2.2. Templates Section
+
+The `templates` section maps operating systems/platforms to their corresponding code generation templates.
+
+**Syntax:**
+```
+templates
+  <os_name>: "<template_file>",
+  ...
+end
+```
+
+**Example:**
+```
+Sensor[Env] BME680
+  ...
+  templates
+    raspbian: "bme680.py.tmpl",
+    riotos: "bme680_riot.c.tmpl"
+  end
+end
+```
+
+**Validation:**
+- Template files must exist in the appropriate templates directory
+- OS names must be valid identifiers
+- Used by code generators to select appropriate templates
+
+### 2.3. Attributes
+
+Attributes define configurable parameters for peripherals. They can be specified in the peripheral definition (defaults) or overridden in the Components block.
+
+**Syntax in Peripheral Definition:**
+```
+attributes
+  <name> [<type>] = <default_value>,
+  ...
+end
+```
+
+**Syntax in Components Block:**
+```
+Components
+  peripherals:
+    <instance>(<Type>) [
+      <attribute> = <value>,
+      ...
+    ]
+end
+```
+
+**Example - Peripheral Definition:**
+```
+Sensor[Env] BME680
+  ...
+  attributes
+    poll_period[int] = 10,
+    humidity_oversample[int] = 2,
+    filter_size[int] = 3
+  end
+end
+```
+
+**Example - Components Block:**
+```
+Components
+  board: RaspberryPi_4B_4GB
+  peripherals:
+    BME680(MyBME) [
+        poll_period = 5,
+        filter_size = 7
+      ]
+end
+```
+
+**Validation:**
+- Attribute names must be valid identifiers
+- Values must match declared types
+- Attributes in Components block override peripheral defaults
 
 ---
 
-## 4. Static Semantics
+## 3. Power Connection Validation
 
-### 4.1 Well-Formedness Rules
+Power connections are fundamental to the operation of any electronic device. The validator enforces strict rules to ensure that power is supplied correctly and safely.
 
-#### Judgment Forms
+### Voltage Compatibility
 
-```
-Γ ⊢ d : ok                    (Device model d is well-formed in environment Γ)
-Γ ⊢ c : Components            (Components c are well-formed)
-Γ ⊢ k : Connection            (Connection k is well-formed)
-Γ ⊢ pin₁ ~ pin₂ : PowerConn   (Power connection is valid)
-Γ ⊢ pin₁ ~ pin₂ : IOConn      (IO connection is valid)
-```
+The core principle of power connection validation is voltage compatibility. Voltages are parsed from pin types (e.g., `5V`, `3V3`, `GND`).
 
-#### Environment
+-   **Rule `[T-PowerConn-GND]`**: A `GND` pin can only be connected to another `GND` pin.
+-   **Rule `[T-PowerConn-VCC]`**: A voltage-supplying pin (e.g., `5V`) can only be connected to another voltage-supplying pin if their voltages are compatible.
 
-```
-Γ ::= ∅                       (empty environment)
-    | Γ, b : Board            (board binding)
-    | Γ, p : Peripheral       (peripheral binding)
-    | Γ, pin : Pin            (pin binding)
-```
+**Compatibility Definition**: Two voltages, `v₁` and `v₂`, are considered compatible if the absolute difference between them is within a tolerance of `0.5V`.
+`compatible(v₁, v₂) ≡ |v₁ - v₂| ≤ 0.5`
 
-#### Device Well-Formedness
-
-```
-────────────────────────────────────────────────────────────────────── [T-Device]
-Γ ⊢ m : Metadata    Γ ⊢ n : Network    Γ ⊢ c : Components
-Γ ⊢ br : Option[Broker]    Γ, c ⊢ k₁ : Connection ... Γ, c ⊢ kₙ : Connection
-────────────────────────────────────────────────────────────────────────────────
-Γ ⊢ Device(m, n, c, br, [k₁, ..., kₙ]) : ok
-```
-
-#### Component Well-Formedness
-
-```
-────────────────────────────────────────────────────────────────── [T-Components]
-Γ ⊢ b : Board    Γ ⊢ p₁ : Peripheral ... Γ ⊢ pₙ : Peripheral
-∀i,j. i≠j ⇒ pᵢ.instanceName ≠ pⱼ.instanceName    (unique peripheral names)
-─────────────────────────────────────────────────────────────────────────────────
-Γ ⊢ Comp(b, [p₁, ..., pₙ]) : Components
-```
-
-#### Connection Well-Formedness
-
-```
-────────────────────────────────────────────────────────────────── [T-Connection]
-Γ(c.board) = b : Board    Γ(k.peripheral) = p : Peripheral
-∀pc ∈ k.powerConns. Γ ⊢ b.pins(pc.boardPin) ~ p.pins(pc.peripheralPin) : PowerConn
-∀ioc ∈ k.ioConns. Γ ⊢ validateIOConn(ioc, b, p) : IOConn
-Γ ⊢ k.endpoint : Option[Endpoint]
-∀s ∈ k.settings. Γ ⊢ s : Setting
-─────────────────────────────────────────────────────────────────────────────────
-Γ ⊢ k : Connection
-```
-
-#### Power Connection Validation
-
-```
-─────────────────────────────────────────────────────────── [T-PowerConn-GND]
-pin₁ : PowerPin(_, _, GND)    pin₂ : PowerPin(_, _, GND)
-───────────────────────────────────────────────────────────────────────────────
-Γ ⊢ pin₁ ~ pin₂ : PowerConn
-```
-
-```
-────────────────────────────────────────────────────────── [T-PowerConn-VCC]
-pin₁ : PowerPin(_, _, v₁)    pin₂ : PowerPin(_, _, v₂)
-v₁ ≠ GND ∧ v₂ ≠ GND ∧ compatible(v₁, v₂)
-───────────────────────────────────────────────────────────────────────────
-Γ ⊢ pin₁ ~ pin₂ : PowerConn
-
-where compatible(v₁, v₂) ≡ 
-    (v₁ = v₂) ∨ 
-    (v₁ = Custom(x) ∧ v₂ = Custom(y) ∧ |x - y| ≤ 0.5)
-```
-
-#### GPIO Connection Validation
-
-```
-──────────────────────────────────────────────────────────── [T-GPIO-Conn]
-pin₁ : IOPin(_, _, funcs₁, _, _, _)    GPIO ∈ funcs₁
-pin₂ : IOPin(_, _, funcs₂, _, _, _)    GPIO ∈ funcs₂
-────────────────────────────────────────────────────────────────────────
-Γ ⊢ GPIOConn(_, PC(pin₁.name, pin₂.name), _) : IOConn
-```
-
-#### I2C Connection Validation
-
-```
-───────────────────────────────────────────────────────────── [T-I2C-Conn]
-pin₁ : IOPin(_, _, funcs₁, _, _, _)    ∃bus. SDA(bus) ∈ funcs₁
-pin₂ : IOPin(_, _, funcs₂, _, _, _)    SDA(_) ∈ funcs₂
-pin₃ : IOPin(_, _, funcs₃, _, _, _)    ∃bus. SCL(bus) ∈ funcs₃
-pin₄ : IOPin(_, _, funcs₄, _, _, _)    SCL(_) ∈ funcs₄
-0x00 ≤ addr ≤ 0x7F
-──────────────────────────────────────────────────────────────────────────
-Γ ⊢ I2CConn(_, addr, PC(pin₁.name, pin₂.name), PC(pin₃.name, pin₄.name)) : IOConn
-```
-
-#### Constraint Validation
-
-```
-───────────────────────────────────────────────────── [T-Constraint-Freq]
-p : Peripheral    MaxFrequency(f, unit) ∈ p.constraints
-────────────────────────────────────────────────────────────────────────
-∀k. k.peripheral = p ⇒ k.settings.poll_rate ≤ toHz(f, unit)
-```
-
-### 4.2 Type Rules
-
-#### Setting Type Checking
-
-```
-────────────────────── [T-IntSetting]
-v : ℤ
-────────────────────────────────────
-Γ ⊢ IntSetting(n, Some(v)) : ok
-```
-
-```
-────────────────────── [T-ListSetting]
-v₁ : τ ... vₙ : τ
-────────────────────────────────────────────────
-Γ ⊢ ListSetting(n, Some([v₁, ..., vₙ])) : ok
-```
-
-```
-───────────────────────────────────────────── [T-DictSetting]
-Γ ⊢ s₁ : Setting ... Γ ⊢ sₙ : Setting
-────────────────────────────────────────────────────────────
-Γ ⊢ DictSetting(n, Some({k₁ ↦ s₁, ..., kₙ ↦ sₙ})) : ok
-```
+This tolerance allows for slight variations in voltage levels between different components.
 
 ---
 
-## 5. Operational Semantics
+## 4. Data Connection Validation
 
-### 5.1 Runtime State
+Data connections enable communication between the main board and its peripherals. The validator checks that the pins used for data connections have the required functionality and that the protocol-specific properties are correctly defined.
 
-#### State Configuration
+### 4.1. GPIO Connections
 
-```
-σ ∈ State ::= ⟨D, B, C, M⟩
+-   **Rule `[T-GPIO-Conn]`**: Both the board pin and the peripheral pin involved in a GPIO connection must have `GPIO` functionality.
+-   **Properties**:
+    -   `mode`: Must be either `'input'` or `'output'`.
+    -   `pullup`/`pulldown`: Must be a boolean value.
+    -   `name` is a **deprecated** property.
 
-D : DeviceState        (device runtime state)
-B : BrokerState        (broker connection state)
-C : ConnectionState    (peripheral connection states)
-M : MessageQueue       (message queue)
-```
+### 4.2. I2C Connections
 
-#### Device State
+-   **Rule `[T-I2C-Conn]`**:
+    -   The board and peripheral pins must have the appropriate `SDA` (Serial Data) and `SCL` (Serial Clock) functions.
+    -   The `slave_address` must be within the valid I2C address range of `0x00` to `0x7F`.
+-   **Properties**:
+    -   `bus_speed`: Must be a positive integer (e.g., `100000` for 100kHz).
+    -   `name` is a **deprecated** property.
 
-```
-DeviceState ::= {
-    status: DeviceStatus,
-    board: BoardState,
-    peripherals: Map[ID, PeripheralState],
-    network: NetworkState
-}
+### 4.3. SPI Connections
 
-DeviceStatus ::= Initializing | Running | Error(String) | Stopped
+-   **Functionality**: The validator checks that all four SPI pins (`MOSI`, `MISO`, `SCK`, `CS`) on both the board and the peripheral have the corresponding SPI functionality.
+-   **Properties**:
+    -   `bus_speed`: Must be a positive integer.
+    -   `mode`: Must be an integer from `0` to `3`.
+    -   `name` is a **deprecated** property.
 
-BoardState ::= {
-    pins: Map[ID, PinState]
-}
+### 4.4. UART Connections
 
-PinState ::= {
-    value: Option[Value],
-    direction: Option[Direction],
-    mode: Option[Mode]
-}
-
-Direction ::= Input | Output
-Mode ::= PullUp | PullDown | OpenDrain | Default
-```
-
-#### Peripheral State
-
-```
-PeripheralState ::= {
-    status: PeripheralStatus,
-    config: Map[String, Value],
-    lastRead: Option[Value],
-    lastWrite: Option[Value],
-    timestamp: Time
-}
-
-PeripheralStatus ::= Idle | Reading | Writing | Error(String)
-```
-
-#### Broker State
-
-```
-BrokerState ::= {
-    connected: Bool,
-    subscriptions: Set[Topic],
-    publications: Set[Topic]
-}
-```
-
-#### Message Queue
-
-```
-MessageQueue ::= List[Message]
-
-Message ::= Msg(
-    topic: Topic,
-    payload: Value,
-    timestamp: Time,
-    qos: QoS
-)
-
-QoS ::= QoS0 | QoS1 | QoS2
-```
-
-### 5.2 Transition Rules
-
-#### Judgment Form
-
-```
-⟨σ, d⟩ ⟶ ⟨σ', d'⟩        (State σ with device d transitions to σ' with d')
-```
-
-#### Device Initialization
-
-```
-─────────────────────────────────────────────────────────────── [E-Init-Start]
-d.meta.os = os    σ.D.status = Initializing
-initBoard(d.components.board) = b'
-initPeripherals(d.components.peripherals) = ps'
-initNetwork(d.network) = n'
-σ' = σ[D ↦ {status = Running, board = b', peripherals = ps', network = n'}]
-───────────────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### Broker Connection
-
-```
-────────────────────────────────────────────────────────── [E-Broker-Connect]
-d.broker = Some(br)    σ.B.connected = false
-connect(br) = success
-σ' = σ[B ↦ {connected = true, subscriptions = ∅, publications = ∅}]
-──────────────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### Connection Establishment
-
-```
-──────────────────────────────────────────────────────── [E-Conn-Establish]
-k ∈ d.connections    σ.D.status = Running
-validatePowerConnections(k, σ.D.board) = success
-configureIOConnections(k, σ.D.board) = σ'
-──────────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### GPIO Read Operation
-
-```
-───────────────────────────────────────────────────────── [E-GPIO-Read]
-k : Connection    k.ioConns contains GPIOConn(_, pc, mode)
-p = k.peripheral    σ.D.peripherals(p.instanceName).status = Idle
-readGPIO(pc.boardPin) = v
-σ' = σ[D.peripherals(p.instanceName).lastRead ↦ v,
-       D.peripherals(p.instanceName).timestamp ↦ now()]
-─────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### GPIO Write Operation
-
-```
-───────────────────────────────────────────────────────── [E-GPIO-Write]
-k : Connection    k.ioConns contains GPIOConn(_, pc, mode)
-p = k.peripheral    v : Value
-writeGPIO(pc.boardPin, v) = success
-σ' = σ[D.peripherals(p.instanceName).lastWrite ↦ v,
-       D.peripherals(p.instanceName).timestamp ↦ now()]
-──────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### I2C Read Operation
-
-```
-────────────────────────────────────────────────────────── [E-I2C-Read]
-k : Connection    k.ioConns contains I2CConn(_, addr, sda, scl)
-p = k.peripheral    σ.D.peripherals(p.instanceName).status = Idle
-i2cRead(addr, sda.boardPin, scl.boardPin) = data
-σ' = σ[D.peripherals(p.instanceName).lastRead ↦ data,
-       D.peripherals(p.instanceName).timestamp ↦ now()]
-──────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### Message Publication
-
-```
-─────────────────────────────────────────────────────── [E-Msg-Publish]
-k : Connection    k.endpoint = Some(EP(Some(topic), Some(Publisher)))
-p = k.peripheral    σ.D.peripherals(p.instanceName).lastRead = Some(v)
-σ.B.connected = true
-msg = Msg(topic, v, now(), QoS0)
-σ' = σ[M ↦ σ.M ++ [msg]]
-publish(σ.B, msg) = success
-───────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### Message Subscription
-
-```
-──────────────────────────────────────────────────────── [E-Msg-Subscribe]
-k : Connection    k.endpoint = Some(EP(Some(topic), Some(Subscriber)))
-σ.B.connected = true    topic ∉ σ.B.subscriptions
-subscribe(σ.B, topic) = success
-σ' = σ[B.subscriptions ↦ σ.B.subscriptions ∪ {topic}]
-─────────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### Message Reception
-
-```
-─────────────────────────────────────────────────────────── [E-Msg-Receive]
-k : Connection    k.endpoint = Some(EP(Some(topic), Some(Subscriber)))
-p = k.peripheral    topic ∈ σ.B.subscriptions
-msg = Msg(topic, v, t, qos) ∈ σ.M
-processMessage(k, p, v) = σ''
-σ' = σ''[M ↦ σ.M \ {msg}]
-───────────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
-
-#### Periodic Sensor Reading
-
-```
-─────────────────────────────────────────────────────────── [E-Periodic-Read]
-k : Connection    p : Sensor = k.peripheral
-k.settings contains IntSetting("poll_rate", Some(rate))
-now() - σ.D.peripherals(p.instanceName).timestamp ≥ 1/rate
-⟨σ, d⟩ ⟶[E-GPIO-Read or E-I2C-Read] ⟨σ₁, d⟩
-⟨σ₁, d⟩ ⟶[E-Msg-Publish] ⟨σ', d⟩
-────────────────────────────────────────────────────────────────────────────
-⟨σ, d⟩ ⟶ ⟨σ', d⟩
-```
+-   **Functionality**: The connection must correctly map `TX` (Transmit) to `RX` (Receive).
+    -   Board `TX` must connect to Peripheral `RX`.
+    -   Board `RX` must connect to Peripheral `TX`.
+-   **Properties**:
+    -   `baudrate`: Must be a positive integer. A warning is issued for non-standard baud rates.
+    -   `parity`: Must be one of `'none'`, `'even'`, `'odd'`, `'mark'`, or `'space'`.
+    -   `stop_bits`: Must be `1` or `2`.
+    -   `data_bits`: Must be an integer from `5` to `8`.
+    -   `name` is a **deprecated** property.
 
 ---
 
-## 6. Axiomatic Semantics
+## 5. Safety Properties
 
-### 6.1 Hoare Logic for Device Operations
+Safety properties are invariants that must hold to prevent hardware damage and ensure stable operation.
 
-#### Assertion Language
+### 5.1. Pin Conflicts (Inv-Unique-Pins)
 
-```
-P, Q ∈ Assertion ::= true | false
-                    | P ∧ Q | P ∨ Q | ¬P | P ⇒ Q
-                    | ∀x. P | ∃x. P
-                    | σ.D.status = s
-                    | σ.B.connected = b
-                    | σ.D.peripherals(p).lastRead = v
-                    | compatible(pin₁, pin₂)
-                    | validConnection(k)
-                    | inRange(v, min, max)
-```
+-   **Rule**: A single board pin cannot be used for multiple conflicting purposes simultaneously.
+-   **Invariant**: `∀k₁, k₂ ∈ connections, k₁ ≠ k₂. usedPins(k₁) ∩ usedPins(k₂) = ∅`
+-   **Exceptions**:
+    -   **Power Pins (`GND`, `VCC`)**: Multiple peripherals can connect to the same power pins.
+    -   **I2C Pins (`SDA`, `SCL`)**: I2C is a bus protocol, so multiple devices can share the same `SDA` and `SCL` pins.
 
-### 6.2 Device Initialization Axioms
+### 5.2. I2C Address Uniqueness (Safety-I2C-Address-Unique)
 
-```
-────────────────────────────────────────────────────── [Ax-Init]
-{ σ.D.status = Initializing ∧ wellFormed(d) }
-  initDevice(d)
-{ σ.D.status = Running ∧ 
-  ∀p ∈ d.components.peripherals. 
-    σ.D.peripherals(p.instanceName).status = Idle }
-```
+-   **Rule**: On a shared I2C bus, every peripheral must have a unique `slave_address`.
+-   **Invariant**: `∀k₁, k₂. sameBus(k₁, k₂) ⇒ k₁.slaveAddr ≠ k₂.slaveAddr`
 
-### 6.3 Connection Establishment Axioms
+### 5.3. Voltage Limits (Safety-Voltage-Limits)
 
-```
-─────────────────────────────────────────────────────────────── [Ax-Power-Conn]
-{ validPowerConnection(k, pc) ∧ 
-  compatible(boardPin(pc), peripheralPin(pc)) }
-  establishPowerConnection(k, pc)
-{ powerConnected(pc) ∧ 
-  voltage(peripheralPin(pc)) = voltage(boardPin(pc)) }
-```
+-   **Rule**: The voltage supplied to a peripheral must not exceed its maximum rated voltage (`vcc`).
+-   **Invariant**: `∀k ∈ connections, p = k.peripheral. voltage(p) ≤ p.vcc.toVolts()`
+-   A tolerance of `0.5V` is allowed.
 
-```
-──────────────────────────────────────────────────────────── [Ax-GPIO-Conn]
-{ validGPIOConnection(k, gc) ∧ 
-  hasFunction(boardPin(gc), GPIO) ∧ 
-  hasFunction(peripheralPin(gc), GPIO) }
-  establishGPIOConnection(k, gc)
-{ gpioConnected(gc) ∧ 
-  ∀v. write(boardPin(gc), v) ⇒ read(peripheralPin(gc)) = v }
-```
+### 5.4. IO Voltage Compatibility
 
+-   **Rule**: The I/O voltage level of the board (`ioVcc`) must be compatible with the I/O voltage level of the connected peripheral.
+-   **Warning**: If the I/O voltages are not compatible (i.e., differ by more than `0.5V`), a warning is issued. This may lead to communication errors or, in worst-case scenarios, damage the hardware.
+
+### 5.5. Common Ground
+
+-   **Rule**: Every peripheral must share a common ground (`GND`) connection with the board.
+-   **Warning**: If a peripheral has no defined power connections or lacks a `GND` connection, a warning is issued. A common ground is essential for creating a complete electrical circuit and ensuring signal integrity.
+
+### 5.6. Topic Format Validation (Safety-Topic-Format)
+
+-   **Rule**: Remote topics specified in connections must conform to the format requirements of the configured broker type.
+-   **Validation**: Topics are validated based on the broker protocol to prevent runtime errors and ensure compatibility with the message broker.
+
+#### MQTT Topic Validation
+
+When using an **MQTT broker** (`Broker[MQTT]`), topics must follow MQTT protocol specifications:
+
+**Requirements:**
+-   Use forward slashes (`/`) as level separators
+-   Cannot start with `$` (reserved for system topics like `$SYS`)
+-   Maximum length: 1000 characters
+-   No null characters (`\x00`)
+-   Wildcards (for subscriptions):
+    -   `+` : Single-level wildcard (must be alone in its level)
+    -   `#` : Multi-level wildcard (must be last level and alone)
+
+**Valid Examples:**
 ```
-───────────────────────────────────────────────────────────── [Ax-I2C-Conn]
-{ validI2CConnection(k, ic) ∧ 
-  hasFunction(ic.sda.boardPin, SDA) ∧ 
-  hasFunction(ic.scl.boardPin, SCL) ∧ 
-  0x00 ≤ ic.slaveAddr ≤ 0x7F }
-  establishI2CConnection(k, ic)
-{ i2cConnected(ic) ∧ 
-  canCommunicate(ic.slaveAddr, ic.sda, ic.scl) }
+sensors/temperature/room1
+home/living_room/light
+devices/+/status
+sensor/#
 ```
 
-### 6.4 Message Broker Axioms
-
+**Invalid Examples:**
 ```
-──────────────────────────────────────────────────────── [Ax-Broker-Connect]
-{ ¬σ.B.connected ∧ reachable(broker.host, broker.port) ∧
-  validAuth(broker.auth) }
-  connect(broker)
-{ σ.B.connected ∧ authenticated(σ.B) }
+$SYS/broker/stats          // System topic (starts with $)
+sensors/temp+/room         // Wildcard not alone
+sensors/room/#/temp        // # must be last level
 ```
 
-```
-─────────────────────────────────────────────────────── [Ax-Publish]
-{ σ.B.connected ∧ k.endpoint.type = Publisher ∧
-  k.endpoint.topic = topic ∧ validValue(v) }
-  publish(topic, v)
-{ ∃msg ∈ σ.M. msg.topic = topic ∧ msg.payload = v ∧
-  topic ∈ σ.B.publications }
-```
+#### AMQP Routing Key Validation
 
-```
-──────────────────────────────────────────────────────── [Ax-Subscribe]
-{ σ.B.connected ∧ k.endpoint.type = Subscriber ∧
-  k.endpoint.topic = topic }
-  subscribe(topic)
-{ topic ∈ σ.B.subscriptions ∧
-  ∀msg. msg.topic = topic ⇒ willReceive(msg) }
-```
+When using an **AMQP broker** (`Broker[AMQP]`), routing keys must follow AMQP topic exchange rules:
 
-### 6.5 Sensor Reading Axioms
+**Requirements:**
+-   Use dots (`.`) as word separators
+-   Maximum length: 255 characters
+-   Allowed characters: alphanumeric, underscore (`_`), hyphen (`-`)
+-   No empty segments (double dots `..`)
+-   Wildcards (for bindings):
+    -   `*` : Matches exactly one word
+    -   `#` : Matches zero or more words
 
+**Valid Examples:**
 ```
-───────────────────────────────────────────────────────── [Ax-Sensor-Read]
-{ p : Sensor ∧ σ.D.peripherals(p.instanceName).status = Idle ∧
-  validConnection(k, p) ∧ powerConnected(k) }
-  readSensor(p)
-{ ∃v. σ.D.peripherals(p.instanceName).lastRead = Some(v) ∧
-  satisfiesConstraints(v, p.constraints) }
+sensors.temperature.room1
+home.living_room.light
+devices.*.status
+sensor.#
 ```
 
+**Invalid Examples:**
 ```
-────────────────────────────────────────────────────────── [Ax-Range-Check]
-{ p : Sensor ∧ 
-  MinDistance(dₘᵢₙ, unit) ∈ p.constraints ∧
-  MaxDistance(dₘₐₓ, unit) ∈ p.constraints ∧
-  σ.D.peripherals(p.instanceName).lastRead = Some(v) }
-  validateReading(v, p)
-{ toUnit(dₘᵢₙ, unit) ≤ v ≤ toUnit(dₘₐₓ, unit) }
+sensors/temperature/room   // Uses slashes instead of dots
+sensors..room              // Empty segment (double dots)
+sensors.temp@.room         // Invalid character (@)
 ```
 
-### 6.6 Actuator Control Axioms
+#### Redis Channel Validation
 
+When using a **Redis broker** (`Broker[Redis]`), channels have flexible naming:
+
+**Requirements:**
+-   Cannot be empty
+-   Maximum length: 512 characters
+-   Supports glob-style pattern matching (`*`, `?`)
+-   Convention: Use colons (`:`) or dots (`.`) as separators
+
+**Valid Examples:**
 ```
-───────────────────────────────────────────────────────────── [Ax-Actuator-Write]
-{ a : Actuator ∧ σ.D.peripherals(a.instanceName).status = Idle ∧
-  validConnection(k, a) ∧ powerConnected(k) ∧
-  validValue(v) }
-  writeActuator(a, v)
-{ σ.D.peripherals(a.instanceName).lastWrite = Some(v) ∧
-  actuatorState(a) = v }
-```
-
-### 6.7 Invariants
-
-#### Global Invariants
-
-```
-Inv-Device-Status:
-  σ.D.status = Running ⇒ 
-    (∀p ∈ peripherals. σ.D.peripheral(p).status ∈ {Idle, Reading, Writing})
-
-Inv-Power-Compatibility:
-  ∀k ∈ connections, pc ∈ k.powerConns.
-    powerConnected(pc) ⇒ compatible(boardPin(pc), peripheralPin(pc))
-
-Inv-Unique-Pins:
-  ∀k₁, k₂ ∈ connections, k₁ ≠ k₂.
-    usedPins(k₁) ∩ usedPins(k₂) = ∅
-
-Inv-Broker-Connection:
-  (∃k. k.endpoint.type ∈ {Publisher, Subscriber}) ⇒ 
-    (broker ≠ None ∧ σ.B.connected)
-
-Inv-Message-Delivery:
-  topic ∈ σ.B.subscriptions ∧ msg.topic = topic ∧ msg ∈ σ.M ⇒ 
-    ◊(msg will be processed)
-
-Inv-Constraint-Satisfaction:
-  ∀p : Sensor, v = σ.D.peripherals(p).lastRead.
-    satisfiesConstraints(v, p.constraints)
+sensors:temperature:room1
+home.living_room.light
+device:*:status
+sensor*
 ```
 
-#### Connection-Specific Invariants
+**Implementation:**
+The validation is performed in `demol/lang/semantics.py` via the `validate_topic_format()` function, which automatically selects the appropriate validator based on the broker type defined in the device model.
 
+**Error Example:**
 ```
-Inv-I2C-Address:
-  ∀k : Connection, ic : I2CConn ∈ k.ioConns.
-    0x00 ≤ ic.slaveAddr ≤ 0x7F
-
-Inv-UART-Baudrate:
-  ∀k : Connection, uc : UARTConn ∈ k.ioConns.
-    uc.baudrate ∈ {9600, 19200, 38400, 57600, 115200, ...}
-
-Inv-GPIO-Direction:
-  ∀k : Connection, gc : GPIOConn ∈ k.ioConns.
-    (gc.mode.output = true ⇒ gc.mode.input = false) ∨
-    (gc.mode.input = true ⇒ gc.mode.output = false)
+[TopicValidationError] [Topic-Validation] Invalid MQTT topic at 
+ParkingSensor.dev:27: Peripheral 'Sensor1' has topic '$SYS/broker/stats'. 
+MQTT topic cannot start with '$' (reserved for system topics)
 ```
 
----
 
-## 7. Type System
+## 6. Well-Formedness Rules
 
-### 7.1 Type Judgments
+Well-formedness rules ensure that the device model is complete and logically sound.
 
-```
-Γ ⊢ e : τ        (Expression e has type τ in environment Γ)
-```
+### 6.1. All Peripherals Connected (WF-All-Peripherals-Connected)
 
-### 7.2 Base Types
+-   **Rule**: Every peripheral declared in the `Components` section must be used in at least one `Connection`.
+-   **Invariant**: `∀p ∈ components.peripherals. ∃k ∈ connections. k.peripheral = p`
 
-```
-τ ∈ Type ::= Int | Float | String | Bool 
-           | List[τ] | Dict[String, τ]
-           | Board | Peripheral | Connection
-           | Pin | Broker | Network
-           | Unit
-```
+### 6.2. Broker Requirements (Inv-Broker-Connection)
 
-### 7.3 Typing Rules
+-   **Rule**: If any connection defines a remote endpoint (e.g., for MQTT `Publisher` or `Subscriber`), a `Broker` must be configured in the device model.
+-   **Invariant**: `(∃k. k.endpoint.type ∈ {Publisher, Subscriber}) ⇒ (broker ≠ None)`
 
-```
-───────────────── [T-Int]
-Γ ⊢ n : Int
-```
+### 6.3. Unique Pin Numbers (WF-Unique-Pin-Numbers)
 
-```
-───────────────── [T-Float]
-Γ ⊢ f : Float
-```
+-   **Rule**: Within a single component (board or peripheral) definition, all physical pin numbers must be unique.
 
-```
-───────────────── [T-String]
-Γ ⊢ s : String
-```
+### 6.4. Unique Peripheral Names (WF-Unique-Peripheral-Names)
 
-```
-───────────────── [T-Bool]
-Γ ⊢ b : Bool
-```
-
-```
-───────────────────────────────── [T-List]
-Γ ⊢ e₁ : τ ... Γ ⊢ eₙ : τ
-─────────────────────────────────────────
-Γ ⊢ [e₁, ..., eₙ] : List[τ]
-```
-
-```
-──────────────────────────────────────────────── [T-Dict]
-Γ ⊢ e₁ : τ ... Γ ⊢ eₙ : τ
-────────────────────────────────────────────────────────
-Γ ⊢ {k₁: e₁, ..., kₙ: eₙ} : Dict[String, τ]
-```
-
-```
-──────────────────────────────── [T-Board-Ref]
-Γ(b) = Board
-─────────────────────────────────────────
-Γ ⊢ b : Board
-```
-
-```
-────────────────────────────────────── [T-Peripheral-Ref]
-Γ(p) = Peripheral
-─────────────────────────────────────────────────
-Γ ⊢ p : Peripheral
-```
-
-### 7.4 Subtyping
-
-```
-τ <: τ        (Reflexivity)
-
-τ₁ <: τ₂    τ₂ <: τ₃
-────────────────────    (Transitivity)
-τ₁ <: τ₃
-
-Int <: Float    (Numeric widening)
-
-Custom(v) <: V3_3    if |v - 3.3| ≤ 0.5
-Custom(v) <: V5      if |v - 5.0| ≤ 0.5
-```
-
----
-
-## 8. Verification Conditions
-
-### 8.1 Safety Properties
-
-```
-Safety-No-Short-Circuit:
-  ∀k ∈ connections, pc₁, pc₂ ∈ k.powerConns.
-    pc₁.boardPin ≠ pc₂.boardPin ∧ 
-    ¬(powerType(pc₁) = GND ∧ powerType(pc₂) ≠ GND ∧ 
-      connectedTo(pc₁.boardPin, pc₂.boardPin))
-
-Safety-Voltage-Limits:
-  ∀k ∈ connections, p = k.peripheral.
-    voltage(p) ≤ p.vcc.toVolts() ∧
-    (p.ioVcc ≠ None ⇒ ioVoltage(p) ≤ p.ioVcc.toVolts())
-
-Safety-Pin-Capacity:
-  ∀k ∈ connections, pin ∈ usedPins(k).
-    currentDraw(pin) ≤ maxCurrent(pin)
-
-Safety-I2C-Address-Unique:
-  ∀k₁, k₂ ∈ connections, k₁ ≠ k₂,
-   ic₁ : I2CConn ∈ k₁.ioConns, ic₂ : I2CConn ∈ k₂.ioConns.
-    sameBus(ic₁, ic₂) ⇒ ic₁.slaveAddr ≠ ic₂.slaveAddr
-```
-
-### 8.2 Liveness Properties
-
-```
-Liveness-Message-Delivery:
-  □◊(∀msg ∈ σ.M. msg.topic ∈ σ.B.subscriptions ⇒ 
-     ◊(msg will be delivered))
-
-Liveness-Sensor-Reading:
-  □(∀p : Sensor, k : Connection.
-    k.peripheral = p ∧ k.settings.poll_rate = r ⇒
-      ◊≤1/r(readSensor(p)))
-
-Liveness-Broker-Reconnect:
-  □(σ.B.connected = false ∧ broker ≠ None ⇒ 
-     ◊(attemptReconnect(broker)))
-```
-
-### 8.3 Correctness Conditions
-
-```
-Correctness-Topic-Generation:
-  ∀k : Connection.
-    k.endpoint.topic = None ⇒
-      k.endpoint.topic = generateTopic(device.meta.name, 
-                                       k.peripheral.type,
-                                       k.peripheral.msg,
-                                       k.peripheral.instanceName)
-
-Correctness-Pin-Function:
-  ∀k : Connection, ioc : IOConn ∈ k.ioConns.
-    requiredFunctions(ioc) ⊆ availableFunctions(boardPins(ioc))
-
-Correctness-Constraint-Satisfaction:
-  ∀p : Peripheral, c ∈ p.constraints, k : Connection.
-    k.peripheral = p ⇒ satisfies(k.settings, c)
-```
-
-### 8.4 Well-Formedness Conditions
-
-```
-WF-All-Peripherals-Connected:
-  ∀p ∈ components.peripherals.
-    ∃k ∈ connections. k.peripheral = p
-
-WF-Board-Referenced:
-  ∀k ∈ connections.
-    k.board = components.board
-
-WF-Pin-Exists:
-  ∀k ∈ connections, pc ∈ k.powerConns ∪ ioConns.
-    pc.boardPin ∈ board.pins.map(_.name) ∧
-    pc.peripheralPin ∈ k.peripheral.pins.map(_.name)
-
-WF-Settings-Match-Attributes:
-  ∀k ∈ connections, s ∈ k.settings.
-    s.name ∈ k.peripheral.attributes.map(_.name)
-```
-
----
-
-## Summary
-
-This formal semantics provides:
-
-1. **Abstract Syntax**: Mathematical representation of DeMoL constructs
-2. **Formal Grammar**: EBNF specification of concrete syntax
-3. **Static Semantics**: Well-formedness and type checking rules
-4. **Operational Semantics**: Runtime behavior via transition systems
-5. **Axiomatic Semantics**: Hoare logic specifications and invariants
-6. **Type System**: Type judgments and subtyping relations
-7. **Verification Conditions**: Safety, liveness, and correctness properties
-
-This formalization enables:
-- **Verification**: Proving correctness of device models
-- **Code Generation**: Sound translation to target platforms
-- **Validation**: Checking compliance with constraints
-- **Reasoning**: Understanding device behavior formally
+-   **Rule**: All peripheral instances defined in the `Components` section must have unique names. This prevents ambiguity when defining connections.

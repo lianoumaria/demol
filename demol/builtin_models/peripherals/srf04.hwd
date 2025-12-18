@@ -1,16 +1,16 @@
-// RIOT Configuration for SRF04 (HC-SR04) ultra sonic range finder
-
-Sensor[Distance] SonarSRF04
-    operational
-    vcc: 5V
-    ioVcc: 5V
-    piTpl: "srf04"
-    riotTpl: "srf04"
-    end
-    pins
-        PPIN vcc[5V] @ 1;
-        PPIN gnd[GND] @ 4;
-        DPIN trigger[gpio] @ 2;
-        DPIN echo[gpio] @ 3;
-    end
-end
+SENSOR[Distance] SonarSRF04 WITH
+    OP
+        vcc=5V,
+        ioVcc=5V,
+        piTpl="srf04",
+        riotTpl="srf04",
+        energy=10 mW, 100 mW, 75 mW
+    PINS
+        vcc[5V] @ 1,
+        gnd[GND] @ 4,
+        trigger[gpio] @ 2,
+        echo[gpio] @ 3
+    TEMPLATES
+        raspbian="srf04.py.tmpl",
+        riotos="srf04_riot.c.tmpl"
+;
