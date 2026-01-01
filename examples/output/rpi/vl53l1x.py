@@ -2,12 +2,12 @@ import time
 import board
 import adafruit_vl53l1x
 
-SENSOR_ADDRESS = {{slaveAddr | default(0x29)}}
-DISTANCE_MODE = {{distance_mode | default(1)}}
-TIMING_BUDGET = {{timing_budget | default(100)}}
-MAX_DISTANCE = {{max_distance | default(200.0)}}
-MIN_DISTANCE = {{min_distance | default(0.1)}}
-MAX_FREQUENCY = {{max_frequency | default(50.0)}}
+SENSOR_ADDRESS = 41
+DISTANCE_MODE = 1
+TIMING_BUDGET = 100
+MAX_DISTANCE = 200.0
+MIN_DISTANCE = 0.1
+MAX_FREQUENCY = 50.0
 
 class VL53L1X:
     def __init__(self):
@@ -16,6 +16,7 @@ class VL53L1X:
         self.vl53.distance_mode = DISTANCE_MODE
         self.vl53.timing_budget = TIMING_BUDGET
         self.vl53.start_ranging()
+        self.open_sensor()
         self.max_distance = MAX_DISTANCE
         self.min_distance = MIN_DISTANCE
         self.max_frequency = MAX_FREQUENCY

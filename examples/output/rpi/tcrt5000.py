@@ -1,0 +1,49 @@
+from gpiozero import DigitalInputDevice as DInD
+from common import Sensor
+from msg import ProximityMessage
+
+D_IN_PIN = "GPIO4"
+D_IN_PIN_NUMBER = 7
+MAX_FREQUENCY = 100.0
+
+
+class TCRT5000(Sensor):
+    """
+    IR reflective sensor - detects black vs white/reflective surfaces
+    """
+    
+    def __init__(self, attributes: dict, conn: dict):
+        super().__init__(attributes, conn)
+        self.sensor = None
+        self.msg = ProximityMessage()
+        
+    def initialize(self):
+        """Initialize the sensor hardware"""
+        self.sensor = DInD(D_IN_PIN)
+        
+    def read(self):
+        """Read sensor data
+        
+        Returns:
+            ProximityMessage: Proximity message
+        """
+        value = self.sensor.value
+        self._data = {
+            "detect": value
+        }
+        self.msg.detect = value
+        return self.msg
+    
+    def get_max_frequency(self):
+        """Get maximum polling frequency in Hz"""
+        return self.attributes.get("frequency", 100.0)
+    
+    def disconnect(self):
+        """Release hardware resources"""
+        if self.sensor:
+            self.sensor.close()
+
+
+if __name__ == "__main__":
+    sensor = TCRT5000()
+    sensor.run()

@@ -1,21 +1,10 @@
 from gpiozero import DistanceSensor as DS
 from time import sleep
 
-{% if sensor_type == "SRF05" %}
-MAX_FREQUENCY = {{max_frequency | default(20)}}  #(Hz) recommended 
-MAX_DISTANCE = {{max_distance | default(200.0)}}
-MIN_DISTANCE = {{min_distance | default(4.0)}}
-{% elif sensor_type == "HC_SR04" %}
-MAX_FREQUENCY = {{max_frequency | default(16)}}
-MAX_DISTANCE = {{max_distance | default(200.0)}}
-MIN_DISTANCE = {{min_distance | default(0.0)}}
-{% endif -%}
-
-
-TRIGGER_PIN = "{{conn.gpio.pins.trigger.name}}"
-TRIGGER_PIN_NUMBER = "{{conn.gpio.pins.trigger.id}}"
-ECHO_PIN = "{{conn.gpio.pins.echo.name}}"
-ECHO_PIN_NUMBER = "{{conn.gpio.pins.echo.id}}"
+TRIGGER_PIN = "GPIO23"
+TRIGGER_PIN_NUMBER = "16"
+ECHO_PIN = "GPIO24"
+ECHO_PIN_NUMBER = "18"
 
 
 class SRF05(Sensor):
@@ -33,7 +22,7 @@ class SRF05(Sensor):
         )
         self.msg = DistanceMessage()
     
-    def read_data(self):
+    def read(self):
         data = {
             "distance": self.sensor.distance * 100,
             "max_distance": self.max_distance,

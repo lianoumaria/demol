@@ -3,9 +3,9 @@ import time
 
 DEFAULT_PRIMARY = bme680.I2C_ADDR_PRIMARY
 DEFAULT_SECONDARY = bme680.I2C_ADDR_SECONDARY
-PRIMARY_SLAVE_ADDRESS = 0x{{slaveAddr | default(76)}}
-SECONDARY_SLAVE_ADDRESS = 0x{{secondary_slave_address | default(77)}}
-MAX_FREQUENCY = {{max_frequency | default(180.0)}}
+PRIMARY_SLAVE_ADDRESS = 0x76
+SECONDARY_SLAVE_ADDRESS = 0x77
+MAX_FREQUENCY = 180.0
 
 
 class BME680:

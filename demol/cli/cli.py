@@ -1,7 +1,8 @@
 import click
 from demol.lang import build_model
-from demol.transformations import m2t_device_plantuml, m2t_device_json, m2t_device_svg
-
+from demol.transformations import m2t_device_svg, m2t_rpi
+import os
+from demol.definitions import REPO_PATH
 
 @click.group("demol")
 @click.pass_context
@@ -27,8 +28,11 @@ def validate(ctx, model_filepath):
 def gen(ctx, generator, model_filepath):
     if generator == 'pi':
         print(f'[*] Running Generator [RPI] for model {model_filepath}')
-        model = build_model(model_filepath)
-        m2t_rpi(model)
+        #out_dir = os.path.join(REPO_PATH, "output", "rpi")
+        out_dir = "output/rpi"
+        print(f'[*] Output directory: {out_dir}')
+        # Pass the model file path (str) — transformer expects a path, it builds the model internally
+        m2t_rpi(model_filepath, out_dir)
     elif generator == 'json':
         print(f'[*] Running Generator [JSON] for model {model_filepath}')
         model = build_model(model_filepath)
