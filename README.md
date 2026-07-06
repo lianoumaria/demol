@@ -91,13 +91,19 @@ Download this repository and either use the CLI and the API of the DSL directly 
 git clone https://github.com/lianoumaria/demol.git
 ```
 
-2. Create a Virtual environment (Optional Step)
+2. Choose the thesis branch to work on the thesis version
+
+```sh
+git checkout thesis_demol
+```
+
+3. Create a Virtual environment (Optional Step)
 
 ```sh
 python -m venv venv && source ./venv/bin/activate
 ```
 
-3. Install the DSL package in `develop` mode
+4. Install the DSL package in `develop` mode
 
 ```sh
 python setup.py develop
